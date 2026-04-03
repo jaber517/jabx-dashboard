@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 33% 98%;
+  --foreground: 225 28% 14%;
+  --muted: 214 20% 94%;
+  --muted-foreground: 220 12% 42%;
+  --border: 214 22% 88%;
+  --surface: 0 0% 100%;
+  --surface-elevated: 210 25% 99%;
+  --primary: 214 82% 46%;
+  --primary-foreground: 210 40% 98%;
+  --success: 156 67% 37%;
+  --warning: 35 92% 52%;
+  --danger: 2 75% 58%;
+  --ring: 214 82% 46%;
+  --font-sans: "Aptos", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-display: "Aptos Display", "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+
+.dark {
+  --background: 221 35% 9%;
+  --foreground: 210 33% 96%;
+  --muted: 223 28% 14%;
+  --muted-foreground: 216 15% 68%;
+  --border: 223 18% 20%;
+  --surface: 222 29% 11%;
+  --surface-elevated: 221 27% 14%;
+  --primary: 200 96% 62%;
+  --primary-foreground: 220 33% 8%;
+  --success: 156 72% 42%;
+  --warning: 35 96% 58%;
+  --danger: 3 86% 63%;
+  --ring: 200 96% 62%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    color: hsl(var(--foreground));
+    background:
+      radial-gradient(circle at top left, rgba(59, 130, 246, 0.11), transparent 30%),
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 18%),
+      hsl(var(--background));
+    text-rendering: optimizeLegibility;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at top left, rgba(59, 130, 246, 0.13), transparent 28%),
+      radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%),
+      hsl(var(--background));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  ::selection {
+    background: rgba(37, 99, 235, 0.18);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .surface-panel {
+    @apply border border-border/80 bg-surface/85 shadow-soft backdrop-blur-xl;
+  }
+
+  .surface-panel-elevated {
+    @apply border border-white/40 bg-surface-elevated/85 shadow-glass backdrop-blur-2xl dark:border-white/5;
+  }
+
+  .page-shell {
+    @apply mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 pb-10 pt-6 sm:px-6 lg:px-8;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.42);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

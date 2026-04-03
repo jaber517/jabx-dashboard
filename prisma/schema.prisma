@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  summary     String
+  description String
+  category    String
+  status      String
+  priority    String
+  progress    Int            @default(0)
+  owner       String?
+  dueDate     DateTime?
+  createdById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  tasks       Task[]
+  notes       Note[]
+  milestones  Milestone[]
+  resources   ResourceLink[]
+  activities  Activity[]
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  status      String    @default("TODO")
+  priority    String
+  dueDate     DateTime?
+  blocked     Boolean   @default(false)
+  category    String
+  createdById String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Note {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  tags        String
+  category    String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model ResourceLink {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  url         String
+  type        String
+  category    String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  title       String
+  summary     String
+  status      String
+  date        DateTime
+  category    String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  action      String
+  description String
+  entityType  String
+  category    String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
