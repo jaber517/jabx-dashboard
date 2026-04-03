@@ -71,7 +71,8 @@ export function HomeDashboard({
       <PageHeader
         eyebrow="Personal Dashboard"
         title="Jaber's Second Brain"
-        description="Track operational projects, HSE actions, training plans, AI initiatives, and personal systems in one clean offline-first workspace."
+        description="Life is too short to remember what you had for lunch 
+        - Jaber 2026"
         actions={
           <>
             <Link href="/projects" className={buttonVariants({ variant: "default", size: "lg" })}>
