@@ -207,25 +207,52 @@ export async function getHomePageData() {
           orderBy: [{ createdAt: "desc" }]
         })
       ]);
+      const typedProjects = projects.map((project) => ({
+  ...project,
+  category: project.category as ProjectRecord["category"],
+  status: project.status as ProjectRecord["status"],
+  priority: project.priority as ProjectRecord["priority"],
+  tasks: (project.tasks ?? []).map((task) => ({
+    ...task,
+    status: task.status as TaskRecord["status"],
+    priority: task.priority as TaskRecord["priority"],
+  })),
+}));
+const typedTasks = tasks.map((task) => ({
+  ...task,
+  status: task.status as TaskRecord["status"],
+  priority: task.priority as TaskRecord["priority"],
+}));
 
-    return {
-      projects: projects.map(mapProject),
-      tasks: tasks.map(mapTask),
-      notes: notes.map(mapNote),
-      activities: activities.map(mapActivity),
-      milestones: milestones.map(mapMilestone),
-      resources: resources.map(mapResource)
-    };
+return {
+  projects: typedProjects.map((project) =>
+    mapProject(project as Parameters<typeof mapProject>[0])
+  ),
+  tasks: typedTasks.map((task) =>
+    mapTask(task as Parameters<typeof mapTask>[0])
+  ),
+  notes: notes.map((note) =>
+    mapNote(note as Parameters<typeof mapNote>[0])
+  ),
+  activities: activities.map((activity) =>
+    mapActivity(activity as Parameters<typeof mapActivity>[0])
+  ),
+  milestones: milestones.map((milestone) =>
+    mapMilestone(milestone as Parameters<typeof mapMilestone>[0])
+  ),
+  resources: resources.map((resource) =>
+    mapResource(resource as Parameters<typeof mapResource>[0])
+  ),
+};
   }, {
     projects: [],
     tasks: [],
     notes: [],
     activities: [],
     milestones: [],
-    resources: []
+    resources: [],
   });
 }
-
 export async function getProjectsData() {
   return withFallback(async () => {
     const projects = await db.project.findMany({
