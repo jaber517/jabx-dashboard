@@ -6,9 +6,9 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Command Center",
+  title: "JabX",
   description:
-    "An offline-first personal dashboard for projects, tasks, notes, analytics, and timelines."
+    "A personal dashboard for projects, tasks, notes, analytics, and timelines."
 };
 
 export const viewport: Viewport = {
