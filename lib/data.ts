@@ -234,13 +234,20 @@ export async function getProjectsData() {
         milestones: true,
         notes: {
           take: 3,
-          orderBy: [{ updatedAt: "desc" }]
-        }
+          orderBy: [{ updatedAt: "desc" }],
+        },
       },
-      orderBy: [{ updatedAt: "desc" }]
+      orderBy: [{ updatedAt: "desc" }],
     });
 
-    return projects.map(mapProject);
+    const typedProjects = projects.map((project) => ({
+      ...project,
+      category: project.category as ProjectRecord["category"],
+      status: project.status as ProjectRecord["status"],
+      priority: project.priority as ProjectRecord["priority"],
+    }));
+
+    return typedProjects.map(mapProject);
   }, [] as ProjectRecord[]);
 }
 
