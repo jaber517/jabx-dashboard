@@ -21,7 +21,7 @@ export function TopNav() {
             </div>
             <div>
               <p className="text-sm font-semibold tracking-tight">Command Center</p>
-              <p className="text-xs text-muted-foreground">Offline-first workspace</p>
+              <p className="text-xs text-muted-foreground">Jaber's workspace</p>
             </div>
           </Link>
 
