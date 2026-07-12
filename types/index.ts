@@ -50,6 +50,7 @@ export type TaskRecord = {
   dueDate: string | null;
   blocked: boolean;
   category: ProjectCategory;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
@@ -63,6 +64,7 @@ export type NoteRecord = {
   content: string;
   tags: string[];
   category: ProjectCategory;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   projectId: string | null;
@@ -117,6 +119,7 @@ export type ProjectRecord = {
   priority: TaskPriority;
   progress: number;
   owner: string | null;
+  imageUrl?: string | null;
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;

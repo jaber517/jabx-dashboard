@@ -86,7 +86,7 @@ export const taskStatusTone: Record<TaskStatus, string> = {
 };
 
 export const navigationItems = [
-  { href: "/", label: "Home" },
+  { href: "/dashboard", label: "Home" },
   { href: "/projects", label: "Projects" },
   { href: "/tasks", label: "Tasks" },
   { href: "/notes", label: "Notes" },

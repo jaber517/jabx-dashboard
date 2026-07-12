@@ -18,6 +18,7 @@ model Project {
   priority    String
   progress    Int            @default(0)
   owner       String?
+  imageUrl    String?
   dueDate     DateTime?
   createdById String?
   createdAt   DateTime       @default(now())
@@ -38,6 +39,7 @@ model Task {
   dueDate     DateTime?
   blocked     Boolean   @default(false)
   category    String
+  imageUrl    String?
   createdById String?
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -52,6 +54,7 @@ model Note {
   content     String
   tags        String
   category    String
+  imageUrl    String?
   createdById String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

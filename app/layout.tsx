@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/components/layout/app-shell";
 import { PwaProvider } from "@/components/providers/pwa-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { fraunces } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function RootLayout({
   children
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={fraunces.variable}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PwaProvider />

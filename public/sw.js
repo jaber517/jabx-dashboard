@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v1";
+const CACHE_NAME = "command-center-v2";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
@@ -29,6 +29,12 @@ self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
 
   if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // Never cache build assets: cache-first here serves stale JS/CSS after
+  // deploys, which breaks hydration until users manually clear the cache.
+  if (requestUrl.pathname.startsWith("/_next/")) {
     return;
   }
 

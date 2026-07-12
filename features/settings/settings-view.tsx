@@ -65,7 +65,7 @@ export function SettingsView() {
 
         <Card>
           <CardHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f79a6b]/15 text-[#c2571f] dark:text-[#f79a6b]">
               <Workflow className="h-5 w-5" />
             </div>
             <CardTitle className="mt-2">Product refinement</CardTitle>

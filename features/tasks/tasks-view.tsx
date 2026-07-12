@@ -11,6 +11,8 @@ import { categoryLabels, priorityTone, taskStatusTone } from "@/lib/constants";
 import { formatDate, getPriorityLabel, getTaskStatusLabel } from "@/lib/formatters";
 import { PROJECT_CATEGORIES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type { TaskRecord } from "@/types";
+import { CreateTaskDialog } from "@/features/tasks/create-task-dialog";
+import { TaskCardActions } from "@/features/tasks/task-card-actions";
 
 export function TasksView({
   tasks,
@@ -23,6 +25,7 @@ export function TasksView({
   const [category, setCategory] = useState("ALL");
   const [priority, setPriority] = useState("ALL");
   const [status, setStatus] = useState(initialStatus);
+  const [sort, setSort] = useState("RECENT");
   const deferredQuery = useDeferredValue(query);
 
   const filteredTasks = tasks.filter((task) => {
@@ -39,12 +42,29 @@ export function TasksView({
     );
   });
 
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    switch (sort) {
+      case "TITLE":
+        return a.title.localeCompare(b.title);
+      case "DUE":
+        return (
+          (a.dueDate ? Date.parse(a.dueDate) : Infinity) -
+          (b.dueDate ? Date.parse(b.dueDate) : Infinity)
+        );
+      case "PRIORITY":
+        return TASK_PRIORITIES.indexOf(a.priority) - TASK_PRIORITIES.indexOf(b.priority);
+      default:
+        return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+    }
+  });
+
   return (
     <div className="page-shell">
       <PageHeader
         eyebrow="Execution"
         title="Tasks"
         description="Track due dates, blockers, priorities, and project-linked execution work from one structured board."
+        actions={<CreateTaskDialog />}
       />
 
       <Card>
@@ -80,6 +100,12 @@ export function TasksView({
               </option>
             ))}
           </Select>
+          <Select value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="RECENT">Sort: Newest first</option>
+            <option value="TITLE">Sort: Title A–Z</option>
+            <option value="DUE">Sort: Due date</option>
+            <option value="PRIORITY">Sort: Priority</option>
+          </Select>
         </CardContent>
       </Card>
 
@@ -90,7 +116,7 @@ export function TasksView({
         />
       ) : (
         <div className="grid gap-4">
-          {filteredTasks.map((task) => (
+          {sortedTasks.map((task) => (
             <Card key={task.id}>
               <CardContent className="mt-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="max-w-3xl">
@@ -104,7 +130,17 @@ export function TasksView({
                   </div>
                   <h2 className="mt-4 text-lg font-semibold">{task.title}</h2>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">{task.description}</p>
+                  {task.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={task.imageUrl}
+                      alt=""
+                      className="mt-4 max-h-56 rounded-2xl border border-border object-cover"
+                    />
+                  ) : null}
                 </div>
+                <div className="flex flex-col gap-3 md:items-end">
+                  <TaskCardActions task={task} />
                 <div className="grid min-w-[220px] gap-3 rounded-2xl border border-border bg-surface p-4 text-sm">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground">Due date</span>
@@ -114,6 +150,7 @@ export function TasksView({
                     <span className="text-muted-foreground">Project</span>
                     <span className="text-right">{task.project?.title ?? "Standalone"}</span>
                   </div>
+                </div>
                 </div>
               </CardContent>
             </Card>

@@ -14,12 +14,15 @@ import { categoryDescriptions, categoryLabels, priorityTone, statusTone } from "
 import { formatDate, getPriorityLabel, getStatusLabel } from "@/lib/formatters";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES } from "@/types";
 import type { ProjectRecord } from "@/types";
+import { CreateProjectDialog } from "@/features/projects/create-project-dialog";
+import { ProjectCardActions } from "@/features/projects/project-card-actions";
 
 export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("ALL");
   const [status, setStatus] = useState("ALL");
   const [priority, setPriority] = useState("ALL");
+  const [sort, setSort] = useState("RECENT");
   const deferredQuery = useDeferredValue(query);
 
   const filteredProjects = projects.filter((project) => {
@@ -34,6 +37,24 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
     return matchesQuery && matchesCategory && matchesStatus && matchesPriority;
   });
 
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    switch (sort) {
+      case "TITLE":
+        return a.title.localeCompare(b.title);
+      case "DUE":
+        return (
+          (a.dueDate ? Date.parse(a.dueDate) : Infinity) -
+          (b.dueDate ? Date.parse(b.dueDate) : Infinity)
+        );
+      case "PRIORITY":
+        return TASK_PRIORITIES.indexOf(a.priority) - TASK_PRIORITIES.indexOf(b.priority);
+      case "PROGRESS":
+        return b.progress - a.progress;
+      default:
+        return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+    }
+  });
+
   return (
     <div className="page-shell">
       <PageHeader
@@ -41,9 +62,12 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
         title="Projects"
         description="A structured view of active and upcoming work with filters for category, priority, and execution status."
         actions={
-          <Link href="/" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-            Back to overview
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/dashboard" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+              Back to overview
+            </Link>
+            <CreateProjectDialog />
+          </div>
         }
       />
 
@@ -80,6 +104,13 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
               </option>
             ))}
           </Select>
+          <Select value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="RECENT">Sort: Newest first</option>
+            <option value="TITLE">Sort: Title A–Z</option>
+            <option value="DUE">Sort: Due date</option>
+            <option value="PRIORITY">Sort: Priority</option>
+            <option value="PROGRESS">Sort: Progress</option>
+          </Select>
         </CardContent>
       </Card>
 
@@ -91,12 +122,23 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
               description="Try widening the category, priority, or status filters to bring more items back into view."
             />
           ) : (
-            filteredProjects.map((project) => (
+            sortedProjects.map((project) => (
+              <div key={project.id} className="relative">
+                <div className="absolute right-4 top-4 z-10">
+                  <ProjectCardActions project={project} />
+                </div>
               <Link
-                key={project.id}
                 href={`/projects/${project.id}`}
-                className="surface-panel-elevated rounded-3xl p-6 transition hover:-translate-y-0.5 hover:border-primary/30"
+                className="block surface-panel-elevated overflow-hidden rounded-3xl p-6 transition hover:-translate-y-0.5 hover:border-primary/30"
               >
+                {project.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={project.imageUrl}
+                    alt=""
+                    className="-mx-6 -mt-6 mb-5 h-44 w-[calc(100%+3rem)] max-w-none object-cover"
+                  />
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
                   <Badge className={priorityTone[project.priority]}>{getPriorityLabel(project.priority)}</Badge>
@@ -126,6 +168,7 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
                   {project.dueDate ? <span>Due {formatDate(project.dueDate)}</span> : null}
                 </div>
               </Link>
+              </div>
             ))
           )}
         </div>

@@ -40,6 +40,7 @@ function mapTask(task: {
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date | null;
+  imageUrl?: string | null;
   projectId: string | null;
   project?: { id: string; title: string; slug: string } | null;
 }): TaskRecord {
@@ -59,6 +60,7 @@ function mapNote(note: {
   content: string;
   tags: string;
   category: NoteRecord["category"];
+  imageUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
   projectId: string | null;
@@ -145,6 +147,7 @@ function mapProject(project: {
   priority: ProjectRecord["priority"];
   progress: number;
   owner: string | null;
+  imageUrl?: string | null;
   dueDate: Date | null;
   createdAt: Date;
   updatedAt: Date;

@@ -3,37 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 33% 98%;
-  --foreground: 225 28% 14%;
-  --muted: 214 20% 94%;
-  --muted-foreground: 220 12% 42%;
-  --border: 214 22% 88%;
+  --background: 35 58% 95%;
+  --foreground: 38 20% 11%;
+  --muted: 35 35% 91%;
+  --muted-foreground: 36 11% 30%;
+  --border: 35 25% 85%;
   --surface: 0 0% 100%;
-  --surface-elevated: 210 25% 99%;
-  --primary: 214 82% 46%;
-  --primary-foreground: 210 40% 98%;
+  --surface-elevated: 35 50% 98%;
+  --primary: 20 85% 60%;
+  --primary-foreground: 38 20% 11%;
   --success: 156 67% 37%;
-  --warning: 35 92% 52%;
+  --warning: 44 100% 62%;
   --danger: 2 75% 58%;
-  --ring: 214 82% 46%;
+  --ring: 20 85% 55%;
   --font-sans: "Aptos", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
-  --font-display: "Aptos Display", "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+  --font-display: var(--font-fraunces), "Fraunces", Georgia, serif;
 }
 
 .dark {
-  --background: 221 35% 9%;
-  --foreground: 210 33% 96%;
-  --muted: 223 28% 14%;
-  --muted-foreground: 216 15% 68%;
-  --border: 223 18% 20%;
-  --surface: 222 29% 11%;
-  --surface-elevated: 221 27% 14%;
-  --primary: 200 96% 62%;
-  --primary-foreground: 220 33% 8%;
+  --background: 30 14% 8%;
+  --foreground: 35 30% 94%;
+  --muted: 30 12% 14%;
+  --muted-foreground: 33 12% 68%;
+  --border: 30 10% 20%;
+  --surface: 30 13% 10%;
+  --surface-elevated: 30 13% 13%;
+  --primary: 20 88% 64%;
+  --primary-foreground: 30 20% 8%;
   --success: 156 72% 42%;
-  --warning: 35 96% 58%;
+  --warning: 44 96% 60%;
   --danger: 3 86% 63%;
-  --ring: 200 96% 62%;
+  --ring: 20 88% 64%;
 }
 
 @layer base {
@@ -50,8 +50,8 @@
     font-family: var(--font-sans);
     color: hsl(var(--foreground));
     background:
-      radial-gradient(circle at top left, rgba(59, 130, 246, 0.11), transparent 30%),
-      radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 24%),
+      radial-gradient(circle at top left, rgba(247, 154, 107, 0.14), transparent 30%),
+      radial-gradient(circle at top right, rgba(255, 209, 92, 0.14), transparent 24%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 18%),
       hsl(var(--background));
     text-rendering: optimizeLegibility;
@@ -59,8 +59,8 @@
 
   .dark body {
     background:
-      radial-gradient(circle at top left, rgba(59, 130, 246, 0.13), transparent 28%),
-      radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 24%),
+      radial-gradient(circle at top left, rgba(247, 154, 107, 0.1), transparent 28%),
+      radial-gradient(circle at top right, rgba(255, 209, 92, 0.08), transparent 24%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%),
       hsl(var(--background));
   }
@@ -74,7 +74,7 @@
   }
 
   ::selection {
-    background: rgba(37, 99, 235, 0.18);
+    background: rgba(247, 154, 107, 0.3);
   }
 }
 

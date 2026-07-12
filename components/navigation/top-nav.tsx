@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -11,18 +12,19 @@ import { ThemeToggle } from "@/components/navigation/theme-toggle";
 export function TopNav() {
   const pathname = usePathname();
 
+  if (pathname === "/" || pathname === "/about" || pathname === "/contact") {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/40 bg-background/75 backdrop-blur-2xl dark:border-white/5">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
-              <LayoutGrid className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold tracking-tight">Command Center</p>
-              <p className="text-xs text-muted-foreground">Jaber's workspace</p>
-            </div>
+            <span className="relative h-11 w-11 overflow-hidden rounded-full bg-white shadow-soft ring-2 ring-foreground/10">
+              <Image src="/logo.jpg" alt="Jaber logo" fill className="object-cover" />
+            </span>
+            <p className="text-sm font-semibold tracking-tight">Jaber&apos;s Dashboard</p>
           </Link>
 
           <div className="flex items-center gap-2">
