@@ -13,12 +13,9 @@ import { logout } from "@/lib/auth-actions";
 export function TopNav() {
   const pathname = usePathname();
 
-  if (
-    pathname === "/" ||
-    pathname === "/about" ||
-    pathname === "/contact" ||
-    pathname === "/login"
-  ) {
+  const publicRoutes = ["/", "/about", "/contact", "/login", "/occ", "/claude"];
+
+  if (publicRoutes.includes(pathname)) {
     return null;
   }
 

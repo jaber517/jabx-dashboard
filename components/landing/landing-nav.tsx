@@ -4,6 +4,8 @@ import { fraunces } from "@/lib/fonts";
 
 const links = [
   { href: "/about", label: "About" },
+  { href: "/occ", label: "OCC" },
+  { href: "/claude", label: "Claude" },
   { href: "/contact", label: "Contact me" }
 ];
 
