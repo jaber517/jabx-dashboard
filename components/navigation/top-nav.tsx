@@ -3,16 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/navigation/theme-toggle";
+import { logout } from "@/lib/auth-actions";
 
 export function TopNav() {
   const pathname = usePathname();
 
-  if (pathname === "/" || pathname === "/about" || pathname === "/contact") {
+  if (
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname === "/contact" ||
+    pathname === "/login"
+  ) {
     return null;
   }
 
@@ -36,6 +42,17 @@ export function TopNav() {
               <span className="hidden sm:inline">Search</span>
             </Link>
             <ThemeToggle />
+            <form action={logout}>
+              <button
+                type="submit"
+                title="Log out"
+                aria-label="Log out"
+                className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "gap-2")}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Log out</span>
+              </button>
+            </form>
           </div>
         </div>
 

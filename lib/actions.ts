@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { assertAuthed } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
   PROJECT_CATEGORIES,
@@ -81,6 +82,7 @@ export async function createProject(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
     const imageUrl = await readImage(formData);
@@ -112,6 +114,7 @@ export async function updateProject(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const id = requireText(formData, "id", "Project id");
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
@@ -140,12 +143,14 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: string): Promise<void> {
+  assertAuthed();
   await db.project.delete({ where: { id } });
   revalidatePath("/projects");
   revalidatePath("/dashboard");
 }
 
 export async function setProjectCompleted(id: string, completed: boolean): Promise<void> {
+  assertAuthed();
   await db.project.update({
     where: { id },
     data: completed ? { status: "COMPLETED", progress: 100 } : { status: "ACTIVE" }
@@ -159,6 +164,7 @@ export async function createTask(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
     const imageUrl = await readImage(formData);
@@ -188,6 +194,7 @@ export async function updateTask(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const id = requireText(formData, "id", "Task id");
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
@@ -214,12 +221,14 @@ export async function updateTask(
 }
 
 export async function deleteTask(id: string): Promise<void> {
+  assertAuthed();
   await db.task.delete({ where: { id } });
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
 }
 
 export async function setTaskDone(id: string, done: boolean): Promise<void> {
+  assertAuthed();
   await db.task.update({
     where: { id },
     data: done
@@ -235,6 +244,7 @@ export async function createNote(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const title = requireText(formData, "title", "Title");
     const content = requireText(formData, "content", "Content");
     const imageUrl = await readImage(formData);
@@ -263,6 +273,7 @@ export async function updateNote(
   formData: FormData
 ): Promise<CreateResult> {
   try {
+    assertAuthed();
     const id = requireText(formData, "id", "Note id");
     const title = requireText(formData, "title", "Title");
     const content = requireText(formData, "content", "Content");
@@ -289,6 +300,7 @@ export async function updateNote(
 }
 
 export async function deleteNote(id: string): Promise<void> {
+  assertAuthed();
   await db.note.delete({ where: { id } });
   revalidatePath("/notes");
   revalidatePath("/dashboard");
