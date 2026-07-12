@@ -2,23 +2,20 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE, sessionToken } from "@/lib/auth";
+import {
+  SESSION_COOKIE,
+  expectedSessionToken,
+  verifyPasscode
+} from "@/lib/auth-config";
 
 export async function login(formData: FormData): Promise<void> {
   const password = formData.get("password");
-  const expected = process.env.DASHBOARD_PASSWORD;
 
-  if (!expected || typeof password !== "string" || password !== expected) {
+  if (typeof password !== "string" || !(await verifyPasscode(password))) {
     redirect("/login?error=1");
   }
 
-  const token = sessionToken();
-
-  if (!token) {
-    redirect("/login?error=1");
-  }
-
-  cookies().set(SESSION_COOKIE, token, {
+  cookies().set(SESSION_COOKIE, await expectedSessionToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function LoginPage({
   searchParams
 }: {
-  searchParams: { error?: string; unconfigured?: string };
+  searchParams: { error?: string };
 }) {
   return (
     <div className="min-h-screen bg-[#faf4ec] text-[#211d16]">
@@ -32,19 +32,12 @@ export default function LoginPage({
           </h1>
 
           <p className="mt-4 text-lg text-[#4c463d]">
-            The dashboard is just for me. If that&apos;s you, welcome back.
+            Please enter the passcode below.
           </p>
-
-          {searchParams.unconfigured ? (
-            <p className="mt-6 rounded-2xl bg-[#fde5d8] px-4 py-3 text-sm font-medium text-[#a13c11]">
-              No dashboard password is configured on this deployment yet, so the
-              dashboard stays locked.
-            </p>
-          ) : null}
 
           {searchParams.error ? (
             <p className="mt-6 rounded-2xl bg-[#fde5d8] px-4 py-3 text-sm font-medium text-[#a13c11]">
-              Wrong password — try again.
+              Wrong passcode — try again.
             </p>
           ) : null}
 
@@ -52,7 +45,8 @@ export default function LoginPage({
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Passcode"
+              inputMode="numeric"
               required
               autoFocus
               className="h-12 w-full rounded-full border border-[#211d16]/15 bg-white px-5 text-center text-sm outline-none transition placeholder:text-[#4c463d]/60 focus:ring-2 focus:ring-[#f79a6b]"

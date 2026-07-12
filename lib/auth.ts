@@ -1,25 +1,15 @@
-import { createHash } from "crypto";
 import { cookies } from "next/headers";
+import { SESSION_COOKIE, expectedSessionToken } from "@/lib/auth-config";
 
-export const SESSION_COOKIE = "jabx_session";
+export { SESSION_COOKIE };
 
-export function sessionToken(): string | null {
-  const password = process.env.DASHBOARD_PASSWORD;
-
-  if (!password) {
-    return null;
-  }
-
-  return createHash("sha256").update(`${password}:jabx-session-v1`).digest("hex");
+export async function isAuthed(): Promise<boolean> {
+  const session = cookies().get(SESSION_COOKIE)?.value;
+  return Boolean(session && session === (await expectedSessionToken()));
 }
 
-export function isAuthed(): boolean {
-  const expected = sessionToken();
-  return Boolean(expected && cookies().get(SESSION_COOKIE)?.value === expected);
-}
-
-export function assertAuthed(): void {
-  if (!isAuthed()) {
+export async function assertAuthed(): Promise<void> {
+  if (!(await isAuthed())) {
     throw new Error("You must be signed in to do that.");
   }
 }
