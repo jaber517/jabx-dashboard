@@ -53,7 +53,7 @@ export default function ContactPage() {
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="mailto:hello@jabx.me"
+              href="mailto:admin@jabx.me"
               className="inline-flex h-13 items-center gap-2 rounded-full bg-[#f79a6b] px-7 py-3.5 text-base font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition hover:bg-[#f58b54]"
             >
               ✉️ Email me
