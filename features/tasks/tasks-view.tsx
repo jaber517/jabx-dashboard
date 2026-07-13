@@ -16,15 +16,18 @@ import { TaskCardActions } from "@/features/tasks/task-card-actions";
 
 export function TasksView({
   tasks,
+  projects = [],
   initialStatus = "ALL"
 }: {
   tasks: TaskRecord[];
+  projects?: { id: string; title: string }[];
   initialStatus?: string;
 }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("ALL");
   const [priority, setPriority] = useState("ALL");
   const [status, setStatus] = useState(initialStatus);
+  const [project, setProject] = useState("ALL");
   const [sort, setSort] = useState("RECENT");
   const deferredQuery = useDeferredValue(query);
 
@@ -34,11 +37,16 @@ export function TasksView({
       task.title.toLowerCase().includes(deferredQuery.toLowerCase()) ||
       task.description.toLowerCase().includes(deferredQuery.toLowerCase());
 
+    const matchesProject =
+      project === "ALL" ||
+      (project === "INDEPENDENT" ? !task.projectId : task.projectId === project);
+
     return (
       matchesQuery &&
       (category === "ALL" || task.category === category) &&
       (priority === "ALL" || task.priority === priority) &&
-      (status === "ALL" || task.status === status)
+      (status === "ALL" || task.status === status) &&
+      matchesProject
     );
   });
 
@@ -64,7 +72,7 @@ export function TasksView({
         eyebrow="Execution"
         title="Tasks"
         description="Track due dates, blockers, priorities, and project-linked execution work from one structured board."
-        actions={<CreateTaskDialog />}
+        actions={<CreateTaskDialog projects={projects} />}
       />
 
       <Card>
@@ -97,6 +105,15 @@ export function TasksView({
             {TASK_STATUSES.map((item) => (
               <option key={item} value={item}>
                 {getTaskStatusLabel(item)}
+              </option>
+            ))}
+          </Select>
+          <Select value={project} onChange={(event) => setProject(event.target.value)}>
+            <option value="ALL">All projects</option>
+            <option value="INDEPENDENT">Independent tasks</option>
+            {projects.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title}
               </option>
             ))}
           </Select>
@@ -140,7 +157,7 @@ export function TasksView({
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-3 md:items-end">
-                  <TaskCardActions task={task} />
+                  <TaskCardActions task={task} projects={projects} />
                 <div className="grid min-w-[220px] gap-3 rounded-2xl border border-border bg-surface p-4 text-sm">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground">Due date</span>

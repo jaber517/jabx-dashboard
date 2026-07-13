@@ -56,10 +56,7 @@ export function TopNav() {
         <nav className="-mx-1 overflow-x-auto">
           <div className="flex min-w-max items-center gap-1 px-1">
             {navigationItems.map((item) => {
-              const active =
-                item.href === "/"
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <Link

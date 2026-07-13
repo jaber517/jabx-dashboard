@@ -7,7 +7,13 @@ import { deleteTask, setTaskDone } from "@/lib/actions";
 import { TaskFormDialog } from "@/features/tasks/create-task-dialog";
 import type { TaskRecord } from "@/types";
 
-export function TaskCardActions({ task }: { task: TaskRecord }) {
+export function TaskCardActions({
+  task,
+  projects
+}: {
+  task: TaskRecord;
+  projects?: { id: string; title: string }[];
+}) {
   const [pending, startTransition] = useTransition();
   const done = task.status === "DONE";
 
@@ -15,6 +21,7 @@ export function TaskCardActions({ task }: { task: TaskRecord }) {
     <div className="flex items-center gap-1.5">
       <TaskFormDialog
         task={task}
+        projects={projects}
         renderTrigger={(open) => (
           <IconButton title="Edit task" aria-label="Edit task" onClick={open}>
             <Pencil className="h-4 w-4" />

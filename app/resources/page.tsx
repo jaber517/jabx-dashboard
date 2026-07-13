@@ -1,8 +1,9 @@
 import { ResourcesView } from "@/features/resources/resources-view";
-import { getResourcesData } from "@/lib/data";
+import { getProjectsData, getResourcesData } from "@/lib/data";
 
 export default async function ResourcesPage() {
-  const resources = await getResourcesData();
+  const [resources, projects] = await Promise.all([getResourcesData(), getProjectsData()]);
+  const projectOptions = projects.map((project) => ({ id: project.id, title: project.title }));
 
-  return <ResourcesView resources={resources} />;
+  return <ResourcesView resources={resources} projects={projectOptions} />;
 }

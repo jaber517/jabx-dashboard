@@ -13,9 +13,11 @@ import type { TaskRecord } from "@/types";
 
 export function TaskFormDialog({
   task,
+  projects = [],
   renderTrigger
 }: {
   task?: TaskRecord;
+  projects?: { id: string; title: string }[];
   renderTrigger?: (open: () => void) => ReactNode;
 }) {
   const isEdit = Boolean(task);
@@ -70,9 +72,22 @@ export function TaskFormDialog({
         </DialogField>
       </div>
 
-      <DialogField label="Due date">
-        <Input name="dueDate" type="date" defaultValue={task?.dueDate?.slice(0, 10)} />
-      </DialogField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DialogField label="Due date">
+          <Input name="dueDate" type="date" defaultValue={task?.dueDate?.slice(0, 10)} />
+        </DialogField>
+
+        <DialogField label="Project">
+          <Select name="projectId" defaultValue={task?.projectId ?? ""}>
+            <option value="">Independent task (no project)</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.title}
+              </option>
+            ))}
+          </Select>
+        </DialogField>
+      </div>
 
       <DialogField label={isEdit ? "Replace photo (optional)" : "Photo (optional)"}>
         <Input name="photo" type="file" accept="image/*" className="py-2" />
@@ -81,6 +96,10 @@ export function TaskFormDialog({
   );
 }
 
-export function CreateTaskDialog() {
-  return <TaskFormDialog />;
+export function CreateTaskDialog({
+  projects
+}: {
+  projects?: { id: string; title: string }[];
+}) {
+  return <TaskFormDialog projects={projects} />;
 }

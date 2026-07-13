@@ -11,8 +11,16 @@ import { Select } from "@/components/ui/select";
 import { categoryLabels } from "@/lib/constants";
 import { PROJECT_CATEGORIES } from "@/types";
 import type { ResourceRecord } from "@/types";
+import { CreateResourceDialog } from "@/features/resources/create-resource-dialog";
+import { ResourceCardActions } from "@/features/resources/resource-card-actions";
 
-export function ResourcesView({ resources }: { resources: ResourceRecord[] }) {
+export function ResourcesView({
+  resources,
+  projects = []
+}: {
+  resources: ResourceRecord[];
+  projects?: { id: string; title: string }[];
+}) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("ALL");
   const deferredQuery = useDeferredValue(query);
@@ -29,6 +37,7 @@ export function ResourcesView({ resources }: { resources: ResourceRecord[] }) {
         eyebrow="Library"
         title="Resources and links"
         description="A clean reference library for checklists, templates, source documents, and system links."
+        actions={<CreateResourceDialog projects={projects} />}
       />
 
       <Card>
@@ -59,24 +68,30 @@ export function ResourcesView({ resources }: { resources: ResourceRecord[] }) {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {filteredResources.map((resource) => (
-            <a
-              key={resource.id}
-              href={resource.url}
-              className="surface-panel-elevated rounded-3xl p-6 transition hover:-translate-y-0.5 hover:border-primary/30"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <Badge className="bg-muted text-muted-foreground">
-                  {categoryLabels[resource.category]}
-                </Badge>
-                <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            <div key={resource.id} className="relative">
+              <div className="absolute right-4 top-4 z-10">
+                <ResourceCardActions resource={resource} projects={projects} />
               </div>
-              <h3 className="mt-4 text-lg font-semibold">{resource.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>
-              <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                <span>{resource.type}</span>
-                {resource.project ? <span>{resource.project.title}</span> : null}
-              </div>
-            </a>
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block surface-panel-elevated rounded-3xl p-6 transition hover:-translate-y-0.5 hover:border-primary/30"
+              >
+                <div className="flex items-center justify-between gap-3 pr-20">
+                  <Badge className="bg-muted text-muted-foreground">
+                    {categoryLabels[resource.category]}
+                  </Badge>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold">{resource.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>
+                <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                  <span>{resource.type}</span>
+                  {resource.project ? <span>{resource.project.title}</span> : null}
+                </div>
+              </a>
+            </div>
           ))}
         </div>
       )}

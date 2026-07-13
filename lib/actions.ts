@@ -69,6 +69,11 @@ function optionalDate(formData: FormData, field: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function optionalProjectId(formData: FormData): string | null {
+  const value = formData.get("projectId");
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 function slugify(title: string): string {
   const base = title
     .toLowerCase()
@@ -97,6 +102,7 @@ export async function createProject(
         status: optionalChoice(formData, "status", PROJECT_STATUSES, "PLANNED"),
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         dueDate: optionalDate(formData, "dueDate"),
+        owner: "Jaber",
         imageUrl
       }
     });
@@ -130,6 +136,7 @@ export async function updateProject(
         status: optionalChoice(formData, "status", PROJECT_STATUSES, "PLANNED"),
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         dueDate: optionalDate(formData, "dueDate"),
+        owner: "Jaber",
         ...(imageUrl ? { imageUrl } : {})
       }
     });
@@ -169,6 +176,8 @@ export async function createTask(
     const description = requireText(formData, "description", "Description");
     const imageUrl = await readImage(formData);
 
+    const projectId = optionalProjectId(formData);
+
     await db.task.create({
       data: {
         title,
@@ -177,12 +186,15 @@ export async function createTask(
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
         dueDate: optionalDate(formData, "dueDate"),
+        projectId,
         imageUrl
       }
     });
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
+    revalidatePath("/projects");
+    if (projectId) revalidatePath(`/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -199,6 +211,9 @@ export async function updateTask(
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
     const imageUrl = await readImage(formData);
+    const newProjectId = optionalProjectId(formData);
+
+    const previous = await db.task.findUnique({ where: { id }, select: { projectId: true } });
 
     await db.task.update({
       where: { id },
@@ -208,12 +223,16 @@ export async function updateTask(
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
         dueDate: optionalDate(formData, "dueDate"),
+        projectId: newProjectId,
         ...(imageUrl ? { imageUrl } : {})
       }
     });
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
+    revalidatePath("/projects");
+    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -222,14 +241,16 @@ export async function updateTask(
 
 export async function deleteTask(id: string): Promise<void> {
   await assertAuthed();
-  await db.task.delete({ where: { id } });
+  const task = await db.task.delete({ where: { id } });
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
+  revalidatePath("/projects");
+  if (task.projectId) revalidatePath(`/projects/${task.projectId}`);
 }
 
 export async function setTaskDone(id: string, done: boolean): Promise<void> {
   await assertAuthed();
-  await db.task.update({
+  const task = await db.task.update({
     where: { id },
     data: done
       ? { status: "DONE", blocked: false, completedAt: new Date() }
@@ -237,6 +258,8 @@ export async function setTaskDone(id: string, done: boolean): Promise<void> {
   });
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
+  revalidatePath("/projects");
+  if (task.projectId) revalidatePath(`/projects/${task.projectId}`);
 }
 
 export async function createNote(
@@ -304,4 +327,98 @@ export async function deleteNote(id: string): Promise<void> {
   await db.note.delete({ where: { id } });
   revalidatePath("/notes");
   revalidatePath("/dashboard");
+}
+
+function requireUrl(formData: FormData): string {
+  const value = formData.get("url");
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error("A link is required.");
+  }
+
+  const trimmed = value.trim();
+  const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    return new URL(withScheme).toString();
+  } catch {
+    throw new Error("That doesn't look like a valid link.");
+  }
+}
+
+export async function createResource(
+  _prev: CreateResult,
+  formData: FormData
+): Promise<CreateResult> {
+  try {
+    await assertAuthed();
+    const title = requireText(formData, "title", "Title");
+    const description = requireText(formData, "description", "Description");
+    const url = requireUrl(formData);
+    const type = requireText(formData, "type", "Type");
+    const projectId = optionalProjectId(formData);
+
+    await db.resourceLink.create({
+      data: {
+        title,
+        description,
+        url,
+        type,
+        category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
+        projectId
+      }
+    });
+
+    revalidatePath("/resources");
+    revalidatePath("/dashboard");
+    if (projectId) revalidatePath(`/projects/${projectId}`);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
+  }
+}
+
+export async function updateResource(
+  _prev: CreateResult,
+  formData: FormData
+): Promise<CreateResult> {
+  try {
+    await assertAuthed();
+    const id = requireText(formData, "id", "Resource id");
+    const title = requireText(formData, "title", "Title");
+    const description = requireText(formData, "description", "Description");
+    const url = requireUrl(formData);
+    const type = requireText(formData, "type", "Type");
+    const newProjectId = optionalProjectId(formData);
+
+    const previous = await db.resourceLink.findUnique({ where: { id }, select: { projectId: true } });
+
+    await db.resourceLink.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        url,
+        type,
+        category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
+        projectId: newProjectId
+      }
+    });
+
+    revalidatePath("/resources");
+    revalidatePath("/dashboard");
+    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
+  }
+}
+
+export async function deleteResource(id: string): Promise<void> {
+  await assertAuthed();
+  const resource = await db.resourceLink.delete({ where: { id } });
+  revalidatePath("/resources");
+  revalidatePath("/dashboard");
+  if (resource.projectId) revalidatePath(`/projects/${resource.projectId}`);
 }

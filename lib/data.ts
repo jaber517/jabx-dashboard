@@ -162,12 +162,34 @@ function mapProject(project: {
     dueDate: project.dueDate?.toISOString() ?? null,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
+    progress: deriveProjectProgress(project.status, project.tasks, project.progress),
     tasks: project.tasks?.map(mapTask),
     notes: project.notes?.map(mapNote),
     milestones: project.milestones?.map(mapMilestone),
     resources: project.resources?.map(mapResource),
     activities: project.activities?.map(mapActivity)
   };
+}
+
+// A project's progress bar should reflect the work actually linked to it: once
+// tasks are attached, their completion ratio drives the number instead of a
+// number someone typed in once and forgot about. Marking a project completed
+// always shows 100 regardless of task state, since that's an explicit override.
+function deriveProjectProgress(
+  status: ProjectRecord["status"],
+  tasks: { status: TaskRecord["status"] }[] | undefined,
+  storedProgress: number
+): number {
+  if (status === "COMPLETED") {
+    return 100;
+  }
+
+  if (tasks && tasks.length > 0) {
+    const done = tasks.filter((task) => task.status === "DONE").length;
+    return Math.round((done / tasks.length) * 100);
+  }
+
+  return storedProgress;
 }
 
 export async function getHomePageData() {
@@ -394,4 +416,30 @@ export async function getAnalyticsData() {
     projects: [] as ProjectRecord[],
     tasks: [] as TaskRecord[]
   });
+}
+
+export async function getSettingsStats() {
+  return withFallback(
+    async () => {
+      const [projectCount, activeProjectCount, taskCount, doneTaskCount, noteCount, resourceCount] =
+        await Promise.all([
+          db.project.count(),
+          db.project.count({ where: { status: { in: ["ACTIVE", "PLANNED", "WAITING"] } } }),
+          db.task.count(),
+          db.task.count({ where: { status: "DONE" } }),
+          db.note.count(),
+          db.resourceLink.count()
+        ]);
+
+      return { projectCount, activeProjectCount, taskCount, doneTaskCount, noteCount, resourceCount };
+    },
+    {
+      projectCount: 0,
+      activeProjectCount: 0,
+      taskCount: 0,
+      doneTaskCount: 0,
+      noteCount: 0,
+      resourceCount: 0
+    }
+  );
 }
