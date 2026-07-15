@@ -338,7 +338,7 @@ export function HomeDashboard({
     {
       id: "task-radar",
       title: "Task radar",
-      defaultWidth: "full",
+      defaultWidth: "half",
       node: (
         <Card>
           <CardHeader className="flex-row items-end justify-between gap-4">
@@ -385,6 +385,21 @@ export function HomeDashboard({
     }
   ];
 
+  // Default section order shown on a fresh device (users can still rearrange
+  // and their choice is saved locally).
+  const defaultOrder = [
+    "metrics",
+    "current-progress",
+    "deadlines",
+    "focus-projects",
+    "task-radar",
+    "quick-actions",
+    "activity"
+  ];
+  const orderedSections = defaultOrder
+    .map((id) => sections.find((section) => section.id === id))
+    .filter((section): section is HomeSection => Boolean(section));
+
   return (
     <div className="page-shell">
       <PageHeader
@@ -403,7 +418,7 @@ export function HomeDashboard({
         }
       />
 
-      <CustomizableGrid sections={sections} />
+      <CustomizableGrid sections={orderedSections} />
     </div>
   );
 }
