@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { FilterBadge } from "@/components/ui/filter-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -134,15 +136,24 @@ export function TasksView({
       ) : (
         <div className="grid gap-4">
           {sortedTasks.map((task) => (
-            <Card key={task.id}>
-              <CardContent className="mt-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <Card key={task.id} className="relative">
+              <Link
+                href={`/tasks/${task.id}`}
+                aria-label={task.title}
+                className="absolute inset-0 z-0 rounded-3xl"
+              />
+              <CardContent className="pointer-events-none mt-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="max-w-3xl">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
-                    <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
-                    <Badge className="bg-muted text-muted-foreground">
+                    <FilterBadge className={taskStatusTone[task.status]} onSelect={() => setStatus(task.status)}>
+                      {getTaskStatusLabel(task.status)}
+                    </FilterBadge>
+                    <FilterBadge className={priorityTone[task.priority]} onSelect={() => setPriority(task.priority)}>
+                      {getPriorityLabel(task.priority)}
+                    </FilterBadge>
+                    <FilterBadge className="bg-muted text-muted-foreground" onSelect={() => setCategory(task.category)}>
                       {categoryLabels[task.category]}
-                    </Badge>
+                    </FilterBadge>
                     {task.blocked ? <Badge className="bg-danger/10 text-danger">Blocked</Badge> : null}
                   </div>
                   <h2 className="mt-4 text-lg font-semibold">{task.title}</h2>
@@ -157,7 +168,9 @@ export function TasksView({
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-3 md:items-end">
-                  <TaskCardActions task={task} projects={projects} />
+                  <div className="pointer-events-auto relative z-10">
+                    <TaskCardActions task={task} projects={projects} />
+                  </div>
                 <div className="grid min-w-[220px] gap-3 rounded-2xl border border-border bg-surface p-4 text-sm">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground">Due date</span>

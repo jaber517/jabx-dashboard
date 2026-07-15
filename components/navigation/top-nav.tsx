@@ -3,11 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Search } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { navigationItems } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/navigation/theme-toggle";
+import { GlobalSearch } from "@/components/navigation/global-search";
 import { logout } from "@/lib/auth-actions";
 
 export function TopNav() {
@@ -31,14 +31,7 @@ export function TopNav() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/notes"
-              className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "gap-2")}
-            >
-              <Search className="h-4 w-4" />
-              <span className="hidden sm:inline">Search</span>
-            </Link>
-            <ThemeToggle />
+            <GlobalSearch />
             <form action={logout}>
               <button
                 type="submit"

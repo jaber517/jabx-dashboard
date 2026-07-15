@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -8,16 +9,24 @@ export function MetricCard({
   value,
   trend,
   icon,
+  href,
   accentClassName
 }: {
   label: string;
   value: string;
   trend?: string;
   icon?: ReactNode;
+  href?: string;
   accentClassName?: string;
 }) {
-  return (
-    <Card className={cn("relative overflow-hidden", accentClassName)}>
+  const content = (
+    <Card
+      className={cn(
+        "relative overflow-hidden",
+        href && "h-full transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft",
+        accentClassName
+      )}
+    >
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5" />
       <CardHeader className="relative gap-4">
         <div className="flex items-start justify-between gap-4">
@@ -38,4 +47,14 @@ export function MetricCard({
       </CardHeader>
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }

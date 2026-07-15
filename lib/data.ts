@@ -343,6 +343,17 @@ export async function getTasksData() {
   }, [] as TaskRecord[]);
 }
 
+export async function getTaskDetail(id: string) {
+  return withFallback(async () => {
+    const task = await db.task.findUnique({
+      where: { id },
+      include: { project: true }
+    });
+
+    return task ? mapTask(task as Parameters<typeof mapTask>[0]) : null;
+  }, null as TaskRecord | null);
+}
+
 export async function getNotesData() {
   return withFallback(async () => {
     const notes = await db.note.findMany({
@@ -354,6 +365,17 @@ export async function getNotesData() {
 
     return notes.map(mapNote);
   }, [] as NoteRecord[]);
+}
+
+export async function getNoteDetail(id: string) {
+  return withFallback(async () => {
+    const note = await db.note.findUnique({
+      where: { id },
+      include: { project: true }
+    });
+
+    return note ? mapNote(note as Parameters<typeof mapNote>[0]) : null;
+  }, null as NoteRecord | null);
 }
 
 export async function getActivityData() {

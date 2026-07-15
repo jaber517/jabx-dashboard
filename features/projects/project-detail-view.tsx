@@ -13,6 +13,7 @@ import {
   getTaskStatusLabel
 } from "@/lib/formatters";
 import type { ProjectRecord } from "@/types";
+import { ProjectCardActions } from "@/features/projects/project-card-actions";
 
 export function ProjectDetailView({ project }: { project: ProjectRecord }) {
   return (
@@ -22,14 +23,12 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
         title={project.title}
         description={project.description}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <Link href="/projects" className={buttonVariants({ variant: "secondary", size: "lg" })}>
               All projects
             </Link>
-            <Link href="/tasks" className={buttonVariants({ variant: "default", size: "lg" })}>
-              View tasks
-            </Link>
-          </>
+            <ProjectCardActions project={project} />
+          </div>
         }
       />
 
@@ -129,7 +128,11 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
           </CardHeader>
           <CardContent className="space-y-4">
             {project.tasks?.map((task) => (
-              <div key={task.id} className="rounded-2xl border border-border bg-surface p-4">
+              <Link
+                key={task.id}
+                href={`/tasks/${task.id}`}
+                className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
                   <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
@@ -140,7 +143,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                   {task.dueDate ? <span>Due {formatDate(task.dueDate)}</span> : null}
                   {task.blocked ? <span>Blocked</span> : null}
                 </div>
-              </div>
+              </Link>
             ))}
           </CardContent>
         </Card>
@@ -153,9 +156,13 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
             </CardHeader>
             <CardContent className="space-y-4">
               {project.notes?.map((note) => (
-                <div key={note.id} className="rounded-2xl border border-border bg-surface p-4">
+                <Link
+                  key={note.id}
+                  href={`/notes/${note.id}`}
+                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                >
                   <p className="text-sm font-semibold">{note.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{note.content}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{note.content}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {note.tags.map((tag) => (
                       <Badge key={tag} className="bg-muted text-muted-foreground">
@@ -163,7 +170,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                       </Badge>
                     ))}
                   </div>
-                </div>
+                </Link>
               ))}
             </CardContent>
           </Card>

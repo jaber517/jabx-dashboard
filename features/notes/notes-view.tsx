@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { FilterBadge } from "@/components/ui/filter-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -79,22 +80,29 @@ export function NotesView({ notes }: { notes: NoteRecord[] }) {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {sortedNotes.map((note) => (
-            <Card key={note.id} className="flex h-full flex-col">
-              <CardHeader>
+            <Card key={note.id} className="relative flex h-full flex-col">
+              <Link
+                href={`/notes/${note.id}`}
+                aria-label={note.title}
+                className="absolute inset-0 z-0 rounded-3xl"
+              />
+              <CardHeader className="pointer-events-none">
                 <div className="flex items-center justify-between gap-3">
-                  <Badge className="bg-muted text-muted-foreground">
+                  <FilterBadge className="bg-muted text-muted-foreground" onSelect={() => setCategory(note.category)}>
                     {categoryLabels[note.category]}
-                  </Badge>
+                  </FilterBadge>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
                       {formatRelativeDate(note.updatedAt)}
                     </span>
-                    <NoteCardActions note={note} />
+                    <div className="pointer-events-auto relative z-10">
+                      <NoteCardActions note={note} />
+                    </div>
                   </div>
                 </div>
                 <CardTitle className="mt-2">{note.title}</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-1 flex-col justify-between">
+              <CardContent className="pointer-events-none flex flex-1 flex-col justify-between">
                 <div>
                   {note.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -104,13 +112,13 @@ export function NotesView({ notes }: { notes: NoteRecord[] }) {
                       className="mb-4 max-h-48 w-full rounded-2xl border border-border object-cover"
                     />
                   ) : null}
-                  <p className="text-sm leading-6 text-muted-foreground">{note.content}</p>
+                  <p className="text-sm leading-6 text-muted-foreground line-clamp-4">{note.content}</p>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {note.tags.map((tag) => (
-                    <Badge key={tag} className="bg-primary/10 text-primary">
+                    <FilterBadge key={tag} className="bg-primary/10 text-primary" onSelect={() => setQuery(tag)}>
                       #{tag}
-                    </Badge>
+                    </FilterBadge>
                   ))}
                 </div>
                 {note.project ? (

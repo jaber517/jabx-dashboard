@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { FilterBadge } from "@/components/ui/filter-badge";
 import { Select } from "@/components/ui/select";
 import { categoryDescriptions, categoryLabels, priorityTone, statusTone } from "@/lib/constants";
 import { formatDate, getPriorityLabel, getStatusLabel } from "@/lib/formatters";
@@ -140,11 +141,15 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
                   />
                 ) : null}
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
-                  <Badge className={priorityTone[project.priority]}>{getPriorityLabel(project.priority)}</Badge>
-                  <Badge className="bg-muted text-muted-foreground">
+                  <FilterBadge className={statusTone[project.status]} onSelect={() => setStatus(project.status)}>
+                    {getStatusLabel(project.status)}
+                  </FilterBadge>
+                  <FilterBadge className={priorityTone[project.priority]} onSelect={() => setPriority(project.priority)}>
+                    {getPriorityLabel(project.priority)}
+                  </FilterBadge>
+                  <FilterBadge className="bg-muted text-muted-foreground" onSelect={() => setCategory(project.category)}>
                     {categoryLabels[project.category]}
-                  </Badge>
+                  </FilterBadge>
                 </div>
                 <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="max-w-2xl">
