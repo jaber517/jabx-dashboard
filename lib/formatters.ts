@@ -3,11 +3,15 @@ import { categoryLabels, priorityLabels, statusLabels, taskStatusLabels } from "
 import type { ProjectCategory, ProjectStatus, TaskPriority, TaskStatus } from "@/types";
 
 export function formatDate(value: string | Date, pattern = "MMM d, yyyy") {
-  return format(new Date(value), pattern);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return format(date, pattern);
 }
 
 export function formatRelativeDate(value: string | Date) {
-  return formatDistanceToNow(new Date(value), { addSuffix: true });
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "recently";
+  return formatDistanceToNow(date, { addSuffix: true });
 }
 
 export function getCategoryLabel(category: ProjectCategory) {

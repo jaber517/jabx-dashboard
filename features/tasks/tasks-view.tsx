@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { FilterBadge } from "@/components/ui/filter-badge";
+import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -145,9 +146,12 @@ export function TasksView({
               <CardContent className="pointer-events-none mt-0 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="max-w-3xl">
                   <div className="flex flex-wrap items-center gap-2">
-                    <FilterBadge className={taskStatusTone[task.status]} onSelect={() => setStatus(task.status)}>
-                      {getTaskStatusLabel(task.status)}
-                    </FilterBadge>
+                    <span className="pointer-events-auto relative z-10 inline-flex items-center gap-1.5">
+                      <TaskStatusIcon status={task.status} />
+                      <FilterBadge className={taskStatusTone[task.status]} onSelect={() => setStatus(task.status)}>
+                        {getTaskStatusLabel(task.status)}
+                      </FilterBadge>
+                    </span>
                     <FilterBadge className={priorityTone[task.priority]} onSelect={() => setPriority(task.priority)}>
                       {getPriorityLabel(task.priority)}
                     </FilterBadge>

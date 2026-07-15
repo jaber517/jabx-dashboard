@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PageHeader } from "@/components/ui/page-header";
 import { categoryLabels, priorityTone, taskStatusTone } from "@/lib/constants";
 import { formatDate, formatRelativeDate, getPriorityLabel, getTaskStatusLabel } from "@/lib/formatters";
+import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import type { TaskRecord } from "@/types";
 import { TaskCardActions } from "@/features/tasks/task-card-actions";
 
@@ -35,7 +36,10 @@ export function TaskDetailView({
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
+              <span className="inline-flex items-center gap-1.5">
+                <TaskStatusIcon status={task.status} />
+                <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
+              </span>
               <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
               <Badge className="bg-muted text-muted-foreground">{categoryLabels[task.category]}</Badge>
               {task.blocked ? <Badge className="bg-danger/10 text-danger">Blocked</Badge> : null}

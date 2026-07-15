@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import { categoryLabels, priorityTone, statusTone, taskStatusTone } from "@/lib/constants";
 import {
   formatDate,
@@ -16,6 +19,9 @@ import type { ProjectRecord } from "@/types";
 import { ProjectCardActions } from "@/features/projects/project-card-actions";
 
 export function ProjectDetailView({ project }: { project: ProjectRecord }) {
+  const doneTasks = project.tasks?.filter((task) => task.status === "DONE").length ?? 0;
+  const totalTasks = project.tasks?.length ?? 0;
+
   return (
     <div className="page-shell">
       <PageHeader
@@ -59,66 +65,48 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
-              <Badge className={priorityTone[project.priority]}>{getPriorityLabel(project.priority)}</Badge>
-              <Badge className="bg-muted text-muted-foreground">
-                {categoryLabels[project.category]}
-              </Badge>
-            </div>
-            <CardTitle className="mt-2">Progress and delivery</CardTitle>
-            <CardDescription>{project.summary}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProgressBar value={project.progress} />
-            <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-              <span>{project.progress}% complete</span>
-              <span>Updated {formatRelativeDate(project.updatedAt)}</span>
-            </div>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
+            <Badge className={priorityTone[project.priority]}>{getPriorityLabel(project.priority)}</Badge>
+            <Badge className="bg-muted text-muted-foreground">
+              {categoryLabels[project.category]}
+            </Badge>
+          </div>
+          <CardTitle className="mt-2">Progress and delivery</CardTitle>
+          <CardDescription>{project.summary}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProgressBar value={project.progress} />
+          <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">{project.progress}% complete</span>
+            <span>Updated {formatRelativeDate(project.updatedAt)}</span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {project.status === "COMPLETED"
+              ? "Marked completed."
+              : totalTasks > 0
+                ? `Based on ${doneTasks} of ${totalTasks} tasks done.`
+                : "Add tasks to track progress automatically."}
+          </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-border bg-surface p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Tasks</p>
-                <p className="mt-2 text-2xl font-semibold">{project.tasks?.length ?? 0}</p>
-              </div>
-              <div className="rounded-2xl border border-border bg-surface p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Notes</p>
-                <p className="mt-2 text-2xl font-semibold">{project.notes?.length ?? 0}</p>
-              </div>
-              <div className="rounded-2xl border border-border bg-surface p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Milestones</p>
-                <p className="mt-2 text-2xl font-semibold">{project.milestones?.length ?? 0}</p>
-              </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Tasks</p>
+              <p className="mt-2 text-2xl font-semibold">{totalTasks}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Milestones</CardTitle>
-            <CardDescription>Key upcoming checkpoints for this project.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {project.milestones?.map((milestone) => (
-              <div key={milestone.id} className="rounded-2xl border border-border bg-surface p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold">{milestone.title}</p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {milestone.summary}
-                    </p>
-                  </div>
-                  <Badge className={statusTone[milestone.status]}>{getStatusLabel(milestone.status)}</Badge>
-                </div>
-                <p className="mt-3 text-xs text-muted-foreground">{formatDate(milestone.date)}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Notes</p>
+              <p className="mt-2 text-2xl font-semibold">{project.notes?.length ?? 0}</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Resources</p>
+              <p className="mt-2 text-2xl font-semibold">{project.resources?.length ?? 0}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card>
@@ -127,24 +115,31 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
             <CardDescription>Delivery items attached to this project.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {project.tasks?.map((task) => (
-              <Link
-                key={task.id}
-                href={`/tasks/${task.id}`}
-                className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
-                  <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
-                </div>
-                <p className="mt-3 text-sm font-semibold">{task.title}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{task.description}</p>
-                <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  {task.dueDate ? <span>Due {formatDate(task.dueDate)}</span> : null}
-                  {task.blocked ? <span>Blocked</span> : null}
-                </div>
-              </Link>
-            ))}
+            {totalTasks === 0 ? (
+              <EmptyState title="No tasks yet" description="Add tasks and link them to this project." />
+            ) : (
+              project.tasks?.map((task) => (
+                <Link
+                  key={task.id}
+                  href={`/tasks/${task.id}`}
+                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <TaskStatusIcon status={task.status} />
+                      <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
+                    </span>
+                    <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold">{task.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{task.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    {task.dueDate ? <span>Due {formatDate(task.dueDate)}</span> : null}
+                    {task.blocked ? <span>Blocked</span> : null}
+                  </div>
+                </Link>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -155,49 +150,56 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
               <CardDescription>Supporting context and project ideas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {project.notes?.map((note) => (
-                <Link
-                  key={note.id}
-                  href={`/notes/${note.id}`}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
-                >
-                  <p className="text-sm font-semibold">{note.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{note.content}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {note.tags.map((tag) => (
-                      <Badge key={tag} className="bg-muted text-muted-foreground">
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </Link>
-              ))}
+              {(project.notes?.length ?? 0) === 0 ? (
+                <EmptyState title="No notes yet" description="Notes linked to this project appear here." />
+              ) : (
+                project.notes?.map((note) => (
+                  <Link
+                    key={note.id}
+                    href={`/notes/${note.id}`}
+                    className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                  >
+                    <p className="text-sm font-semibold">{note.title}</p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{note.content}</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {note.tags.map((tag) => (
+                        <Badge key={tag} className="bg-muted text-muted-foreground">
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Link>
+                ))
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Resources and activity</CardTitle>
-              <CardDescription>Linked references and recent changes.</CardDescription>
+              <CardTitle>Resources</CardTitle>
+              <CardDescription>Links and references for this project.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {project.resources?.map((resource) => (
-                <a
-                  key={resource.id}
-                  href={resource.url}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
-                >
-                  <p className="text-sm font-semibold">{resource.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>
-                </a>
-              ))}
-              {project.activities?.map((activity) => (
-                <div key={activity.id} className="rounded-2xl border border-border bg-surface p-4">
-                  <p className="text-sm font-semibold">{activity.action}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{activity.description}</p>
-                  <p className="mt-3 text-xs text-muted-foreground">{formatRelativeDate(activity.createdAt)}</p>
-                </div>
-              ))}
+              {(project.resources?.length ?? 0) === 0 ? (
+                <EmptyState title="No resources yet" description="Add links on the Resources page and attach this project." />
+              ) : (
+                project.resources?.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{resource.title}</p>
+                      <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{resource.description}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{resource.type}</p>
+                  </a>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

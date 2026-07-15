@@ -60,12 +60,43 @@ export function HomeDashboard({
   ).length;
   const openTasks = tasks.filter((task) => task.status !== "DONE").length;
   const blockedItems = tasks.filter((task) => task.blocked).length;
-  const thisWeekDeadlineCount = milestones.filter((milestone) => {
-    const date = new Date(milestone.date).getTime();
-    const now = Date.now();
-    const inWeek = now + 1000 * 60 * 60 * 24 * 7;
-    return date >= now && date <= inWeek;
+
+  const now = Date.now();
+  const inWeek = now + 1000 * 60 * 60 * 24 * 7;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const thisWeekDeadlineCount = tasks.filter((task) => {
+    if (task.status === "DONE" || !task.dueDate) return false;
+    const date = Date.parse(task.dueDate);
+    return date >= startOfToday.getTime() && date <= inWeek;
   }).length;
+
+  // Upcoming due dates across projects and open tasks (soonest first).
+  const upcomingDeadlines = [
+    ...projects
+      .filter((project) => project.dueDate)
+      .map((project) => ({
+        id: `project-${project.id}`,
+        type: "Project" as const,
+        title: project.title,
+        subtitle: project.summary,
+        href: `/projects/${project.id}`,
+        due: project.dueDate as string
+      })),
+    ...tasks
+      .filter((task) => task.dueDate && task.status !== "DONE")
+      .map((task) => ({
+        id: `task-${task.id}`,
+        type: "Task" as const,
+        title: task.title,
+        subtitle: task.project?.title ?? "Independent task",
+        href: `/tasks/${task.id}`,
+        due: task.dueDate as string
+      }))
+  ]
+    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))
+    .slice(0, 5);
 
   const sections: HomeSection[] = [
     {
@@ -267,28 +298,29 @@ export function HomeDashboard({
             </Link>
           </CardHeader>
           <CardContent className="space-y-4">
-            {milestones.length === 0 ? (
+            {upcomingDeadlines.length === 0 ? (
               <EmptyState
                 title="No deadlines scheduled"
-                description="Upcoming milestones and delivery checkpoints will surface here."
+                description="Give a project or task a due date and it will surface here."
               />
             ) : (
-              milestones.slice(0, 5).map((milestone) => (
-                <div key={milestone.id} className="rounded-2xl border border-border bg-surface p-4">
+              upcomingDeadlines.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold">{milestone.title}</p>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                        {milestone.summary}
-                      </p>
+                      <p className="text-sm font-semibold">{item.title}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.subtitle}</p>
                     </div>
-                    <Badge className={statusTone[milestone.status]}>{getStatusLabel(milestone.status)}</Badge>
+                    <Badge className="bg-muted text-muted-foreground">{item.type}</Badge>
                   </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{getCategoryLabel(milestone.category)}</span>
-                    <span>{formatDate(milestone.date)}</span>
+                  <div className="mt-3 flex items-center justify-end text-xs text-muted-foreground">
+                    <span>Due {formatDate(item.due)}</span>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </CardContent>

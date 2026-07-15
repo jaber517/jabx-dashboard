@@ -378,30 +378,131 @@ export async function getNoteDetail(id: string) {
   }, null as NoteRecord | null);
 }
 
+export type FeedItem = {
+  id: string;
+  type: "Project" | "Task" | "Note" | "Resource";
+  title: string;
+  description: string;
+  category: ProjectRecord["category"];
+  href: string;
+  at: string;
+  action: string;
+};
+
+// A live activity feed derived from the most recently touched records, so it
+// always reflects real changes instead of a static seed table.
 export async function getActivityData() {
   return withFallback(async () => {
-    const activities = await db.activity.findMany({
-      include: {
-        project: true
-      },
-      orderBy: [{ createdAt: "desc" }]
-    });
+    const [projects, tasks, notes, resources] = await Promise.all([
+      db.project.findMany({ orderBy: [{ updatedAt: "desc" }], take: 15 }),
+      db.task.findMany({ orderBy: [{ updatedAt: "desc" }], take: 15 }),
+      db.note.findMany({ orderBy: [{ updatedAt: "desc" }], take: 15 }),
+      db.resourceLink.findMany({ orderBy: [{ createdAt: "desc" }], take: 15 })
+    ]);
 
-    return activities.map(mapActivity);
-  }, [] as ActivityRecord[]);
+    const wasCreated = (createdAt: Date, updatedAt: Date) =>
+      Math.abs(updatedAt.getTime() - createdAt.getTime()) < 1000;
+
+    const items: FeedItem[] = [
+      ...projects.map((p) => ({
+        id: `project-${p.id}`,
+        type: "Project" as const,
+        title: p.title,
+        description: p.summary,
+        category: p.category as ProjectRecord["category"],
+        href: `/projects/${p.id}`,
+        at: p.updatedAt.toISOString(),
+        action: wasCreated(p.createdAt, p.updatedAt) ? "Project created" : "Project updated"
+      })),
+      ...tasks.map((t) => ({
+        id: `task-${t.id}`,
+        type: "Task" as const,
+        title: t.title,
+        description: t.description,
+        category: t.category as ProjectRecord["category"],
+        href: `/tasks/${t.id}`,
+        at: t.updatedAt.toISOString(),
+        action:
+          t.status === "DONE"
+            ? "Task completed"
+            : wasCreated(t.createdAt, t.updatedAt)
+              ? "Task created"
+              : "Task updated"
+      })),
+      ...notes.map((n) => ({
+        id: `note-${n.id}`,
+        type: "Note" as const,
+        title: n.title,
+        description: n.content,
+        category: n.category as ProjectRecord["category"],
+        href: `/notes/${n.id}`,
+        at: n.updatedAt.toISOString(),
+        action: wasCreated(n.createdAt, n.updatedAt) ? "Note added" : "Note updated"
+      })),
+      ...resources.map((r) => ({
+        id: `resource-${r.id}`,
+        type: "Resource" as const,
+        title: r.title,
+        description: r.description,
+        category: r.category as ProjectRecord["category"],
+        href: r.url,
+        at: r.createdAt.toISOString(),
+        action: "Resource saved"
+      }))
+    ];
+
+    return items.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 25);
+  }, [] as FeedItem[]);
 }
 
+export type CalendarItem = {
+  id: string;
+  type: "Project" | "Task";
+  title: string;
+  description: string;
+  category: ProjectRecord["category"];
+  status: string;
+  href: string;
+  dueDate: string;
+};
+
+// The calendar shows real work with a due date: projects and tasks.
 export async function getCalendarData() {
   return withFallback(async () => {
-    const milestones = await db.milestone.findMany({
-      include: {
-        project: true
-      },
-      orderBy: [{ date: "asc" }]
-    });
+    const [projects, tasks] = await Promise.all([
+      db.project.findMany({ where: { dueDate: { not: null } }, orderBy: [{ dueDate: "asc" }] }),
+      db.task.findMany({
+        where: { dueDate: { not: null } },
+        include: { project: true },
+        orderBy: [{ dueDate: "asc" }]
+      })
+    ]);
 
-    return milestones.map(mapMilestone);
-  }, [] as MilestoneRecord[]);
+    const items: CalendarItem[] = [
+      ...projects.map((p) => ({
+        id: `project-${p.id}`,
+        type: "Project" as const,
+        title: p.title,
+        description: p.summary,
+        category: p.category as ProjectRecord["category"],
+        status: p.status,
+        href: `/projects/${p.id}`,
+        dueDate: (p.dueDate as Date).toISOString()
+      })),
+      ...tasks.map((t) => ({
+        id: `task-${t.id}`,
+        type: "Task" as const,
+        title: t.title,
+        description: t.description,
+        category: t.category as ProjectRecord["category"],
+        status: t.status,
+        href: `/tasks/${t.id}`,
+        dueDate: (t.dueDate as Date).toISOString()
+      }))
+    ];
+
+    return items.sort((a, b) => Date.parse(a.dueDate) - Date.parse(b.dueDate));
+  }, [] as CalendarItem[]);
 }
 
 export async function getResourcesData() {

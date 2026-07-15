@@ -1,8 +1,10 @@
 import { CalendarView } from "@/features/calendar/calendar-view";
 import { getCalendarData } from "@/lib/data";
 
-export default async function CalendarPage() {
-  const milestones = await getCalendarData();
+export const dynamic = "force-dynamic";
 
-  return <CalendarView milestones={milestones} />;
+export default async function CalendarPage() {
+  const items = await getCalendarData();
+
+  return <CalendarView items={items} />;
 }
