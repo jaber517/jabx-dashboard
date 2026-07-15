@@ -5,7 +5,7 @@ export const SESSION_COOKIE = "jabx_session";
 // sha256("<passcode>:jabx-pass-v1"). The passcode itself is not stored in the
 // repo; setting the DASHBOARD_PASSWORD env var overrides this fallback.
 const FALLBACK_PASSCODE_SHA256 =
-  "9b51c7164edbf6b841b65cee0e13f41b6c45ba745338e0d1994e185a8af899f0";
+  "ac38c7d35f68ef18b158908d9fd5bc83014aac6ffb1f0cd843a397560c3b9aad";
 
 export async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
