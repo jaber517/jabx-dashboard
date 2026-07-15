@@ -1,17 +1,19 @@
 import { notFound } from "next/navigation";
 import { NoteDetailView } from "@/features/notes/note-detail-view";
-import { getNoteDetail } from "@/lib/data";
+import { getNoteDetail, getProjectsData } from "@/lib/data";
 
 export default async function NoteDetailPage({
   params
 }: {
   params: { id: string };
 }) {
-  const note = await getNoteDetail(params.id);
+  const [note, projects] = await Promise.all([getNoteDetail(params.id), getProjectsData()]);
 
   if (!note) {
     notFound();
   }
 
-  return <NoteDetailView note={note} />;
+  const projectOptions = projects.map((project) => ({ id: project.id, title: project.title }));
+
+  return <NoteDetailView note={note} projects={projectOptions} />;
 }

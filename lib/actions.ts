@@ -273,18 +273,22 @@ export async function createNote(
     const imageUrl = await readImage(formData);
     const tags = formData.get("tags");
 
+    const projectId = optionalProjectId(formData);
+
     await db.note.create({
       data: {
         title,
         content,
         tags: typeof tags === "string" ? tags.trim() : "",
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
+        projectId,
         imageUrl
       }
     });
 
     revalidatePath("/notes");
     revalidatePath("/dashboard");
+    if (projectId) revalidatePath(`/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -302,6 +306,9 @@ export async function updateNote(
     const content = requireText(formData, "content", "Content");
     const imageUrl = await readImage(formData);
     const tags = formData.get("tags");
+    const newProjectId = optionalProjectId(formData);
+
+    const previous = await db.note.findUnique({ where: { id }, select: { projectId: true } });
 
     await db.note.update({
       where: { id },
@@ -310,12 +317,15 @@ export async function updateNote(
         content,
         tags: typeof tags === "string" ? tags.trim() : "",
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
+        projectId: newProjectId,
         ...(imageUrl ? { imageUrl } : {})
       }
     });
 
     revalidatePath("/notes");
     revalidatePath("/dashboard");
+    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };

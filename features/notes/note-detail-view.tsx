@@ -8,7 +8,13 @@ import { formatRelativeDate } from "@/lib/formatters";
 import type { NoteRecord } from "@/types";
 import { NoteCardActions } from "@/features/notes/note-card-actions";
 
-export function NoteDetailView({ note }: { note: NoteRecord }) {
+export function NoteDetailView({
+  note,
+  projects
+}: {
+  note: NoteRecord;
+  projects?: { id: string; title: string }[];
+}) {
   return (
     <div className="page-shell">
       <PageHeader
@@ -20,7 +26,7 @@ export function NoteDetailView({ note }: { note: NoteRecord }) {
             <Link href="/notes" className={buttonVariants({ variant: "secondary", size: "lg" })}>
               All notes
             </Link>
-            <NoteCardActions note={note} />
+            <NoteCardActions note={note} projects={projects} />
           </div>
         }
       />

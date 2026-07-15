@@ -7,13 +7,20 @@ import { deleteNote } from "@/lib/actions";
 import { NoteFormDialog } from "@/features/notes/create-note-dialog";
 import type { NoteRecord } from "@/types";
 
-export function NoteCardActions({ note }: { note: NoteRecord }) {
+export function NoteCardActions({
+  note,
+  projects
+}: {
+  note: NoteRecord;
+  projects?: { id: string; title: string }[];
+}) {
   const [pending, startTransition] = useTransition();
 
   return (
     <div className="flex items-center gap-1.5">
       <NoteFormDialog
         note={note}
+        projects={projects}
         renderTrigger={(open) => (
           <IconButton title="Edit note" aria-label="Edit note" onClick={open}>
             <Pencil className="h-4 w-4" />

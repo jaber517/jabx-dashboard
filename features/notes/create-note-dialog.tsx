@@ -12,9 +12,11 @@ import type { NoteRecord } from "@/types";
 
 export function NoteFormDialog({
   note,
+  projects = [],
   renderTrigger
 }: {
   note?: NoteRecord;
+  projects?: { id: string; title: string }[];
   renderTrigger?: (open: () => void) => ReactNode;
 }) {
   const isEdit = Boolean(note);
@@ -63,6 +65,17 @@ export function NoteFormDialog({
         </DialogField>
       </div>
 
+      <DialogField label="Project">
+        <Select name="projectId" defaultValue={note?.projectId ?? ""}>
+          <option value="">Not linked to a project</option>
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>
+              {project.title}
+            </option>
+          ))}
+        </Select>
+      </DialogField>
+
       <DialogField label={isEdit ? "Replace photo (optional)" : "Photo (optional)"}>
         <Input name="photo" type="file" accept="image/*" className="py-2" />
       </DialogField>
@@ -70,6 +83,10 @@ export function NoteFormDialog({
   );
 }
 
-export function CreateNoteDialog() {
-  return <NoteFormDialog />;
+export function CreateNoteDialog({
+  projects
+}: {
+  projects?: { id: string; title: string }[];
+}) {
+  return <NoteFormDialog projects={projects} />;
 }

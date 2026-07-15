@@ -15,7 +15,13 @@ import type { NoteRecord } from "@/types";
 import { CreateNoteDialog } from "@/features/notes/create-note-dialog";
 import { NoteCardActions } from "@/features/notes/note-card-actions";
 
-export function NotesView({ notes }: { notes: NoteRecord[] }) {
+export function NotesView({
+  notes,
+  projects = []
+}: {
+  notes: NoteRecord[];
+  projects?: { id: string; title: string }[];
+}) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("ALL");
   const [sort, setSort] = useState("RECENT");
@@ -44,7 +50,7 @@ export function NotesView({ notes }: { notes: NoteRecord[] }) {
         eyebrow="Vault"
         title="Notes and ideas"
         description="A searchable knowledge vault for project thinking, meeting outcomes, reusable ideas, and prompt patterns."
-        actions={<CreateNoteDialog />}
+        actions={<CreateNoteDialog projects={projects} />}
       />
 
       <Card>
@@ -96,7 +102,7 @@ export function NotesView({ notes }: { notes: NoteRecord[] }) {
                       {formatRelativeDate(note.updatedAt)}
                     </span>
                     <div className="pointer-events-auto relative z-10">
-                      <NoteCardActions note={note} />
+                      <NoteCardActions note={note} projects={projects} />
                     </div>
                   </div>
                 </div>
