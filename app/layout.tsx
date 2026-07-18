@@ -7,14 +7,21 @@ import { fraunces } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "JabX",
+  title: {
+    default: "Jaber's Dashboard",
+    template: "%s · Jaber"
+  },
   description:
-    "A personal dashboard for projects, tasks, notes, analytics, and timelines."
+    "A personal dashboard for projects, tasks, notes, analytics, and timelines.",
+  icons: {
+    icon: "/logo.jpg",
+    apple: "/logo.jpg"
+  }
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f8fc" },
+    { media: "(prefers-color-scheme: light)", color: "#faf4ec" },
     { media: "(prefers-color-scheme: dark)", color: "#0d1320" }
   ]
 };
