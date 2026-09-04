@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "A personal dashboard for projects, tasks, notes, analytics, and timelines.",
   icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg"
+    icon: "/jabx-logo.png",
+    apple: "/jabx-logo.png"
   }
 };
 

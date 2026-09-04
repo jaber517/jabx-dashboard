@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { plexMono } from "@/lib/fonts";
@@ -66,11 +67,8 @@ export function PublicHeader() {
       )}
     >
       <div className="relative mx-auto flex h-14 max-w-[1080px] items-center justify-between px-6">
-        <Link href="/" className={`${plexMono.className} flex items-center gap-2.5 text-[15px] text-[#EDF1F8]`}>
-          <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-white/[0.03] text-[11px] text-[#0A84FF]">
-            J
-          </span>
-          <span>jabx</span>
+        <Link href="/" className="flex items-center" aria-label="jabx.me">
+          <Image src="/jabx-logo.png" alt="jabx.me" width={112} height={112} priority className="h-8 w-8 rounded-[6px]" />
         </Link>
 
         <nav className="flex items-center gap-7">
