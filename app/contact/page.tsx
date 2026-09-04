@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Instagram } from "lucide-react";
-import { LandingNav } from "@/components/landing/landing-nav";
-import { fraunces } from "@/lib/fonts";
+import { Atmosphere } from "@/components/public/atmosphere";
+import { PublicHeader } from "@/components/public/public-header";
+import { PublicFooter } from "@/components/public/public-footer";
+import { SpringIn } from "@/components/public/spring-in";
 
 export const metadata: Metadata = {
-  title: "Contact — Jaber",
+  title: { absolute: "Contact — jabx" },
   description: "Get in touch with Jaber."
 };
 
@@ -18,69 +20,71 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#faf4ec] text-[#211d16]">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
-        <LandingNav />
+    <div className="min-h-screen bg-[#06080D] text-[#EDF1F8]">
+      <Atmosphere />
+      <PublicHeader />
 
-        <section className="mx-auto max-w-2xl py-20 text-center md:py-28">
-          <h1
-            className={`${fraunces.className} text-4xl font-bold leading-tight tracking-tight sm:text-5xl`}
-          >
-            Say{" "}
-            <span className="relative inline-block">
-              hello
-              <svg
-                className="absolute -bottom-2 left-0 w-full"
-                viewBox="0 0 80 12"
-                fill="none"
-                aria-hidden="true"
+      <main className="mx-auto max-w-[1080px] px-6">
+        <section className="mx-auto max-w-2xl py-20 text-center sm:py-28">
+          <SpringIn>
+            <h1 className="m-0 mb-[22px] text-4xl font-semibold leading-[1.1] tracking-[-0.025em] sm:text-5xl">
+              Say{" "}
+              <span className="relative inline-block">
+                hello
+                <svg
+                  className="absolute -bottom-2 left-0 w-full"
+                  viewBox="0 0 80 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 8c15-5 28-4 37-2s24 3 37-3"
+                    stroke="#0A84FF"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+            </h1>
+
+            <p className="mx-auto max-w-md text-lg leading-[1.65] text-[#8A94A6] sm:text-xl">
+              Got a question, a project idea, or a mountain I should know about?
+              Pick whichever way suits you best.
+            </p>
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="mailto:admin@jabx.me"
+                className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#0A84FF] px-6 text-[15px] font-medium text-[#04101F] transition ease-spring hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
               >
-                <path
-                  d="M3 8c15-5 28-4 37-2s24 3 37-3"
-                  stroke="#3fb6ff"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>{" "}
-            <span aria-hidden="true">👋</span>
-          </h1>
+                ✉️ Email me
+              </a>
 
-          <p className="mt-7 text-lg leading-relaxed text-[#4c463d] sm:text-xl">
-            Got a question, a project idea, or a mountain I should know about?
-            I&apos;d love to hear from you. Pick whichever way suits you best.
-          </p>
+              <a
+                href="https://instagram.com/jabx.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 text-[15px] font-medium text-[#EDF1F8] transition ease-spring hover:bg-white/[0.06] active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                <Instagram className="h-4 w-4 text-[#E1306C]" />
+                @jabx.ai
+              </a>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
-              href="mailto:admin@jabx.me"
-              className="inline-flex h-13 items-center gap-2 rounded-full bg-[#f79a6b] px-7 py-3.5 text-base font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:bg-[#f58b54] active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
-            >
-              ✉️ Email me
-            </a>
-
-            <a
-              href="https://instagram.com/jabx.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:opacity-90 active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
-            >
-              <Instagram className="h-5 w-5" />
-              @jabx.ai
-            </a>
-
-            <a
-              href="https://wa.me/96541095120"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:bg-[#1fb959] active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
-            >
-              <WhatsAppIcon className="h-5 w-5" />
-              WhatsApp
-            </a>
-          </div>
+              <a
+                href="https://wa.me/96541095120"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 text-[15px] font-medium text-[#EDF1F8] transition ease-spring hover:bg-white/[0.06] active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
+                WhatsApp
+              </a>
+            </div>
+          </SpringIn>
         </section>
-      </div>
+      </main>
+
+      <PublicFooter />
     </div>
   );
 }

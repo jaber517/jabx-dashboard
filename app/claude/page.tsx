@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { fraunces } from "@/lib/fonts";
+import { Atmosphere } from "@/components/public/atmosphere";
+import { PublicHeader } from "@/components/public/public-header";
+import { PublicFooter } from "@/components/public/public-footer";
+import { SpringIn } from "@/components/public/spring-in";
+import { plexMono } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Claude Learning Hub — jabx.me",
+  title: { absolute: "Claude Learning Hub — jabx.me" },
   description: "A learning hub about Claude. Coming soon."
 };
 
@@ -42,23 +46,34 @@ function ClaudeMark({ className }: { className?: string }) {
 
 export default function ClaudeHubPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#faf4ec] px-6 text-center text-[#211d16]">
-      <ClaudeMark className="h-32 w-32 text-[#d97757] sm:h-40 sm:w-40" />
+    <div className="flex min-h-screen flex-col bg-[#06080D] text-[#EDF1F8]">
+      <Atmosphere />
+      <PublicHeader />
 
-      <h1
-        className={`${fraunces.className} mt-10 text-4xl font-bold leading-tight tracking-tight sm:text-6xl`}
-      >
-        Claude Learning Hub
-      </h1>
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+        <SpringIn>
+          <div className="flex flex-col items-center">
+            <ClaudeMark className="h-28 w-28 text-[#d97757] sm:h-32 sm:w-32" />
 
-      <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#4c463d] sm:text-xl">
-        Guides, experiments, and everything I&apos;m learning about building with
-        Claude — all in one place.
-      </p>
+            <h1 className="m-0 mt-8 text-4xl font-semibold leading-[1.1] tracking-[-0.025em] sm:text-5xl">
+              Claude Learning Hub
+            </h1>
 
-      <p className="mt-12 rounded-full border border-[#211d16]/15 bg-white px-6 py-2.5 text-sm font-medium uppercase tracking-[0.3em] text-[#4c463d]">
-        Coming soon
-      </p>
+            <p className="mt-4 max-w-xl text-lg leading-[1.65] text-[#8A94A6] sm:text-xl">
+              Guides, experiments, and everything I&apos;m learning about building with
+              Claude — all in one place.
+            </p>
+
+            <p
+              className={`${plexMono.className} mt-10 rounded-full border border-white/[0.08] px-6 py-2.5 text-xs tracking-[0.3em] text-[#8A94A6]`}
+            >
+              COMING SOON
+            </p>
+          </div>
+        </SpringIn>
+      </main>
+
+      <PublicFooter />
     </div>
   );
 }
