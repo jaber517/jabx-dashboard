@@ -68,7 +68,7 @@ export function PublicHeader() {
     >
       <div className="relative mx-auto flex h-14 max-w-[1080px] items-center justify-between px-6">
         <Link href="/" className="flex items-center" aria-label="jabx.me">
-          <Image src="/jabx-logo.png" alt="jabx.me" width={112} height={112} priority className="h-8 w-8 rounded-[6px]" />
+          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={64} height={64} priority className="h-8 w-8 rounded-[6px]" />
         </Link>
 
         <nav className="flex items-center gap-7">
