@@ -70,11 +70,45 @@
   h3,
   h4 {
     font-family: var(--font-display);
+  }
+
+  /* Tracking is size-specific: large display text needs negative tracking
+     (letters read too far apart as they grow), small headings need much
+     less. A single flat value for every heading level is always wrong
+     somewhere. */
+  h1 {
     letter-spacing: -0.03em;
+  }
+
+  h2 {
+    letter-spacing: -0.025em;
+  }
+
+  h3,
+  h4 {
+    letter-spacing: -0.015em;
   }
 
   ::selection {
     background: rgba(247, 154, 107, 0.3);
+  }
+}
+
+/* Reduced motion: keep feedback (color/opacity) but drop transforms,
+   overshoot, and looping ambient animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-float,
+  .animate-pulse-soft {
+    animation: none !important;
   }
 }
 

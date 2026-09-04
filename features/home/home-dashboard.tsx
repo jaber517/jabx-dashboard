@@ -156,7 +156,7 @@ export function HomeDashboard({
               <Link
                 key={action.title}
                 href={action.href}
-                className="group rounded-3xl border border-border bg-surface p-5 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
+                className="group rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100"
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-base font-semibold">{action.title}</h3>
@@ -194,7 +194,7 @@ export function HomeDashboard({
                 <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                  className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -248,7 +248,7 @@ export function HomeDashboard({
                 <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
-                  className="group rounded-3xl border border-border bg-surface p-5 transition hover:border-primary/30"
+                  className="group rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
@@ -308,7 +308,7 @@ export function HomeDashboard({
                 <Link
                   key={item.id}
                   href={item.href}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                  className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -395,7 +395,7 @@ export function HomeDashboard({
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="block rounded-3xl border border-border bg-surface p-5 transition hover:-translate-y-0.5 hover:border-primary/30"
+                  className="block rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>

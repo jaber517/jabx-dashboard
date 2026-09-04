@@ -59,7 +59,7 @@ export function ActivityView({ activities }: { activities: FeedItem[] }) {
                 href={item.href}
                 target={item.type === "Resource" ? "_blank" : undefined}
                 rel={item.type === "Resource" ? "noopener noreferrer" : undefined}
-                className="flex gap-4 rounded-3xl border border-border bg-surface p-5 transition hover:border-primary/30"
+                className="flex gap-4 rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:border-primary/30 active:scale-[0.99] motion-reduce:active:scale-100"
               >
                 <div className="flex flex-col items-center">
                   <span className={cn("h-3 w-3 rounded-full", categoryDot[item.category])} />

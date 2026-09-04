@@ -137,7 +137,10 @@ export function TasksView({
       ) : (
         <div className="grid gap-4">
           {sortedTasks.map((task) => (
-            <Card key={task.id} className="relative">
+            <Card
+              key={task.id}
+              className="relative transition ease-spring [&:has(>a:hover)]:border-primary/30 [&:has(>a:active)]:scale-[0.99] motion-reduce:[&:has(>a:active)]:scale-100"
+            >
               <Link
                 href={`/tasks/${task.id}`}
                 aria-label={task.title}

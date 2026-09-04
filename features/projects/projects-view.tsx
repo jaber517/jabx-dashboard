@@ -130,7 +130,7 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
                 </div>
               <Link
                 href={`/projects/${project.id}`}
-                className="block surface-panel-elevated overflow-hidden rounded-3xl p-6 transition hover:-translate-y-0.5 hover:border-primary/30"
+                className="block surface-panel-elevated overflow-hidden rounded-3xl p-6 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 active:translate-y-0 active:scale-[0.99] motion-reduce:active:scale-100"
               >
                 {project.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element

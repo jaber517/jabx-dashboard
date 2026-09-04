@@ -7,6 +7,8 @@ import { ExternalLink, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
+const EXIT_DURATION = 160;
+
 type SearchResult = {
   type: string;
   id: string;
@@ -25,20 +27,33 @@ const typeTone: Record<string, string> = {
 
 export function GlobalSearch() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [entered, setEntered] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const open = mounted;
+
+  function openPalette() {
+    window.clearTimeout(closeTimer.current);
+    setMounted(true);
+  }
+
+  function closePalette() {
+    setEntered(false);
+    closeTimer.current = setTimeout(() => setMounted(false), EXIT_DURATION);
+  }
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setOpen(true);
+        openPalette();
       }
       if (event.key === "Escape") {
-        setOpen(false);
+        closePalette();
       }
     }
     window.addEventListener("keydown", onKey);
@@ -46,8 +61,16 @@ export function GlobalSearch() {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, [mounted]);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setTimeout(() => inputRef.current?.focus(), 80);
     } else {
       setQuery("");
       setResults([]);
@@ -85,7 +108,7 @@ export function GlobalSearch() {
   }, [query, open]);
 
   function openResult(result: SearchResult) {
-    setOpen(false);
+    closePalette();
     if (result.external) {
       window.open(result.href, "_blank", "noopener,noreferrer");
     } else {
@@ -97,24 +120,32 @@ export function GlobalSearch() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openPalette}
         className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "gap-2")}
       >
         <Search className="h-4 w-4" />
         <span className="hidden sm:inline">Search</span>
       </button>
 
-      {open
+      {mounted
         ? createPortal(
             <div
-              className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[12vh] backdrop-blur-sm"
-              onClick={() => setOpen(false)}
+              className={cn(
+                "fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[12vh] backdrop-blur-sm transition-opacity ease-spring motion-reduce:transition-none",
+                entered ? "opacity-100 duration-200" : "opacity-0 duration-150"
+              )}
+              onClick={closePalette}
             >
               <div
                 role="dialog"
                 aria-modal="true"
                 aria-label="Search"
-                className="w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-glass"
+                className={cn(
+                  "w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-glass transition ease-spring motion-reduce:transition-opacity",
+                  entered
+                    ? "translate-y-0 scale-100 opacity-100 duration-200"
+                    : "-translate-y-2 scale-95 opacity-0 duration-150"
+                )}
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="flex items-center gap-3 border-b border-border px-5 py-4">
@@ -145,7 +176,7 @@ export function GlobalSearch() {
                         key={`${result.type}-${result.id}`}
                         type="button"
                         onClick={() => openResult(result)}
-                        className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition hover:bg-muted"
+                        className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition ease-spring hover:bg-muted active:scale-[0.98] motion-reduce:active:scale-100"
                       >
                         <span
                           className={cn(

@@ -86,7 +86,10 @@ export function NotesView({
       ) : (
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {sortedNotes.map((note) => (
-            <Card key={note.id} className="relative flex h-full flex-col">
+            <Card
+              key={note.id}
+              className="relative flex h-full flex-col transition ease-spring [&:has(>a:hover)]:border-primary/30 [&:has(>a:active)]:scale-[0.99] motion-reduce:[&:has(>a:active)]:scale-100"
+            >
               <Link
                 href={`/notes/${note.id}`}
                 aria-label={note.title}

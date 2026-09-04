@@ -34,7 +34,7 @@ export function FilterBadge({
         }
       }}
       className={cn(
-        "pointer-events-auto relative z-10 inline-flex cursor-pointer items-center rounded-full px-3 py-1 text-xs font-medium transition hover:ring-2 hover:ring-primary/40",
+        "pointer-events-auto relative z-10 inline-flex cursor-pointer items-center rounded-full px-3 py-1 text-xs font-medium transition ease-spring hover:ring-2 hover:ring-primary/40 active:scale-90 motion-reduce:active:scale-100",
         className
       )}
     >

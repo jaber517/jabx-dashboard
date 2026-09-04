@@ -82,7 +82,7 @@ export function CalendarView({ items }: { items: CalendarItem[] }) {
                     <Link
                       key={item.id}
                       href={item.href}
-                      className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                      className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.99] motion-reduce:active:scale-100"
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
                         {item.type === "Project" ? (

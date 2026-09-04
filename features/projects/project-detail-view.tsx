@@ -122,7 +122,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                  className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5">
@@ -157,7 +157,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                   <Link
                     key={note.id}
                     href={`/notes/${note.id}`}
-                    className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                    className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                   >
                     <p className="text-sm font-semibold">{note.title}</p>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{note.content}</p>
@@ -189,7 +189,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/30"
+                    className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold">{resource.title}</p>

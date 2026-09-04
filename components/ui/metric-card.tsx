@@ -23,7 +23,8 @@ export function MetricCard({
     <Card
       className={cn(
         "relative overflow-hidden",
-        href && "h-full transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft",
+        href &&
+          "h-full transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100",
         accentClassName
       )}
     >

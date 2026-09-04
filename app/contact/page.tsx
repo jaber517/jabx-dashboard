@@ -54,7 +54,7 @@ export default function ContactPage() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="mailto:admin@jabx.me"
-              className="inline-flex h-13 items-center gap-2 rounded-full bg-[#f79a6b] px-7 py-3.5 text-base font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition hover:bg-[#f58b54]"
+              className="inline-flex h-13 items-center gap-2 rounded-full bg-[#f79a6b] px-7 py-3.5 text-base font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:bg-[#f58b54] active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
             >
               ✉️ Email me
             </a>
@@ -63,7 +63,7 @@ export default function ContactPage() {
               href="https://instagram.com/jabx.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition hover:opacity-90"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:opacity-90 active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
             >
               <Instagram className="h-5 w-5" />
               @jabx.ai
@@ -73,7 +73,7 @@ export default function ContactPage() {
               href="https://wa.me/96541095120"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition hover:bg-[#1fb959]"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3.5 text-base font-semibold text-white shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:bg-[#1fb959] active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
             >
               <WhatsAppIcon className="h-5 w-5" />
               WhatsApp

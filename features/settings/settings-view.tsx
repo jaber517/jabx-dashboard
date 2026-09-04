@@ -50,7 +50,7 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
                 type="button"
                 onClick={() => setTheme(value)}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-2xl border px-4 py-4 text-sm font-medium transition",
+                  "flex flex-col items-center gap-2 rounded-2xl border px-4 py-4 text-sm font-medium transition ease-spring active:scale-95 motion-reduce:active:scale-100",
                   theme === value
                     ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-border bg-surface text-muted-foreground hover:bg-muted"

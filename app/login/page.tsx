@@ -53,7 +53,7 @@ export default function LoginPage({
             />
             <button
               type="submit"
-              className="h-12 rounded-full bg-[#f79a6b] text-sm font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition hover:bg-[#f58b54]"
+              className="h-12 rounded-full bg-[#f79a6b] text-sm font-semibold text-[#211d16] shadow-[0_2px_0_rgba(33,29,22,0.25)] transition ease-spring hover:bg-[#f58b54] active:scale-[0.97] active:shadow-none motion-reduce:active:scale-100"
             >
               Sign in
             </button>
