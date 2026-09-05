@@ -67,9 +67,9 @@ export function PublicHeader() {
         scrolled ? "border-white/[0.08] bg-[#06080D]/75" : "bg-[#06080D]/35"
       )}
     >
-      <div className="relative mx-auto flex h-14 max-w-[1080px] items-center justify-between px-6">
+      <div className="relative mx-auto flex h-16 max-w-[1080px] items-center justify-between px-6">
         <Link href="/" className="flex items-center" aria-label="jabx.me">
-          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={128} height={128} priority className="h-12 w-12 rounded-lg" />
+          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={128} height={128} priority className="h-14 w-14 rounded-lg" />
         </Link>
 
         <nav className="flex items-center gap-7">
