@@ -23,7 +23,16 @@ import {
 import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type { ProjectRecord, TaskRecord } from "@/types";
 
-const palette = ["#2563eb", "#10b981", "#f59e0b", "#06b6d4", "#f43f5e", "#8b5cf6", "#64748b"];
+const palette = ["#0A84FF", "#10b981", "#f59e0b", "#06b6d4", "#f43f5e", "#8b5cf6", "#64748b"];
+
+const tooltipStyle = {
+  borderRadius: 16,
+  border: "1px solid hsl(var(--border))",
+  background: "hsl(var(--surface-elevated))",
+  color: "hsl(var(--foreground))"
+};
+
+const axisTick = { fill: "hsl(var(--muted-foreground))", fontSize: 12 };
 
 export function AnalyticsCharts({
   projects,
@@ -75,12 +84,7 @@ export function AnalyticsCharts({
                 <Cell key={entry.name} fill={palette[index % palette.length]} />
               ))}
             </Pie>
-            <Tooltip
-              contentStyle={{
-                borderRadius: 16,
-                border: "1px solid rgba(148, 163, 184, 0.22)"
-              }}
-            />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -88,16 +92,11 @@ export function AnalyticsCharts({
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={projectsByCategory}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
-            <XAxis dataKey="name" tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 16,
-                border: "1px solid rgba(148, 163, 184, 0.22)"
-              }}
-            />
-            <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#2563eb" />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
+            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
+            <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#0A84FF" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -111,15 +110,10 @@ export function AnalyticsCharts({
                 <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.03} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
-            <XAxis dataKey="name" tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 16,
-                border: "1px solid rgba(148, 163, 184, 0.22)"
-              }}
-            />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
+            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
             <Area
               type="monotone"
               dataKey="completed"
@@ -130,7 +124,7 @@ export function AnalyticsCharts({
             <Area
               type="monotone"
               dataKey="total"
-              stroke="#2563eb"
+              stroke="#0A84FF"
               fillOpacity={0}
               strokeWidth={3}
             />
@@ -141,15 +135,10 @@ export function AnalyticsCharts({
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={tasksByStatus}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
-            <XAxis dataKey="name" tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 16,
-                border: "1px solid rgba(148, 163, 184, 0.22)"
-              }}
-            />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
+            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
             <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#10b981" />
           </BarChart>
         </ResponsiveContainer>

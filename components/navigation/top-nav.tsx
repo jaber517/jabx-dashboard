@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { navigationItems } from "@/lib/constants";
+import { plexMono } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/navigation/global-search";
@@ -20,14 +21,12 @@ export function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/40 bg-background/75 backdrop-blur-2xl dark:border-white/5">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-2xl">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="relative h-11 w-11 overflow-hidden rounded-full bg-white shadow-soft ring-2 ring-foreground/10">
-              <Image src="/logo.jpg" alt="Jaber logo" fill className="object-cover" />
-            </span>
-            <p className="text-sm font-semibold tracking-tight">Jaber&apos;s Dashboard</p>
+          <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="jabx dashboard">
+            <Image src="/jabx-logo-header.jpg" alt="" width={80} height={80} priority className="h-8 w-8 rounded-lg" />
+            <p className={`${plexMono.className} text-sm text-foreground`}>dashboard</p>
           </Link>
 
           <div className="flex items-center gap-2">
@@ -56,10 +55,10 @@ export function TopNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm font-medium transition",
+                    "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary text-primary-foreground shadow-soft"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "border-primary text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.label}

@@ -85,6 +85,13 @@ export const taskStatusTone: Record<TaskStatus, string> = {
   DONE: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
 };
 
+export const recordTypeTone: Record<string, string> = {
+  Project: "bg-primary/10 text-primary",
+  Task: "bg-blue-500/10 text-blue-600 dark:text-blue-300",
+  Note: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+  Resource: "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+};
+
 export const navigationItems = [
   { href: "/dashboard", label: "Home" },
   { href: "/projects", label: "Projects" },

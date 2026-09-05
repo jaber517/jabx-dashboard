@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Atmosphere } from "@/components/public/atmosphere";
 import { PublicHeader } from "@/components/public/public-header";
 import { PublicFooter } from "@/components/public/public-footer";
 import { SpringIn } from "@/components/public/spring-in";
@@ -18,7 +17,6 @@ export default function LoginPage({
 }) {
   return (
     <div className="min-h-screen bg-[#06080D] text-[#EDF1F8]">
-      <Atmosphere />
       <PublicHeader />
 
       <main className="mx-auto max-w-[1080px] px-6">

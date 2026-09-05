@@ -7,17 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
-import { categoryLabels, categoryDot } from "@/lib/constants";
+import { categoryLabels, categoryDot, recordTypeTone } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { FeedItem } from "@/lib/data";
-
-const typeTone: Record<string, string> = {
-  Project: "bg-primary/10 text-primary",
-  Task: "bg-blue-500/10 text-blue-600 dark:text-blue-300",
-  Note: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
-  Resource: "bg-amber-500/10 text-amber-600 dark:text-amber-300"
-};
 
 export function ActivityView({ activities }: { activities: FeedItem[] }) {
   const [type, setType] = useState("ALL");
@@ -68,7 +61,7 @@ export function ActivityView({ activities }: { activities: FeedItem[] }) {
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold">{item.action}</p>
-                    <Badge className={typeTone[item.type]}>{item.type}</Badge>
+                    <Badge className={recordTypeTone[item.type]}>{item.type}</Badge>
                     <Badge className="bg-muted text-muted-foreground">
                       {categoryLabels[item.category]}
                     </Badge>

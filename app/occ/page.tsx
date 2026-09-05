@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Atmosphere } from "@/components/public/atmosphere";
 import { PublicHeader } from "@/components/public/public-header";
 import { PublicFooter } from "@/components/public/public-footer";
 import { SpringIn } from "@/components/public/spring-in";
@@ -28,7 +27,6 @@ function OccMark({ className }: { className?: string }) {
 export default function OccPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#06080D] text-[#EDF1F8]">
-      <Atmosphere />
       <PublicHeader />
 
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">

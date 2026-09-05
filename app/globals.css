@@ -3,37 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --background: 35 58% 95%;
-  --foreground: 38 20% 11%;
-  --muted: 35 35% 91%;
-  --muted-foreground: 36 11% 30%;
-  --border: 35 25% 85%;
+  --background: 216 29% 97%;
+  --foreground: 220 29% 6%;
+  --muted: 217 4% 93%;
+  --muted-foreground: 217 11% 40%;
+  --border: 218 23% 91%;
   --surface: 0 0% 100%;
-  --surface-elevated: 35 50% 98%;
-  --primary: 20 85% 60%;
-  --primary-foreground: 38 20% 11%;
-  --success: 156 67% 37%;
-  --warning: 44 100% 62%;
-  --danger: 2 75% 58%;
-  --ring: 20 85% 55%;
+  --surface-elevated: 220 20% 98%;
+  --primary: 210 100% 52%;
+  --primary-foreground: 0 0% 100%;
+  --success: 156 65% 32%;
+  --warning: 38 92% 45%;
+  --danger: 3 80% 50%;
+  --ring: 210 100% 52%;
   --font-sans: "Aptos", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
   --font-display: var(--font-fraunces), "Fraunces", Georgia, serif;
 }
 
 .dark {
-  --background: 30 14% 8%;
-  --foreground: 35 30% 94%;
-  --muted: 30 12% 14%;
-  --muted-foreground: 33 12% 68%;
-  --border: 30 10% 20%;
-  --surface: 30 13% 10%;
-  --surface-elevated: 30 13% 13%;
-  --primary: 20 88% 64%;
-  --primary-foreground: 30 20% 8%;
+  --background: 223 37% 4%;
+  --foreground: 218 44% 95%;
+  --muted: 222 20% 12%;
+  --muted-foreground: 219 14% 60%;
+  --border: 221 25% 15%;
+  --surface: 222 27% 10%;
+  --surface-elevated: 221 25% 13%;
+  --primary: 210 100% 52%;
+  --primary-foreground: 213 77% 7%;
   --success: 156 72% 42%;
   --warning: 44 96% 60%;
   --danger: 3 86% 63%;
-  --ring: 20 88% 64%;
+  --ring: 210 100% 52%;
 }
 
 @layer base {
@@ -49,20 +49,8 @@
     min-height: 100vh;
     font-family: var(--font-sans);
     color: hsl(var(--foreground));
-    background:
-      radial-gradient(circle at top left, rgba(247, 154, 107, 0.14), transparent 30%),
-      radial-gradient(circle at top right, rgba(255, 209, 92, 0.14), transparent 24%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 18%),
-      hsl(var(--background));
+    background: hsl(var(--background));
     text-rendering: optimizeLegibility;
-  }
-
-  .dark body {
-    background:
-      radial-gradient(circle at top left, rgba(247, 154, 107, 0.1), transparent 28%),
-      radial-gradient(circle at top right, rgba(255, 209, 92, 0.08), transparent 24%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%),
-      hsl(var(--background));
   }
 
   h1,
@@ -90,7 +78,7 @@
   }
 
   ::selection {
-    background: rgba(247, 154, 107, 0.3);
+    background: rgba(10, 132, 255, 0.3);
   }
 }
 

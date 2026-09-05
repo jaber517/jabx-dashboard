@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { ExternalLink, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { recordTypeTone } from "@/lib/constants";
 import { buttonVariants } from "@/components/ui/button";
 
 const EXIT_DURATION = 160;
@@ -16,13 +17,6 @@ type SearchResult = {
   subtitle?: string;
   href: string;
   external?: boolean;
-};
-
-const typeTone: Record<string, string> = {
-  Project: "bg-primary/10 text-primary",
-  Task: "bg-blue-500/10 text-blue-600 dark:text-blue-300",
-  Note: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
-  Resource: "bg-amber-500/10 text-amber-600 dark:text-amber-300"
 };
 
 export function GlobalSearch() {
@@ -181,7 +175,7 @@ export function GlobalSearch() {
                         <span
                           className={cn(
                             "mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
-                            typeTone[result.type] ?? "bg-muted text-muted-foreground"
+                            recordTypeTone[result.type] ?? "bg-muted text-muted-foreground"
                           )}
                         >
                           {result.type}
