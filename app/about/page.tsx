@@ -60,10 +60,10 @@ export default function AboutPage() {
               </h1>
 
               <p className="mx-auto max-w-xl text-lg leading-[1.65] text-[#8A94A6] sm:text-xl md:mx-0">
-                I&apos;m Jaber, a Mechanical Engineer with a love for the outdoors — and
-                the builder behind jabx, a small AI solutions lab. When I&apos;m not
-                shipping something here, you&apos;ll find me planning the next trip,
-                climbing the next mountain, or learning something new.
+                AI Engineer. Building AI solutions out of a small lab — where ideas
+                get tested, refined, and shipped. The focus is practical: tools
+                people actually use, built with care and a bit of experimentation
+                along the way.
               </p>
             </div>
           </SpringIn>

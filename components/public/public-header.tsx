@@ -12,6 +12,7 @@ const links = [
   { href: "/about", label: "About" },
   { href: "/occ", label: "OCC" },
   { href: "/claude", label: "Claude" },
+  { href: "/ai-news", label: "AI News" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -68,7 +69,7 @@ export function PublicHeader() {
     >
       <div className="relative mx-auto flex h-14 max-w-[1080px] items-center justify-between px-6">
         <Link href="/" className="flex items-center" aria-label="jabx.me">
-          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={96} height={96} priority className="h-10 w-10 rounded-lg" />
+          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={128} height={128} priority className="h-12 w-12 rounded-lg" />
         </Link>
 
         <nav className="flex items-center gap-7">
@@ -82,7 +83,7 @@ export function PublicHeader() {
             </Link>
           ))}
           <MagneticButton href="/dashboard" className="hidden sm:inline-flex">
-            dashboard
+            Dashboard
           </MagneticButton>
           <button
             type="button"
@@ -128,7 +129,7 @@ export function PublicHeader() {
                 onClick={closeMenu}
                 className={`${plexMono.className} mt-1 block rounded-lg bg-[#0A84FF] px-4 py-3 text-center text-[13px] tracking-[0.03em] text-[#04101F] transition ease-spring active:scale-[0.98] motion-reduce:active:scale-100`}
               >
-                dashboard
+                Dashboard
               </Link>
             </nav>
           </>

@@ -26,28 +26,11 @@ export default function ContactPage() {
         <section className="mx-auto max-w-2xl py-20 text-center sm:py-28">
           <SpringIn>
             <h1 className="m-0 mb-[22px] text-4xl font-semibold leading-[1.1] tracking-[-0.025em] sm:text-5xl">
-              Say{" "}
-              <span className="relative inline-block">
-                hello
-                <svg
-                  className="absolute -bottom-2 left-0 w-full"
-                  viewBox="0 0 80 12"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M3 8c15-5 28-4 37-2s24 3 37-3"
-                    stroke="#0A84FF"
-                    strokeWidth="5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
+              Get in touch
             </h1>
 
             <p className="mx-auto max-w-md text-lg leading-[1.65] text-[#8A94A6] sm:text-xl">
-              Got a question, a project idea, or a mountain I should know about?
-              Pick whichever way suits you best.
+              For project inquiries, collabs, or a quick hello. I&apos;d love to hear from you.
             </p>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
