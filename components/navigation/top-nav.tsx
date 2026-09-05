@@ -24,7 +24,7 @@ export function TopNav() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="jabx dashboard">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="jabx.me">
             <Image src="/jabx-logo-header.jpg" alt="" width={80} height={80} priority className="h-8 w-8 rounded-lg" />
             <p className={`${plexMono.className} text-sm text-foreground`}>dashboard</p>
           </Link>
