@@ -35,7 +35,7 @@ export default function ContactPage() {
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a
-                href="mailto:admin@jabx.me"
+                href="mailto:contact@jabx.me"
                 className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#0A84FF] px-6 text-[15px] font-medium text-[#04101F] transition ease-spring hover:opacity-90 active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 ✉️ Email me

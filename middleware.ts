@@ -18,12 +18,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Subdomain sites: every path on these hosts shows their landing page.
-  if (host.startsWith("occ.")) {
-    return pathname === "/occ"
-      ? NextResponse.next()
-      : NextResponse.rewrite(new URL("/occ", request.url));
-  }
-
   if (host.startsWith("claude.")) {
     return pathname === "/claude"
       ? NextResponse.next()

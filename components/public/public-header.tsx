@@ -10,7 +10,6 @@ import { MagneticButton } from "@/components/public/magnetic-button";
 
 const links = [
   { href: "/about", label: "About" },
-  { href: "/occ", label: "OCC" },
   { href: "/claude", label: "Claude" },
   { href: "/ai-news", label: "AI News" },
   { href: "/contact", label: "Contact" }
