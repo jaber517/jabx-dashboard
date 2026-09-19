@@ -70,7 +70,8 @@ export async function middleware(request: NextRequest) {
 
   if (decodedPath !== "/login") {
     const session = request.cookies.get(SESSION_COOKIE)?.value;
-    if (!session || session !== (await expectedSessionToken())) {
+    const expected = await expectedSessionToken();
+    if (!session || !expected || session !== expected) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.host = host;
       loginUrl.pathname = "/login";

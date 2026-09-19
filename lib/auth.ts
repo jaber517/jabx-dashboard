@@ -7,7 +7,8 @@ export { SESSION_COOKIE };
 export async function isAuthed(): Promise<boolean> {
   if (!isPrivateHost(headers().get("host") ?? "")) return false;
   const session = cookies().get(SESSION_COOKIE)?.value;
-  return Boolean(session && session === (await expectedSessionToken()));
+  const expected = await expectedSessionToken();
+  return Boolean(session && expected && session === expected);
 }
 
 export async function assertAuthed(): Promise<void> {

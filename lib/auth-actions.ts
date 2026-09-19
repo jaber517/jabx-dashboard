@@ -13,11 +13,14 @@ export async function login(formData: FormData): Promise<void> {
   if (!isPrivateHost(headers().get("host") ?? "")) notFound();
   const password = formData.get("password");
 
-  if (typeof password !== "string" || !(await verifyPasscode(password))) {
+  const token = await expectedSessionToken();
+  if (typeof password !== "string" || !token || !(await verifyPasscode(password))) {
+    // Slow each wrong guess down; with a long passphrase this makes online guessing impractical.
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     redirect("/login?error=1");
   }
 
-  cookies().set(SESSION_COOKIE, await expectedSessionToken(), {
+  cookies().set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

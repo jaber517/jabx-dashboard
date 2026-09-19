@@ -2,10 +2,10 @@
 
 export const SESSION_COOKIE = "jabx_session";
 
-// sha256("<passcode>:jabx-pass-v1"). The passcode itself is not stored in the
-// repo; setting the DASHBOARD_PASSWORD env var overrides this fallback.
-const FALLBACK_PASSCODE_SHA256 =
-  "ac38c7d35f68ef18b158908d9fd5bc83014aac6ffb1f0cd843a397560c3b9aad";
+// The passcode comes only from the DASHBOARD_PASSWORD env var. There is
+// deliberately no built-in fallback: this repo is public, so any value derived
+// from committed code could be used to forge a session. If the variable is
+// missing, nobody can sign in and no session is ever valid.
 
 export async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -14,15 +14,17 @@ export async function sha256Hex(value: string): Promise<string> {
     .join("");
 }
 
-async function passcodeHash(): Promise<string> {
+async function passcodeHash(): Promise<string | null> {
   const envPassword = process.env.DASHBOARD_PASSWORD;
-  return envPassword ? sha256Hex(`${envPassword}:jabx-pass-v1`) : FALLBACK_PASSCODE_SHA256;
+  return envPassword ? sha256Hex(`${envPassword}:jabx-pass-v1`) : null;
 }
 
 export async function verifyPasscode(input: string): Promise<boolean> {
-  return (await sha256Hex(`${input}:jabx-pass-v1`)) === (await passcodeHash());
+  const expected = await passcodeHash();
+  return expected !== null && (await sha256Hex(`${input}:jabx-pass-v1`)) === expected;
 }
 
-export async function expectedSessionToken(): Promise<string> {
-  return sha256Hex(`${await passcodeHash()}:jabx-session-v1`);
+export async function expectedSessionToken(): Promise<string | null> {
+  const hash = await passcodeHash();
+  return hash === null ? null : sha256Hex(`${hash}:jabx-session-v1`);
 }
