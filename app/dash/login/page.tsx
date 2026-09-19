@@ -12,7 +12,7 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
   return (
     <div className="page-shell flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-md">
-        <Image src="/jabx-logo-header.jpg" alt="jabx" width={64} height={64} priority className="mx-auto rounded-2xl" />
+        <Image src="/jabx-logo-header.jpg" alt="jabx" width={128} height={128} priority className="mx-auto h-24 w-24 rounded-2xl" />
         <h1 className="mt-6 text-center text-3xl font-semibold text-foreground">Private workspace</h1>
         <p className="mt-3 text-center text-sm text-muted-foreground">Enter your passcode to sign in.</p>
         {searchParams.error === "1" ? (

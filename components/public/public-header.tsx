@@ -19,7 +19,7 @@ export function PublicHeader() {
   }}>
     <div className="public-container public-header-row">
       <Link href="/" aria-label="jabx — Home" className="public-logo" onClick={() => setOpen(false)}>
-        <Image src="/jabx-logo-header.jpg" alt="jabx" width={128} height={128} priority className="h-14 w-14 rounded-lg" />
+        <Image src="/jabx-logo-header.jpg" alt="jabx" width={128} height={128} priority className="h-[72px] w-[72px] rounded-xl" />
       </Link>
       <nav aria-label="Main navigation" className="public-nav">
         {links.map(({ href, label }) => <Link key={href} href={href} className="public-desktop-link" aria-current={pathname === href ? "page" : undefined}>{label}</Link>)}

@@ -133,7 +133,7 @@
 @media (max-width: 700px) {
   .public-container { width: calc(100% - 40px); }
   .public-header-row { height: 76px; }
-  .public-logo img { width: 48px; height: 48px; }
+  .public-logo img { width: 60px; height: 60px; }
   .public-nav { gap: 12px; }
   .public-nav .public-desktop-link { display: none; }
   .public-nav .public-button { min-height: 44px; padding: 10px 20px; font-size: 14px; }
