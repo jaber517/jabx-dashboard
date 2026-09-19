@@ -1,7 +1,8 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import { isPrivateHost } from "@/lib/hosts";
 import {
   SESSION_COOKIE,
   expectedSessionToken,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/auth-config";
 
 export async function login(formData: FormData): Promise<void> {
+  if (!isPrivateHost(headers().get("host") ?? "")) notFound();
   const password = formData.get("password");
 
   if (typeof password !== "string" || !(await verifyPasscode(password))) {
@@ -27,6 +29,7 @@ export async function login(formData: FormData): Promise<void> {
 }
 
 export async function logout(): Promise<void> {
+  if (!isPrivateHost(headers().get("host") ?? "")) notFound();
   cookies().delete(SESSION_COOKIE);
-  redirect("/");
+  redirect("/login");
 }

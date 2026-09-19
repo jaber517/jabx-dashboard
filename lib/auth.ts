@@ -1,9 +1,11 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { SESSION_COOKIE, expectedSessionToken } from "@/lib/auth-config";
+import { isPrivateHost } from "@/lib/hosts";
 
 export { SESSION_COOKIE };
 
 export async function isAuthed(): Promise<boolean> {
+  if (!isPrivateHost(headers().get("host") ?? "")) return false;
   const session = cookies().get(SESSION_COOKIE)?.value;
   return Boolean(session && session === (await expectedSessionToken()));
 }

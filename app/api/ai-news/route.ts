@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthed } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,19 @@ function parseFeed(xml: string, source: string): NewsItem[] {
 }
 
 export async function GET() {
+  if (!(await isAuthed())) return NextResponse.json({ items: [] }, { status: 401 });
+
   const results = await Promise.allSettled(
     FEEDS.map(async ({ source, url }) => {
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000), cache: "no-store" });
       if (!res.ok) throw new Error(`${source} ${res.status}`);
       return parseFeed(await res.text(), source);
     })
   );
+
+  if (results.every((result) => result.status === "rejected")) {
+    return NextResponse.json({ items: [], error: "Couldn't reach the news feeds. Try again." }, { status: 502 });
+  }
 
   // Cap each feed to its 3 freshest items before merging, so a
   // high-frequency source (Hacker News) can't drown out the rest.

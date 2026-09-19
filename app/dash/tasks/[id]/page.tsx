@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { TaskDetailView } from "@/features/tasks/task-detail-view";
 import { getProjectsData, getTaskDetail } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export default async function TaskDetailPage({
   params
 }: {

@@ -101,6 +101,7 @@ export const navigationItems = [
   { href: "/activity", label: "Activity" },
   { href: "/calendar", label: "Calendar" },
   { href: "/resources", label: "Resources" },
+  { href: "/ai-news", label: "AI News" },
   { href: "/settings", label: "Settings" }
 ] as const;
 

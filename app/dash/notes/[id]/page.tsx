@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { NoteDetailView } from "@/features/notes/note-detail-view";
 import { getNoteDetail, getProjectsData } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export default async function NoteDetailPage({
   params
 }: {

@@ -107,8 +107,8 @@ export async function createProject(
       }
     });
 
-    revalidatePath("/projects");
-    revalidatePath("/dashboard");
+    revalidatePath("/dash/projects");
+    revalidatePath("/dash/dashboard");
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -141,8 +141,8 @@ export async function updateProject(
       }
     });
 
-    revalidatePath("/projects");
-    revalidatePath("/dashboard");
+    revalidatePath("/dash/projects");
+    revalidatePath("/dash/dashboard");
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -152,8 +152,8 @@ export async function updateProject(
 export async function deleteProject(id: string): Promise<void> {
   await assertAuthed();
   await db.project.delete({ where: { id } });
-  revalidatePath("/projects");
-  revalidatePath("/dashboard");
+  revalidatePath("/dash/projects");
+  revalidatePath("/dash/dashboard");
 }
 
 export async function setProjectCompleted(id: string, completed: boolean): Promise<void> {
@@ -162,8 +162,8 @@ export async function setProjectCompleted(id: string, completed: boolean): Promi
     where: { id },
     data: completed ? { status: "COMPLETED", progress: 100 } : { status: "ACTIVE" }
   });
-  revalidatePath("/projects");
-  revalidatePath("/dashboard");
+  revalidatePath("/dash/projects");
+  revalidatePath("/dash/dashboard");
 }
 
 export async function createTask(
@@ -191,10 +191,10 @@ export async function createTask(
       }
     });
 
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
-    revalidatePath("/projects");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/dash/tasks");
+    revalidatePath("/dash/dashboard");
+    revalidatePath("/dash/projects");
+    if (projectId) revalidatePath(`/dash/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -228,11 +228,11 @@ export async function updateTask(
       }
     });
 
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
-    revalidatePath("/projects");
-    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
-    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
+    revalidatePath("/dash/tasks");
+    revalidatePath("/dash/dashboard");
+    revalidatePath("/dash/projects");
+    if (previous?.projectId) revalidatePath(`/dash/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/dash/projects/${newProjectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -242,10 +242,10 @@ export async function updateTask(
 export async function deleteTask(id: string): Promise<void> {
   await assertAuthed();
   const task = await db.task.delete({ where: { id } });
-  revalidatePath("/tasks");
-  revalidatePath("/dashboard");
-  revalidatePath("/projects");
-  if (task.projectId) revalidatePath(`/projects/${task.projectId}`);
+  revalidatePath("/dash/tasks");
+  revalidatePath("/dash/dashboard");
+  revalidatePath("/dash/projects");
+  if (task.projectId) revalidatePath(`/dash/projects/${task.projectId}`);
 }
 
 export async function setTaskDone(id: string, done: boolean): Promise<void> {
@@ -256,10 +256,10 @@ export async function setTaskDone(id: string, done: boolean): Promise<void> {
       ? { status: "DONE", blocked: false, completedAt: new Date() }
       : { status: "TODO", completedAt: null }
   });
-  revalidatePath("/tasks");
-  revalidatePath("/dashboard");
-  revalidatePath("/projects");
-  if (task.projectId) revalidatePath(`/projects/${task.projectId}`);
+  revalidatePath("/dash/tasks");
+  revalidatePath("/dash/dashboard");
+  revalidatePath("/dash/projects");
+  if (task.projectId) revalidatePath(`/dash/projects/${task.projectId}`);
 }
 
 export async function createNote(
@@ -286,9 +286,9 @@ export async function createNote(
       }
     });
 
-    revalidatePath("/notes");
-    revalidatePath("/dashboard");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/dash/notes");
+    revalidatePath("/dash/dashboard");
+    if (projectId) revalidatePath(`/dash/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -322,10 +322,10 @@ export async function updateNote(
       }
     });
 
-    revalidatePath("/notes");
-    revalidatePath("/dashboard");
-    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
-    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
+    revalidatePath("/dash/notes");
+    revalidatePath("/dash/dashboard");
+    if (previous?.projectId) revalidatePath(`/dash/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/dash/projects/${newProjectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -335,8 +335,8 @@ export async function updateNote(
 export async function deleteNote(id: string): Promise<void> {
   await assertAuthed();
   await db.note.delete({ where: { id } });
-  revalidatePath("/notes");
-  revalidatePath("/dashboard");
+  revalidatePath("/dash/notes");
+  revalidatePath("/dash/dashboard");
 }
 
 function requireUrl(formData: FormData): string {
@@ -379,9 +379,9 @@ export async function createResource(
       }
     });
 
-    revalidatePath("/resources");
-    revalidatePath("/dashboard");
-    if (projectId) revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/dash/resources");
+    revalidatePath("/dash/dashboard");
+    if (projectId) revalidatePath(`/dash/projects/${projectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -415,10 +415,10 @@ export async function updateResource(
       }
     });
 
-    revalidatePath("/resources");
-    revalidatePath("/dashboard");
-    if (previous?.projectId) revalidatePath(`/projects/${previous.projectId}`);
-    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/projects/${newProjectId}`);
+    revalidatePath("/dash/resources");
+    revalidatePath("/dash/dashboard");
+    if (previous?.projectId) revalidatePath(`/dash/projects/${previous.projectId}`);
+    if (newProjectId && newProjectId !== previous?.projectId) revalidatePath(`/dash/projects/${newProjectId}`);
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Something went wrong." };
@@ -428,7 +428,7 @@ export async function updateResource(
 export async function deleteResource(id: string): Promise<void> {
   await assertAuthed();
   const resource = await db.resourceLink.delete({ where: { id } });
-  revalidatePath("/resources");
-  revalidatePath("/dashboard");
-  if (resource.projectId) revalidatePath(`/projects/${resource.projectId}`);
+  revalidatePath("/dash/resources");
+  revalidatePath("/dash/dashboard");
+  if (resource.projectId) revalidatePath(`/dash/projects/${resource.projectId}`);
 }

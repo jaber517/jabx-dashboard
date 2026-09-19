@@ -1,11 +1,16 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { isPrivateHost } from "@/lib/hosts";
+
+export const dynamic = "force-dynamic";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const privateHost = isPrivateHost(headers().get("host") ?? "");
   return {
-    name: "Jaber's Dashboard",
-    short_name: "Jaber",
-    description: "Personal dashboard for projects, tasks, notes, and resources.",
-    start_url: "/dashboard",
+    name: privateHost ? "Jaber's Dashboard" : "jabx",
+    short_name: privateHost ? "Jaber" : "jabx",
+    description: privateHost ? "Personal dashboard for projects, tasks, notes, and resources." : "Apps, tools, and experiments.",
+    start_url: privateHost ? "/dashboard" : "/",
     display: "standalone",
     background_color: "#F4F6F9",
     theme_color: "#0A84FF",

@@ -1,6 +1,8 @@
 import { TasksView } from "@/features/tasks/tasks-view";
 import { getProjectsData, getTasksData } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export default async function TasksPage({
   searchParams
 }: {

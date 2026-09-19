@@ -14,17 +14,11 @@ import { logout } from "@/lib/auth-actions";
 export function TopNav() {
   const pathname = usePathname();
 
-  const publicRoutes = ["/", "/about", "/contact", "/login", "/claude", "/ai-news"];
-
-  if (publicRoutes.includes(pathname)) {
-    return null;
-  }
-
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="jabx.me">
+          <Link href={process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || "https://jabx.me"} className="flex items-center gap-2.5" aria-label="jabx.me">
             <Image src="/jabx-logo-header.jpg" alt="" width={80} height={80} priority className="h-8 w-8 rounded-lg" />
             <p className={`${plexMono.className} text-sm text-foreground`}>dashboard</p>
           </Link>
@@ -48,7 +42,8 @@ export function TopNav() {
         <nav className="-mx-1 overflow-x-auto">
           <div className="flex min-w-max items-center gap-1 px-1">
             {navigationItems.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`) ||
+                (item.href === "/dashboard" && pathname === "/");
 
               return (
                 <Link

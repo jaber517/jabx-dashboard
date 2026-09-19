@@ -1,21 +1,58 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, expectedSessionToken } from "@/lib/auth-config";
+import { isPrivateHost, privateNewsUrl } from "@/lib/hosts";
 
-const PROTECTED_PREFIXES = [
+const PRIVATE_PATHS = [
   "/dashboard",
-  "/projects",
   "/tasks",
   "/notes",
   "/analytics",
   "/activity",
   "/calendar",
   "/resources",
-  "/settings"
+  "/settings",
+  "/login",
+  "/api/search",
+  "/api/ai-news"
 ];
+
+const PUBLIC_ASSETS = new Set([
+  "/icon.jpg", "/apple-icon.jpg", "/manifest.webmanifest", "/sw.js",
+  "/jabx-logo-header.jpg", "/logo.jpg"
+]);
+
+function atPath(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function notFound() {
+  return new NextResponse("Not Found", {
+    status: 404,
+    headers: { "Cache-Control": "private, no-store" }
+  });
+}
 
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const { pathname } = request.nextUrl;
+
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch {
+    return notFound();
+  }
+
+  // Internal routes must never be reachable directly, including encoded paths.
+  if (atPath(decodedPath, "/dash")) return notFound();
+
+  const privateHost = isPrivateHost(host);
+  if (!privateHost) {
+    if (PRIVATE_PATHS.some((path) => atPath(decodedPath, path))) return notFound();
+    if (decodedPath === "/ai-news") {
+      return NextResponse.redirect(privateNewsUrl(request.nextUrl), 308);
+    }
+  }
 
   // Subdomain sites: every path on these hosts shows their landing page.
   if (host.startsWith("claude.")) {
@@ -24,24 +61,36 @@ export async function middleware(request: NextRequest) {
       : NextResponse.rewrite(new URL("/claude", request.url));
   }
 
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
+  if (!privateHost) return NextResponse.next();
 
-  if (!isProtected) {
+  if (PUBLIC_ASSETS.has(decodedPath) || decodedPath === "/api/health" ||
+      decodedPath.startsWith("/_next/") || decodedPath.startsWith("/static/")) {
     return NextResponse.next();
   }
 
-  const session = request.cookies.get(SESSION_COOKIE)?.value;
-
-  if (session === (await expectedSessionToken())) {
-    return NextResponse.next();
+  if (decodedPath !== "/login") {
+    const session = request.cookies.get(SESSION_COOKIE)?.value;
+    if (!session || session !== (await expectedSessionToken())) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.host = host;
+      loginUrl.pathname = "/login";
+      loginUrl.search = "";
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
-  return NextResponse.redirect(new URL("/login", request.url));
+  // APIs stay at their real routes and also authenticate in their handlers.
+  const destination = request.nextUrl.clone();
+  destination.pathname = pathname === "/" ? "/dash/dashboard" : `/dash${pathname}`;
+  const response = atPath(decodedPath, "/api")
+    ? NextResponse.next()
+    : NextResponse.rewrite(destination);
+  response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return response;
 }
 
 export const config = {
-  // Everything except Next internals, API routes, and static files (paths with a dot).
-  matcher: ["/((?!_next/|api/|.*\\..*).*)"]
+  // Include APIs and dotted paths so private IDs/files cannot bypass the boundary.
+  matcher: ["/((?!_next/).*)"]
 };
