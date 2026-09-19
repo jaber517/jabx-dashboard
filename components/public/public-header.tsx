@@ -1,139 +1,36 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
+﻿"use client";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { plexMono } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
-import { MagneticButton } from "@/components/public/magnetic-button";
+import "./public.css";
 
-const links = [
-  { href: "/about", label: "About" },
-  { href: "/claude", label: "Claude" },
-  { href: "/ai-news", label: "AI News" },
-  { href: "/contact", label: "Contact" }
-];
-
-const EXIT_DURATION = 160;
+const links = [{ href: "/projects", label: "Projects" }, { href: "/about", label: "About" }];
 
 export function PublicHeader() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [entered, setEntered] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 6);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  function openMenu() {
-    window.clearTimeout(closeTimer.current);
-    setMounted(true);
-  }
-
-  function closeMenu() {
-    setEntered(false);
-    closeTimer.current = setTimeout(() => setMounted(false), EXIT_DURATION);
-  }
-
-  useEffect(() => {
-    if (!mounted) return;
-    const id = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(id);
-  }, [mounted]);
-
-  useEffect(() => {
-    if (!mounted) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") closeMenu();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [mounted]);
-
-  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
-
-  return (
-    <header
-      className={cn(
-        "sticky top-0 z-20 border-b border-transparent backdrop-blur-xl backdrop-saturate-150 transition-colors duration-250",
-        scrolled ? "border-white/[0.08] bg-[#06080D]/75" : "bg-[#06080D]/35"
-      )}
-    >
-      <div className="relative mx-auto flex h-16 max-w-[1080px] items-center justify-between px-6">
-        <Link href="/" className="flex items-center" aria-label="jabx.me">
-          <Image src="/jabx-logo-header.jpg" alt="jabx.me" width={128} height={128} priority className="h-14 w-14 rounded-lg" />
-        </Link>
-
-        <nav className="flex items-center gap-7">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="hidden text-sm text-[#8A94A6] transition-colors ease-spring hover:text-[#EDF1F8] sm:inline"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <MagneticButton href="/dashboard" className="hidden sm:inline-flex">
-            Dashboard
-          </MagneticButton>
-          <button
-            type="button"
-            onClick={() => (mounted ? closeMenu() : openMenu())}
-            aria-label={mounted ? "Close menu" : "Open menu"}
-            aria-expanded={mounted}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-[#EDF1F8] transition ease-spring hover:bg-white/[0.06] active:scale-90 motion-reduce:active:scale-100 sm:hidden"
-          >
-            {mounted ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </nav>
-
-        {mounted ? (
-          <>
-            <button
-              type="button"
-              aria-hidden="true"
-              tabIndex={-1}
-              onClick={closeMenu}
-              className="fixed inset-0 z-40 cursor-default sm:hidden"
-            />
-            <nav
-              className={cn(
-                "absolute inset-x-0 top-full z-50 mx-4 rounded-xl border border-white/[0.08] bg-[#12161F] p-2 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.65)] transition ease-spring motion-reduce:transition-opacity sm:hidden",
-                entered
-                  ? "translate-y-0 scale-100 opacity-100 duration-200"
-                  : "-translate-y-2 scale-95 opacity-0 duration-150"
-              )}
-              style={{ transformOrigin: "top" }}
-            >
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMenu}
-                  className="block rounded-lg px-4 py-3 text-base text-[#EDF1F8] transition ease-spring hover:bg-white/[0.05] active:scale-[0.98] motion-reduce:active:scale-100"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <Link
-                href="/dashboard"
-                onClick={closeMenu}
-                className={`${plexMono.className} mt-1 block rounded-lg bg-[#0A84FF] px-4 py-3 text-center text-[13px] tracking-[0.03em] text-[#04101F] transition ease-spring active:scale-[0.98] motion-reduce:active:scale-100`}
-              >
-                Dashboard
-              </Link>
-            </nav>
-          </>
-        ) : null}
-      </div>
-    </header>
-  );
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+  return <header className="public-header" onKeyDown={(event) => {
+    if (event.key === "Escape" && open) { setOpen(false); toggle.current?.focus(); }
+  }} onBlur={(event) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
+  }}>
+    <div className="public-container public-header-row">
+      <Link href="/" aria-label="jabx — Home" className="public-logo" onClick={() => setOpen(false)}>
+        <Image src="/jabx-logo-header.jpg" alt="jabx" width={128} height={128} priority className="h-14 w-14 rounded-lg" />
+      </Link>
+      <nav aria-label="Main navigation" className="public-nav">
+        {links.map(({ href, label }) => <Link key={href} href={href} className="public-desktop-link" aria-current={pathname === href ? "page" : undefined}>{label}</Link>)}
+        <Link href="/contact" className="public-button" aria-current={pathname === "/contact" ? "page" : undefined} onClick={() => setOpen(false)}>Contact</Link>
+        <button ref={toggle} type="button" className="public-menu-toggle" aria-expanded={open} aria-controls="public-mobile-nav" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen(!open)}>
+          {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+        </button>
+      </nav>
+    </div>
+    <nav id="public-mobile-nav" aria-label="Mobile navigation" className="public-mobile-nav" hidden={!open}>
+      {links.map(({ href, label }) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={() => setOpen(false)}>{label}</Link>)}
+    </nav>
+  </header>;
 }

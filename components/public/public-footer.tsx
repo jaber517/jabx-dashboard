@@ -1,14 +1,12 @@
-import { plexMono } from "@/lib/fonts";
+﻿import { Instagram, WhatsAppIcon, instagramUrl, whatsappUrl } from "./social-icons";
+import "./public.css";
 
-export function PublicFooter() {
-  return (
-    <footer className="border-t border-[#1D2330]">
-      <div
-        className={`${plexMono.className} mx-auto flex max-w-[1080px] flex-col gap-2 px-6 py-6 text-xs tracking-[0.02em] text-[#8A94A6] sm:flex-row sm:justify-between`}
-      >
-        <span>jabx.me</span>
-        <span>© 2026</span>
-      </div>
-    </footer>
-  );
+export function PublicFooter({ socials = false }: { socials?: boolean }) {
+  return <footer className="public-footer public-container">
+    <span>© 2026 jabx</span>
+    {socials ? <div className="public-footer-socials">
+      <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="jabx on Instagram (opens in a new tab)"><Instagram size={21} aria-hidden="true" /></a>
+      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="jabx on WhatsApp (opens in a new tab)"><WhatsAppIcon /></a>
+    </div> : null}
+  </footer>;
 }
