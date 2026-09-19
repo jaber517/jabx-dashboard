@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
-import { AppShell } from "@/components/layout/app-shell";
+import { PublicRouteShell } from "@/components/public/public-route-shell";
 import { PwaProvider } from "@/components/providers/pwa-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { fraunces } from "@/lib/fonts";
@@ -34,7 +34,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PwaProvider />
-          <AppShell>{children}</AppShell>
+          <PublicRouteShell>{children}</PublicRouteShell>
         </ThemeProvider>
       </body>
     </html>

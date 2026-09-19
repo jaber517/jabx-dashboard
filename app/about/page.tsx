@@ -1,76 +1,21 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import { PublicHeader } from "@/components/public/public-header";
-import { PublicFooter } from "@/components/public/public-footer";
-import { SpringIn } from "@/components/public/spring-in";
+﻿import Link from "next/link";
+import { PublicShell } from "@/components/public/public-shell";
+import { Arrow, RibbonArt } from "@/components/public/public-art";
+import { publicMetadata } from "@/components/public/public-metadata";
 
-export const metadata: Metadata = {
-  title: { absolute: "About — jabx" },
-  description: "Who's behind jabx."
-};
+export const metadata = publicMetadata("About — jabx", "An independent studio for mobile apps, useful tools, and practical AI. Curiosity is the starting point.", "/about");
+const areas = [
+  ["01", "Mobile apps", "Building for iOS and Android."],
+  ["02", "Useful tools", "Exploring simpler ways to get things done."],
+  ["03", "Practical AI", "Testing ideas through small experiments."]
+];
 
 export default function AboutPage() {
-  return (
-    <div className="min-h-screen bg-[#06080D] text-[#EDF1F8]">
-      <PublicHeader />
-
-      <main className="mx-auto max-w-[1080px] px-6">
-        <section className="grid items-center gap-14 py-16 sm:py-24 md:grid-cols-[1fr_1.4fr]">
-          <SpringIn>
-            <div className="relative mx-auto h-60 w-60 sm:h-72 sm:w-72">
-              <div
-                className="absolute inset-0 rounded-full blur-2xl"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(10,132,255,0.28), rgba(124,111,255,0.14) 60%, transparent 75%)"
-                }}
-              />
-              <div className="absolute inset-4 overflow-hidden rounded-full border border-white/[0.08] bg-[#12161F] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.65)]">
-                <Image
-                  src="/logo.jpg"
-                  alt="Portrait illustration of Jaber"
-                  fill
-                  priority
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </SpringIn>
-
-          <SpringIn delay={70}>
-            <div className="text-center md:text-left">
-              <h1 className="m-0 mb-[22px] text-4xl font-semibold leading-[1.1] tracking-[-0.025em] sm:text-5xl">
-                About{" "}
-                <span className="relative inline-block">
-                  me
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full"
-                    viewBox="0 0 60 12"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M3 8c11-5 21-4 27-2s18 3 27-3"
-                      stroke="#0A84FF"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
-              </h1>
-
-              <p className="mx-auto max-w-xl text-lg leading-[1.65] text-[#8A94A6] sm:text-xl md:mx-0">
-                AI Engineer. Building AI solutions out of a small lab — where ideas
-                get tested, refined, and shipped. The focus is practical: tools
-                people actually use, built with care and a bit of experimentation
-                along the way.
-              </p>
-            </div>
-          </SpringIn>
-        </section>
-      </main>
-
-      <PublicFooter />
-    </div>
-  );
+  return <PublicShell>
+    <section className="public-hero"><div className="public-hero-copy"><p className="public-eyebrow">About jabx</p><h1>A space to build.<br />Room to <span className="public-accent">explore.</span></h1><p className="public-lead">An independent studio for mobile apps, useful tools, and practical AI.</p></div><RibbonArt /></section>
+    <section className="public-studio public-section"><p className="public-eyebrow">The studio</p><div><h2>Curiosity is the starting point.</h2><p>jabx brings app development and experimentation together. The focus is on turning ideas into useful digital experiences, with room to learn and improve along the way.</p></div></section>
+    <section className="public-areas public-section"><h2>Areas of exploration</h2><div className="public-area-grid">{areas.map(([number, title, description]) => <div key={number}><span className="public-area-number">{number}</span><h3>{title}</h3><p>{description}</p></div>)}</div></section>
+    <section className="public-current public-section"><p className="public-eyebrow">Currently taking shape</p><h2>DayHQ</h2><p>A mobile app in development.</p><Link href="/projects" className="public-text-link">Explore the project <Arrow /></Link></section>
+    <section className="public-about-closing public-section"><h2>See what is taking shape.</h2><div className="public-actions"><Link href="/projects" className="public-button">Explore projects</Link><Link href="/contact" className="public-text-link">Get in touch <Arrow /></Link></div></section>
+  </PublicShell>;
 }
