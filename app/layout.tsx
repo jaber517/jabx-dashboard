@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { PwaProvider } from "@/components/providers/pwa-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { fraunces } from "@/lib/fonts";
+import { fraunces, inter } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#F4F6F9" },
-    { media: "(prefers-color-scheme: dark)", color: "#06080D" }
+    { media: "(prefers-color-scheme: dark)", color: "#07111B" }
   ]
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   children
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={fraunces.variable}>
+    <html lang="en" suppressHydrationWarning className={`${fraunces.variable} ${inter.variable}`}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <PwaProvider />

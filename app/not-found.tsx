@@ -1,24 +1,19 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/public/public-art";
+import "@/components/public/public.css";
+
+export const metadata = { title: { absolute: "Page not found — jabx" } };
 
 export default function NotFound() {
   return (
-    <div className="page-shell items-center justify-center py-20">
-      <div className="surface-panel-elevated max-w-xl rounded-3xl p-10 text-center">
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
-          404
-        </p>
-        <h1 className="mt-4 text-3xl font-semibold">Page not found</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          The page you requested does not exist yet or has been moved into a
-          different workspace section.
-        </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-95"
-        >
-          Go to dashboard
-        </Link>
+    <main className="public-void">
+      <div>
+        <Wordmark priority />
+        <p className="public-eyebrow">404</p>
+        <h1>Nothing here.</h1>
+        <p>The page you&apos;re looking for doesn&apos;t exist or has moved.</p>
+        <Link href="/" className="public-button">Back to home</Link>
       </div>
-    </div>
+    </main>
   );
 }

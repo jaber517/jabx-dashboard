@@ -7,11 +7,11 @@ export function publicMetadata(title: string, description: string, path: string)
     alternates: { canonical: url },
     openGraph: {
       title, description, url, siteName: "jabx", type: "website",
-      images: [{ url: "https://jabx.me/jabx-logo-header.jpg", alt: "jabx" }]
+      images: [{ url: "https://jabx.me/brand/jabx-og.png", width: 1600, height: 800, alt: "jabx" }]
     },
     twitter: {
-      card: "summary", title, description,
-      images: [{ url: "https://jabx.me/jabx-logo-header.jpg", alt: "jabx" }]
+      card: "summary_large_image", title, description,
+      images: [{ url: "https://jabx.me/brand/jabx-og.png", alt: "jabx" }]
     }
   };
 }

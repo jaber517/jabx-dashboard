@@ -4,8 +4,10 @@
     {
       "name": "jabx-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "C:\\Users\\USER\\Desktop\\Codex",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
     }
   ]

@@ -1,10 +1,11 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 
-export function RibbonArt() {
-  return <div className="public-ribbon" aria-hidden="true">
-    <Image src="/redesign/blue-ribbon.png" alt="" width={317} height={307} priority sizes="(max-width: 700px) 180px, 380px" />
-    <span>Ideas<br />Tools<br />Progress<i /></span>
-  </div>;
+// The jabx wordmark: lowercase jab in white, the x in Signal Blue. Always flat.
+export function Wordmark({ className, priority = false }: { className?: string; priority?: boolean }) {
+  return <Image src="/brand/jabx-wordmark.svg" alt="jabx" width={310} height={160} priority={priority} className={className} />;
+}
+export function DayHQIcon() {
+  return <Image src="/brand/dayhq-logo.png" alt="" width={144} height={144} className="public-app-icon" />;
 }
 export function PlatformPills() {
   return <div className="public-platforms"><span>iOS</span><span>Android</span></div>;

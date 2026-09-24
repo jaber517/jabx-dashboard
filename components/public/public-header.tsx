@@ -1,12 +1,12 @@
 ﻿"use client";
 import { useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { Wordmark } from "./public-art";
 import "./public.css";
 
-const links = [{ href: "/projects", label: "Projects" }, { href: "/about", label: "About" }];
+const links = [{ href: "/projects", label: "Projects" }, { href: "/about", label: "About" }, { href: "/team", label: "Team" }];
 
 export function PublicHeader() {
   const pathname = usePathname();
@@ -19,7 +19,7 @@ export function PublicHeader() {
   }}>
     <div className="public-container public-header-row">
       <Link href="/" aria-label="jabx — Home" className="public-logo" onClick={() => setOpen(false)}>
-        <Image src="/jabx-logo-header.jpg" alt="jabx" width={128} height={128} priority className="h-[72px] w-[72px] rounded-xl" />
+        <Wordmark priority />
       </Link>
       <nav aria-label="Main navigation" className="public-nav">
         {links.map(({ href, label }) => <Link key={href} href={href} className="public-desktop-link" aria-current={pathname === href ? "page" : undefined}>{label}</Link>)}
