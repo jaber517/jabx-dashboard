@@ -17,7 +17,7 @@ const PRIVATE_PATHS = [
 ];
 
 const PUBLIC_ASSETS = new Set([
-  "/icon.jpg", "/apple-icon.jpg", "/manifest.webmanifest", "/sw.js",
+  "/icon.png", "/apple-icon.png", "/manifest.webmanifest", "/sw.js",
   "/jabx-logo-header.jpg", "/logo.jpg"
 ]);
 

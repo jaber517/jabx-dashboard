@@ -11,11 +11,7 @@ export const metadata: Metadata = {
     template: "%s · Jaber"
   },
   description:
-    "A personal dashboard for projects, tasks, notes, analytics, and timelines.",
-  icons: {
-    icon: "/icon.jpg",
-    apple: "/apple-icon.jpg"
-  }
+    "A personal dashboard for projects, tasks, notes, analytics, and timelines."
 };
 
 export const viewport: Viewport = {

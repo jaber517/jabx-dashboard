@@ -9,16 +9,16 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: privateHost ? "Jaber's Dashboard" : "jabx",
     short_name: privateHost ? "Jaber" : "jabx",
-    description: privateHost ? "Personal dashboard for projects, tasks, notes, and resources." : "Apps, tools, and experiments.",
+    description: privateHost ? "Personal dashboard for projects, tasks, notes, and resources." : "jabx — AI lab. Apps, tools, and experiments.",
     start_url: privateHost ? "/dashboard" : "/",
     display: "standalone",
     background_color: "#F4F6F9",
     theme_color: "#0A84FF",
     icons: [
       {
-        src: "/icon.jpg",
+        src: "/icon.png",
         sizes: "512x512",
-        type: "image/jpeg"
+        type: "image/png"
       }
     ]
   };

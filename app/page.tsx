@@ -5,7 +5,7 @@ import { Arrow, DayHQIcon, DevelopmentBadge, PlatformPills, Wordmark } from "@/c
 import { publicMetadata } from "@/components/public/public-metadata";
 import { aiTeam, founder } from "@/lib/team";
 
-export const metadata = publicMetadata("jabx — Digital work, thoughtfully made", "jabx is an independent digital studio where human direction and AI capability work together to make useful digital products.", "/");
+export const metadata = publicMetadata("jabx — AI lab", "jabx is an independent digital studio where human direction and AI capability work together to make useful digital products.", "/");
 
 export default function LandingPage() {
   return <PublicShell>
