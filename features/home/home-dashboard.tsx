@@ -1,35 +1,16 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  CalendarClock,
-  FileText,
-  FolderKanban,
-  ListTodo,
-  Sparkles
-} from "lucide-react";
+import { differenceInCalendarDays, format, startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MetricCard } from "@/components/ui/metric-card";
-import { PageHeader } from "@/components/ui/page-header";
+import { MetricStrip } from "@/components/ui/metric-card";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { TaskFormDialog } from "@/features/tasks/create-task-dialog";
 import { CustomizableGrid, type HomeSection } from "@/features/home/customizable-grid";
-import {
-  categoryDot,
-  priorityTone,
-  quickActions,
-  statusTone,
-  taskStatusTone
-} from "@/lib/constants";
-import {
-  formatDate,
-  formatRelativeDate,
-  getCategoryLabel,
-  getPriorityLabel,
-  getStatusLabel,
-  getTaskStatusLabel
-} from "@/lib/formatters";
+import { Greeting } from "@/features/home/greeting";
+import { NextUpTask } from "@/features/home/next-up-task";
+import { categoryDot, priorityTone, statusTone } from "@/lib/constants";
+import { formatRelativeDate, getCategoryLabel, getPriorityLabel, getStatusLabel } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type {
   ActivityRecord,
@@ -39,6 +20,46 @@ import type {
   ResourceRecord,
   TaskRecord
 } from "@/types";
+
+const priorityRank = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
+
+// "Today", "Tomorrow", a weekday within the week, otherwise "3 Oct".
+function dueLabel(date: Date, today: Date) {
+  const days = differenceInCalendarDays(date, today);
+  if (days < 0) return format(date, "d MMM");
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days < 7) return format(date, "EEE");
+  return format(date, "d MMM");
+}
+
+function Panel({
+  id,
+  title,
+  link,
+  children
+}: {
+  id: string;
+  title: string;
+  link?: { href: string; label: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className="overflow-hidden rounded-3xl border border-border bg-surface">
+      <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+        <h2 id={id} className="text-[17px] font-bold tracking-tight">
+          {title}
+        </h2>
+        {link ? (
+          <Link href={link.href} className="text-sm font-semibold text-primary hover:underline">
+            {link.label}
+          </Link>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export function HomeDashboard({
   projects,
@@ -55,276 +76,162 @@ export function HomeDashboard({
   milestones: MilestoneRecord[];
   resources: ResourceRecord[];
 }) {
-  const activeProjects = projects.filter((project) =>
-    ["ACTIVE", "WAITING", "PLANNED"].includes(project.status)
-  ).length;
-  const openTasks = tasks.filter((task) => task.status !== "DONE").length;
-  const blockedItems = tasks.filter((task) => task.blocked).length;
+  const today = startOfDay(new Date());
+  const openTasks = tasks.filter((task) => task.status !== "DONE");
+  const activeProjects = projects.filter((project) => ["ACTIVE", "WAITING", "PLANNED"].includes(project.status));
+  const blockedCount = openTasks.filter((task) => task.blocked || task.status === "BLOCKED").length;
+  const waitingCount = projects.filter((project) => project.status === "WAITING").length;
 
-  const now = Date.now();
-  const inWeek = now + 1000 * 60 * 60 * 24 * 7;
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const dueThisWeek = openTasks.filter((task) => {
+    if (!task.dueDate) return false;
+    const days = differenceInCalendarDays(new Date(task.dueDate), today);
+    return days >= 0 && days < 7;
+  });
 
-  const thisWeekDeadlineCount = tasks.filter((task) => {
-    if (task.status === "DONE" || !task.dueDate) return false;
-    const date = Date.parse(task.dueDate);
-    return date >= startOfToday.getTime() && date <= inWeek;
-  }).length;
+  // Open tasks, soonest due first (undated last), then by priority.
+  const nextUp = [...openTasks]
+    .sort((a, b) => {
+      const aDue = a.dueDate ? Date.parse(a.dueDate) : Infinity;
+      const bDue = b.dueDate ? Date.parse(b.dueDate) : Infinity;
+      return aDue - bDue || priorityRank[a.priority] - priorityRank[b.priority];
+    })
+    .slice(0, 5);
 
-  // Upcoming due dates across projects and open tasks (soonest first).
-  const upcomingDeadlines = [
+  // Everything dated in the next 7 days: projects, open tasks and milestones.
+  const thisWeek = [
     ...projects
       .filter((project) => project.dueDate)
-      .map((project) => ({
-        id: `project-${project.id}`,
-        type: "Project" as const,
-        title: project.title,
-        subtitle: project.summary,
-        href: `/projects/${project.id}`,
-        due: project.dueDate as string
-      })),
-    ...tasks
-      .filter((task) => task.dueDate && task.status !== "DONE")
-      .map((task) => ({
-        id: `task-${task.id}`,
-        type: "Task" as const,
-        title: task.title,
-        subtitle: task.project?.title ?? "Independent task",
-        href: `/tasks/${task.id}`,
-        due: task.dueDate as string
-      }))
+      .map((project) => ({ id: `p-${project.id}`, kind: "Project due", title: project.title, context: getCategoryLabel(project.category), href: `/projects/${project.id}`, date: project.dueDate as string })),
+    ...openTasks
+      .filter((task) => task.dueDate)
+      .map((task) => ({ id: `t-${task.id}`, kind: "Task", title: task.title, context: task.project?.title ?? getCategoryLabel(task.category), href: `/tasks/${task.id}`, date: task.dueDate as string })),
+    ...milestones.map((milestone) => ({ id: `m-${milestone.id}`, kind: "Milestone", title: milestone.title, context: milestone.project?.title ?? getCategoryLabel(milestone.category), href: milestone.projectId ? `/projects/${milestone.projectId}` : "/calendar", date: milestone.date }))
   ]
-    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due))
+    .filter((item) => {
+      const days = differenceInCalendarDays(new Date(item.date), today);
+      return days >= 0 && days < 7;
+    })
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
     .slice(0, 5);
+
+  const nextDeadline = dueThisWeek
+    .map((task) => new Date(task.dueDate as string))
+    .sort((a, b) => a.getTime() - b.getTime())[0];
 
   const sections: HomeSection[] = [
     {
       id: "metrics",
-      title: "Overview stats",
+      title: "Overview",
       defaultWidth: "full",
       node: (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
-            label="Active Projects"
-            value={String(activeProjects)}
-            trend="Execution pace is steady"
-            icon={<FolderKanban className="h-5 w-5" />}
-            href="/projects"
-          />
-          <MetricCard
-            label="Open Tasks"
-            value={String(openTasks)}
-            trend={`${blockedItems} blocked items need review`}
-            icon={<ListTodo className="h-5 w-5" />}
-            href="/tasks"
-          />
-          <MetricCard
-            label="This Week"
-            value={`${thisWeekDeadlineCount} deadlines`}
-            trend="Focus window is visible"
-            icon={<CalendarClock className="h-5 w-5" />}
-            href="/calendar"
-          />
-          <MetricCard
-            label="My Notes"
-            value={String(notes.length)}
-            trend={`${resources.length} linked resources`}
-            icon={<FileText className="h-5 w-5" />}
-            href="/notes"
-          />
-        </div>
+        <MetricStrip
+          metrics={[
+            { label: "Active projects", value: String(activeProjects.length), note: waitingCount ? `${waitingCount} waiting` : "None waiting", href: "/projects" },
+            { label: "Open tasks", value: String(openTasks.length), note: blockedCount ? `${blockedCount} blocked` : "Nothing blocked", href: "/tasks" },
+            { label: "Due this week", value: String(dueThisWeek.length), note: nextDeadline ? `Next: ${dueLabel(nextDeadline, today)}` : "Nothing due", href: "/calendar" },
+            { label: "Notes", value: String(notes.length), note: `${resources.length} linked resources`, href: "/notes" }
+          ]}
+        />
       )
     },
     {
-      id: "quick-actions",
-      title: "Quick actions",
+      id: "next-up",
+      title: "Next up",
       defaultWidth: "half",
       node: (
-        <Card>
-          <CardHeader className="flex-row items-end justify-between gap-4">
-            <div>
-              <CardTitle>Quick actions</CardTitle>
-              <CardDescription>
-                Fast entry points for planning, capture, and weekly review.
-              </CardDescription>
+        <Panel id="home-next-up" title="Next up" link={{ href: "/tasks", label: "Open tasks" }}>
+          {nextUp.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title="Nothing open" description="New tasks will line up here, soonest due first." />
             </div>
-            <Badge className="bg-primary/10 text-primary">6 actions</Badge>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            {quickActions.map((action) => (
-              <Link
-                key={action.title}
-                href={action.href}
-                className="group rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-base font-semibold">{action.title}</h3>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
-                </div>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  {action.description}
-                </p>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
+          ) : (
+            <ul>
+              {nextUp.map((task) => {
+                const due = task.dueDate ? new Date(task.dueDate) : null;
+                return (
+                  <NextUpTask
+                    key={task.id}
+                    id={task.id}
+                    title={task.title}
+                    meta={task.project?.title ?? getCategoryLabel(task.category)}
+                    dot={categoryDot[task.category]}
+                    due={due ? dueLabel(due, today) : undefined}
+                    overdue={Boolean(due && differenceInCalendarDays(due, today) <= 0)}
+                    priority={{ label: getPriorityLabel(task.priority), tone: priorityTone[task.priority] }}
+                  />
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
       )
     },
     {
-      id: "current-progress",
-      title: "Current progress",
+      id: "this-week",
+      title: "This week",
       defaultWidth: "half",
       node: (
-        <Card>
-          <CardHeader>
-            <CardTitle>Current progress</CardTitle>
-            <CardDescription>
-              A compact view of project health across the whole dashboard.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {projects.length === 0 ? (
-              <EmptyState
-                title="No projects loaded yet"
-                description="Create a project to start tracking progress here."
-              />
-            ) : (
-              projects.slice(0, 4).map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("h-2.5 w-2.5 rounded-full", categoryDot[project.category])} />
-                        <p className="text-sm font-semibold">{project.title}</p>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {getCategoryLabel(project.category)}
-                      </p>
-                    </div>
-                    <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
-                  </div>
-                  <ProgressBar value={project.progress} className="mt-4" />
-                  <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{project.progress}% complete</span>
-                    <span>{project.tasks?.length ?? 0} tasks</span>
-                  </div>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      )
-    },
-    {
-      id: "focus-projects",
-      title: "Focus projects",
-      defaultWidth: "half",
-      node: (
-        <Card>
-          <CardHeader className="flex-row items-end justify-between gap-4">
-            <div>
-              <CardTitle>Focus projects</CardTitle>
-              <CardDescription>
-                The highest-signal initiatives currently shaping the week.
-              </CardDescription>
+        <Panel id="home-this-week" title="This week" link={{ href: "/calendar", label: "Calendar" }}>
+          {thisWeek.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title="A clear week" description="Anything due in the next seven days shows up here." />
             </div>
-            <Link href="/projects" className={buttonVariants({ variant: "secondary", size: "sm" })}>
-              View all
-            </Link>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {projects.length === 0 ? (
-              <EmptyState
-                title="Your focus list is empty"
-                description="Once projects are created, the most important items will appear here."
-              />
-            ) : (
-              projects.slice(0, 5).map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="group rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge className={statusTone[project.status]}>{getStatusLabel(project.status)}</Badge>
-                    <Badge className={priorityTone[project.priority]}>{getPriorityLabel(project.priority)}</Badge>
-                    <Badge className="bg-muted text-muted-foreground">
-                      {getCategoryLabel(project.category)}
-                    </Badge>
-                  </div>
-                  <div className="mt-4 flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">{project.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {project.summary}
-                      </p>
-                    </div>
-                    <Sparkles className="h-5 w-5 text-muted-foreground transition group-hover:text-primary" />
-                  </div>
-                  <ProgressBar value={project.progress} className="mt-5" />
-                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                    <span>{project.progress}% complete</span>
-                    <span>{project.tasks?.length ?? 0} tasks</span>
-                    <span>{project.notes?.length ?? 0} recent notes</span>
-                    {project.dueDate ? <span>Due {formatDate(project.dueDate)}</span> : null}
-                  </div>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
+          ) : (
+            <ul className="p-2">
+              {thisWeek.map((item) => {
+                const date = new Date(item.date);
+                return (
+                  <li key={item.id}>
+                    <Link href={item.href} className="flex items-center gap-3.5 rounded-2xl p-2.5 transition-colors hover:bg-muted/60">
+                      <span className="w-12 shrink-0 rounded-xl border border-border bg-background py-1 text-center">
+                        <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{format(date, "EEE")}</span>
+                        <span className="block text-lg font-extrabold tabular-nums">{format(date, "d")}</span>
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold">{item.title}</span>
+                        <span className="mt-0.5 block truncate text-[13px] text-muted-foreground">
+                          {item.kind} · {item.context}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
       )
     },
     {
-      id: "deadlines",
-      title: "Upcoming deadlines",
+      id: "projects",
+      title: "Projects",
       defaultWidth: "half",
       node: (
-        <Card>
-          <CardHeader className="flex-row items-end justify-between gap-4">
-            <div>
-              <CardTitle>Upcoming deadlines</CardTitle>
-              <CardDescription>
-                Planned checkpoints and near-term milestones.
-              </CardDescription>
+        <Panel id="home-projects" title="Projects" link={{ href: "/projects", label: "All projects" }}>
+          {activeProjects.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title="No active projects" description="Create a project to track its progress here." actionLabel="Go to projects" actionHref="/projects" />
             </div>
-            <Link href="/calendar" className={buttonVariants({ variant: "secondary", size: "sm" })}>
-              View calendar
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {upcomingDeadlines.length === 0 ? (
-              <EmptyState
-                title="No deadlines scheduled"
-                description="Give a project or task a due date and it will surface here."
-              />
-            ) : (
-              upcomingDeadlines.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold">{item.title}</p>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.subtitle}</p>
-                    </div>
-                    <Badge className="bg-muted text-muted-foreground">{item.type}</Badge>
-                  </div>
-                  <div className="mt-3 flex items-center justify-end text-xs text-muted-foreground">
-                    <span>Due {formatDate(item.due)}</span>
-                  </div>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
+          ) : (
+            <ul>
+              {activeProjects.slice(0, 5).map((project) => (
+                <li key={project.id} className="border-b border-border last:border-b-0">
+                  <Link href={`/projects/${project.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-5 py-3.5 transition-colors hover:bg-muted/60 sm:grid-cols-[minmax(0,1fr)_6rem_7.5rem]">
+                    <span className="flex min-w-0 items-center gap-2.5 text-sm font-semibold">
+                      <span className={cn("h-2 w-2 shrink-0 rounded-full", categoryDot[project.category])} aria-hidden="true" />
+                      <span className="truncate">{project.title}</span>
+                    </span>
+                    <Badge className={cn("justify-self-end sm:justify-self-start", statusTone[project.status])}>{getStatusLabel(project.status)}</Badge>
+                    <span className="col-span-2 flex items-center gap-2.5 sm:col-span-1">
+                      <ProgressBar value={project.progress} className="flex-1" />
+                      <span className="w-9 text-right text-[13px] tabular-nums text-muted-foreground">{project.progress}%</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
       )
     },
     {
@@ -332,125 +239,48 @@ export function HomeDashboard({
       title: "Recent activity",
       defaultWidth: "half",
       node: (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardDescription>
-              Recent updates across projects, tasks, and notes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {activities.length === 0 ? (
-              <EmptyState
-                title="No recent activity"
-                description="As projects and tasks change, the latest updates will show up here."
-              />
-            ) : (
-              activities.slice(0, 5).map((activity) => (
-                <div key={activity.id} className="flex gap-3 rounded-2xl border border-border bg-surface p-4">
-                  <span
-                    className={cn("mt-2 h-2.5 w-2.5 shrink-0 rounded-full", categoryDot[activity.category])}
-                  />
-                  <div>
-                    <p className="text-sm font-semibold">{activity.action}</p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {activity.description}
-                    </p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {formatRelativeDate(activity.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      )
-    },
-    {
-      id: "task-radar",
-      title: "Task radar",
-      defaultWidth: "half",
-      node: (
-        <Card>
-          <CardHeader className="flex-row items-end justify-between gap-4">
-            <div>
-              <CardTitle>Task radar</CardTitle>
-              <CardDescription>
-                See what needs attention before it impacts momentum.
-              </CardDescription>
+        <Panel id="home-activity" title="Recent activity" link={{ href: "/activity", label: "All activity" }}>
+          {activities.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title="No recent activity" description="Changes to projects, tasks and notes will show up here." />
             </div>
-            <Link href="/tasks" className={buttonVariants({ variant: "secondary", size: "sm" })}>
-              Open task board
-            </Link>
-          </CardHeader>
-          <CardContent className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            {tasks.length === 0 ? (
-              <EmptyState
-                title="No tasks available"
-                description="The task radar will populate once tasks are added to the workspace."
-              />
-            ) : (
-              tasks.slice(0, 6).map((task) => (
-                <Link
-                  key={task.id}
-                  href={`/tasks/${task.id}`}
-                  className="block rounded-3xl border border-border bg-surface p-5 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
-                    <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
+          ) : (
+            <ul className="px-5 py-2">
+              {activities.slice(0, 5).map((activity) => (
+                <li key={activity.id} className="flex gap-3 py-2.5">
+                  <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", categoryDot[activity.category])} aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-sm">
+                      <span className="font-semibold">{activity.action}</span>{" "}
+                      <span className="text-muted-foreground">{activity.description}</span>
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{formatRelativeDate(activity.createdAt)}</p>
                   </div>
-                  <h3 className="mt-4 text-base font-semibold">{task.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{task.description}</p>
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span>{getCategoryLabel(task.category)}</span>
-                    {task.project ? <span>{task.project.title}</span> : null}
-                    {task.dueDate ? <span>Due {formatDate(task.dueDate)}</span> : null}
-                  </div>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
       )
     }
   ];
 
-  // Default section order shown on a fresh device (users can still rearrange
-  // and their choice is saved locally).
-  const defaultOrder = [
-    "metrics",
-    "current-progress",
-    "deadlines",
-    "focus-projects",
-    "task-radar",
-    "quick-actions",
-    "activity"
-  ];
-  const orderedSections = defaultOrder
-    .map((id) => sections.find((section) => section.id === id))
-    .filter((section): section is HomeSection => Boolean(section));
-
   return (
     <div className="page-shell">
-      <PageHeader
-        eyebrow="Personal Dashboard"
-        title="Jaber's Second Brain"
-        description="Life is too short to remember what you had for lunch — Jaber 2026"
-        actions={
-          <>
-            <Link href="/projects" className={buttonVariants({ variant: "default", size: "lg" })}>
-              Review Projects
-            </Link>
-            <Link href="/analytics" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-              Open Analytics
-            </Link>
-          </>
-        }
-      />
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <Greeting name="Jaber" />
+          <p className="mt-2 text-[15px] text-muted-foreground">Life is too short to remember what you had for lunch.</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/calendar" className={buttonVariants({ variant: "secondary" })}>
+            Review week
+          </Link>
+          <TaskFormDialog projects={projects.map((project) => ({ id: project.id, title: project.title }))} />
+        </div>
+      </header>
 
-      <CustomizableGrid sections={orderedSections} />
+      <CustomizableGrid sections={sections} />
     </div>
   );
 }

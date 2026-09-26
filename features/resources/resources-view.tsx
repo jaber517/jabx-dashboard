@@ -76,7 +76,7 @@ export function ResourcesView({
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block surface-panel-elevated rounded-3xl p-6 transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 active:translate-y-0 active:scale-[0.99] motion-reduce:active:scale-100"
+                className="block rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-primary"
               >
                 <div className="flex items-center justify-between gap-3 pr-20">
                   <Badge className="bg-muted text-muted-foreground">

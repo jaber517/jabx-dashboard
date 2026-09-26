@@ -20,7 +20,7 @@ export function ActivityView({ activities }: { activities: FeedItem[] }) {
   return (
     <div className="page-shell">
       <PageHeader
-        eyebrow="Timeline"
+        eyebrow="Insight"
         title="Recent activity"
         description="A live feed of the latest changes across your projects, tasks, notes, and resources."
       />

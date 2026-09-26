@@ -4,9 +4,9 @@ import type { TaskStatus } from "@/types";
 
 const config: Record<TaskStatus, { Icon: typeof Circle; tone: string; label: string }> = {
   TODO: { Icon: Circle, tone: "text-muted-foreground", label: "To do" },
-  IN_PROGRESS: { Icon: Loader, tone: "text-blue-600 dark:text-blue-300", label: "In progress" },
+  IN_PROGRESS: { Icon: Loader, tone: "text-tone-blue", label: "In progress" },
   BLOCKED: { Icon: Ban, tone: "text-danger", label: "Blocked" },
-  DONE: { Icon: CheckCircle2, tone: "text-emerald-600 dark:text-emerald-300", label: "Done" }
+  DONE: { Icon: CheckCircle2, tone: "text-tone-green", label: "Done" }
 };
 
 export function TaskStatusIcon({

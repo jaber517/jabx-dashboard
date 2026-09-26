@@ -19,19 +19,35 @@ const config: Config = {
         surface: "hsl(var(--surface))",
         "surface-elevated": "hsl(var(--surface-elevated))",
         primary: "hsl(var(--primary))",
+        "primary-strong": "hsl(var(--primary-strong))",
         "primary-foreground": "hsl(var(--primary-foreground))",
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         danger: "hsl(var(--danger))",
-        ring: "hsl(var(--ring))"
+        ring: "hsl(var(--ring))",
+        // Status, priority and category hues; each has a light and a dark
+        // value in globals.css so text stays at 4.5:1 in both themes.
+        tone: {
+          blue: "hsl(var(--tone-blue))",
+          green: "hsl(var(--tone-green))",
+          amber: "hsl(var(--tone-amber))",
+          red: "hsl(var(--tone-red))",
+          violet: "hsl(var(--tone-violet))",
+          pink: "hsl(var(--tone-pink))",
+          slate: "hsl(var(--tone-slate))"
+        }
       },
+      // Brand guide: 12-16px corners on cards and buttons.
       borderRadius: {
-        xl: "1.25rem",
-        "2xl": "1.5rem"
+        lg: "0.5rem",
+        xl: "0.625rem",
+        "2xl": "0.75rem",
+        "3xl": "1rem"
       },
+      // Brand guide: cards carry a 1px border and no drop shadow.
       boxShadow: {
-        soft: "0 16px 40px -24px rgba(15, 23, 42, 0.22)",
-        glass: "0 1px 0 rgba(255,255,255,0.5) inset, 0 20px 40px -24px rgba(15, 23, 42, 0.18)"
+        soft: "none",
+        glass: "none"
       },
       transitionTimingFunction: {
         // A critically-damped decelerate curve — the default "response" feel

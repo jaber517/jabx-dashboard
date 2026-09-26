@@ -28,10 +28,10 @@ function bucketFor(dueDate: string): string {
 
 const BUCKET_ORDER = ["Overdue", "This week", "Next 30 days", "Later"];
 const bucketTone: Record<string, string> = {
-  Overdue: "bg-danger/10 text-danger",
-  "This week": "bg-primary/10 text-primary",
-  "Next 30 days": "bg-blue-500/10 text-blue-600 dark:text-blue-300",
-  Later: "bg-muted text-muted-foreground"
+  Overdue: "text-tone-red",
+  "This week": "text-tone-blue",
+  "Next 30 days": "text-tone-violet",
+  Later: "text-tone-slate"
 };
 
 export function CalendarView({ items }: { items: CalendarItem[] }) {
@@ -47,8 +47,8 @@ export function CalendarView({ items }: { items: CalendarItem[] }) {
   return (
     <div className="page-shell">
       <PageHeader
-        eyebrow="Calendar"
-        title="Deadlines"
+        eyebrow="Workspace"
+        title="Calendar"
         description="Everything with a due date — projects and tasks — grouped by how soon it's due."
       />
 

@@ -47,7 +47,7 @@ export function NotesView({
   return (
     <div className="page-shell">
       <PageHeader
-        eyebrow="Vault"
+        eyebrow="Workspace"
         title="Notes and ideas"
         description="A searchable knowledge vault for project thinking, meeting outcomes, reusable ideas, and prompt patterns."
         actions={<CreateNoteDialog projects={projects} />}

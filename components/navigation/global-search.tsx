@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ExternalLink, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { recordTypeTone } from "@/lib/constants";
-import { buttonVariants } from "@/components/ui/button";
 
 const EXIT_DURATION = 160;
 
@@ -18,6 +17,14 @@ type SearchResult = {
   href: string;
   external?: boolean;
 };
+
+// Other controls (the phone header's search button) open the palette by
+// dispatching this event, so only one palette and one ⌘K listener exist.
+export const OPEN_SEARCH_EVENT = "jabx:open-search";
+
+export function openSearch() {
+  window.dispatchEvent(new Event(OPEN_SEARCH_EVENT));
+}
 
 export function GlobalSearch() {
   const router = useRouter();
@@ -51,7 +58,11 @@ export function GlobalSearch() {
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener(OPEN_SEARCH_EVENT, openPalette);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_SEARCH_EVENT, openPalette);
+    };
   }, []);
 
   useEffect(() => {
@@ -115,17 +126,18 @@ export function GlobalSearch() {
       <button
         type="button"
         onClick={openPalette}
-        className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "gap-2")}
+        className="flex h-10 w-full items-center gap-2.5 rounded-xl border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
       >
-        <Search className="h-4 w-4" />
-        <span className="hidden sm:inline">Search</span>
+        <Search className="h-4 w-4" aria-hidden="true" />
+        <span className="flex-1 text-left">Search</span>
+        <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-xs">⌘K</kbd>
       </button>
 
       {mounted
         ? createPortal(
             <div
               className={cn(
-                "fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-[12vh] backdrop-blur-sm transition-opacity ease-spring motion-reduce:transition-none",
+                "fixed inset-0 z-50 flex items-start justify-center bg-[#07111B]/70 p-4 pt-[12vh] transition-opacity ease-spring motion-reduce:transition-none",
                 entered ? "opacity-100 duration-200" : "opacity-0 duration-150"
               )}
               onClick={closePalette}
@@ -135,7 +147,7 @@ export function GlobalSearch() {
                 aria-modal="true"
                 aria-label="Search"
                 className={cn(
-                  "w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-glass transition ease-spring motion-reduce:transition-opacity",
+                  "w-full max-w-xl overflow-hidden rounded-3xl border border-border bg-surface transition ease-spring motion-reduce:transition-opacity",
                   entered
                     ? "translate-y-0 scale-100 opacity-100 duration-200"
                     : "-translate-y-2 scale-95 opacity-0 duration-150"
@@ -174,8 +186,8 @@ export function GlobalSearch() {
                       >
                         <span
                           className={cn(
-                            "mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs font-medium",
-                            recordTypeTone[result.type] ?? "bg-muted text-muted-foreground"
+                            "mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold before:h-1.5 before:w-1.5 before:rounded-full before:bg-current",
+                            recordTypeTone[result.type] ?? "text-muted-foreground"
                           )}
                         >
                           {result.type}

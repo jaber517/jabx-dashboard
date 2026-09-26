@@ -3,18 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-full text-sm font-medium transition ease-spring active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100",
+  "inline-flex items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition ease-spring active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100",
   {
     variants: {
       variant: {
-        default: "bg-primary px-4 py-2.5 text-primary-foreground hover:opacity-95",
+        default: "bg-primary-strong px-4 py-2.5 text-primary-foreground hover:brightness-110",
         secondary:
-          "border border-border bg-surface-elevated px-4 py-2.5 text-foreground hover:bg-muted/70",
+          "border border-border bg-transparent px-4 py-2.5 text-foreground hover:border-primary",
         ghost: "px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
       },
       size: {
-        default: "h-10",
-        sm: "h-9 px-3 text-xs",
+        default: "h-11",
+        sm: "h-9 px-3 text-[13px]",
         lg: "h-11 px-5 text-sm"
       }
     },

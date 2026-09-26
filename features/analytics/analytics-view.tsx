@@ -1,8 +1,7 @@
-import { Activity, CheckCircle2, FolderKanban, ListChecks } from "lucide-react";
 import { AnalyticsCharts } from "@/components/charts/analytics-charts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MetricCard } from "@/components/ui/metric-card";
+import { MetricStrip } from "@/components/ui/metric-card";
 import { PageHeader } from "@/components/ui/page-header";
 import type { ProjectRecord, TaskRecord } from "@/types";
 
@@ -24,17 +23,19 @@ export function AnalyticsView({
   return (
     <div className="page-shell">
       <PageHeader
-        eyebrow="Insights"
+        eyebrow="Insight"
         title="Analytics"
         description="Project and task analytics designed for quick decision-making and weekly portfolio reviews."
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Projects" value={String(projects.length)} icon={<FolderKanban className="h-5 w-5" />} />
-        <MetricCard label="Active work" value={String(activeProjects)} icon={<Activity className="h-5 w-5" />} />
-        <MetricCard label="Task completion" value={`${completionRate}%`} icon={<CheckCircle2 className="h-5 w-5" />} />
-        <MetricCard label="Average progress" value={`${averageProgress}%`} icon={<ListChecks className="h-5 w-5" />} />
-      </div>
+      <MetricStrip
+        metrics={[
+          { label: "Projects", value: String(projects.length) },
+          { label: "Active work", value: String(activeProjects) },
+          { label: "Task completion", value: `${completionRate}%` },
+          { label: "Average progress", value: `${averageProgress}%` }
+        ]}
+      />
 
       <Card>
         <CardHeader>

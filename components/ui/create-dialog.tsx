@@ -111,7 +111,7 @@ export function CreateDialog({
         ? createPortal(
             <div
               className={cn(
-                "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm transition-opacity ease-spring motion-reduce:transition-none",
+                "fixed inset-0 z-50 flex items-center justify-center bg-[#07111B]/70 p-4 transition-opacity ease-spring motion-reduce:transition-none",
                 entered ? "opacity-100 duration-200" : "opacity-0 duration-150"
               )}
               onClick={closeDialog}
@@ -121,7 +121,7 @@ export function CreateDialog({
                 aria-modal="true"
                 aria-label={title}
                 className={cn(
-                  "max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-surface-elevated p-6 shadow-glass transition ease-spring motion-reduce:transition-opacity",
+                  "max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border bg-surface p-6 transition ease-spring motion-reduce:transition-opacity",
                   entered
                     ? "translate-y-0 scale-100 opacity-100 duration-200"
                     : "translate-y-2 scale-95 opacity-0 duration-150"
@@ -130,7 +130,7 @@ export function CreateDialog({
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold">{title}</h2>
+                    <h2 className="text-xl font-bold">{title}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                   </div>
                   <Button

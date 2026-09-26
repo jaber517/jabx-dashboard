@@ -80,7 +80,7 @@ export function AiNewsView() {
   return (
     <div className="page-shell">
       <PageHeader
-        eyebrow="Reading room"
+        eyebrow="Insight"
         title="AI News"
         description="Headlines from AI labs and technology news feeds, refreshed only when you ask."
         actions={<Button type="button" onClick={refreshNews} disabled={loading || restoring}>
@@ -91,7 +91,7 @@ export function AiNewsView() {
         <p className="text-sm text-muted-foreground" aria-live="polite">
           Last refreshed: {refreshedAt ? <time dateTime={saved!.refreshedAt}>{refreshedAt.toLocaleString()}</time> : "Never"}
         </p>
-        {error ? <p role="alert" className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">{error}</p> : null}
+        {error ? <p role="alert" className="mt-4 rounded-2xl border border-danger/40 p-4 text-sm font-medium text-danger">{error}</p> : null}
         {loading || restoring ? <p role="status" className="mt-4 text-sm text-muted-foreground">{restoring ? "Loading saved news…" : "Refreshing news…"}</p> : null}
         {items.length ? (
           <ul className="mt-5 divide-y divide-border">

@@ -23,10 +23,11 @@ import {
 import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type { ProjectRecord, TaskRecord } from "@/types";
 
-const palette = ["#0A84FF", "#10b981", "#f59e0b", "#06b6d4", "#f43f5e", "#8b5cf6", "#64748b"];
+// Brand tones (globals.css), so charts follow the light and dark themes.
+const palette = ["blue", "green", "amber", "violet", "pink", "red", "slate"].map((tone) => `hsl(var(--tone-${tone}))`);
 
 const tooltipStyle = {
-  borderRadius: 16,
+  borderRadius: 12,
   border: "1px solid hsl(var(--border))",
   background: "hsl(var(--surface-elevated))",
   color: "hsl(var(--foreground))"
@@ -96,7 +97,7 @@ export function AnalyticsCharts({
             <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
             <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
             <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
-            <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#0A84FF" />
+            <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--primary))" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -104,12 +105,6 @@ export function AnalyticsCharts({
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={tasksByPriority}>
-            <defs>
-              <linearGradient id="priorityGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.45} />
-                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.03} />
-              </linearGradient>
-            </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
             <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
@@ -117,14 +112,15 @@ export function AnalyticsCharts({
             <Area
               type="monotone"
               dataKey="completed"
-              stroke="#06b6d4"
-              fill="url(#priorityGradient)"
+              stroke="hsl(var(--tone-green))"
+              fill="hsl(var(--tone-green))"
+              fillOpacity={0.12}
               strokeWidth={3}
             />
             <Area
               type="monotone"
               dataKey="total"
-              stroke="#0A84FF"
+              stroke="hsl(var(--primary))"
               fillOpacity={0}
               strokeWidth={3}
             />
@@ -139,7 +135,7 @@ export function AnalyticsCharts({
             <XAxis dataKey="name" tickLine={false} axisLine={false} tick={axisTick} />
             <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={axisTick} />
             <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "hsl(var(--foreground))" }} />
-            <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#10b981" />
+            <Bar dataKey="value" radius={[6, 6, 0, 0]} fill="hsl(var(--tone-green))" />
           </BarChart>
         </ResponsiveContainer>
       </div>

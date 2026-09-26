@@ -1,61 +1,48 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export function MetricCard({
-  label,
-  value,
-  trend,
-  icon,
-  href,
-  accentClassName
-}: {
+export type Metric = {
   label: string;
   value: string;
-  trend?: string;
-  icon?: ReactNode;
+  note?: string;
   href?: string;
-  accentClassName?: string;
-}) {
-  const content = (
-    <Card
+};
+
+// One flat strip of key numbers, divided by hairlines rather than boxed
+// separately: two across on phones, four across on wide screens.
+export function MetricStrip({ metrics, className }: { metrics: Metric[]; className?: string }) {
+  return (
+    <section
+      aria-label="Overview"
       className={cn(
-        "relative overflow-hidden",
-        href &&
-          "h-full transition ease-spring hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft active:translate-y-0 active:scale-[0.98] motion-reduce:active:scale-100",
-        accentClassName
+        "grid grid-cols-2 overflow-hidden rounded-3xl border border-border bg-surface xl:grid-cols-4",
+        className
       )}
     >
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5" />
-      <CardHeader className="relative gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardDescription>{label}</CardDescription>
-            <CardTitle className="mt-3 text-3xl font-semibold">{value}</CardTitle>
+      {metrics.map((metric, index) => {
+        const body = (
+          <>
+            <span className="text-[13px] font-semibold text-muted-foreground">{metric.label}</span>
+            <span className="text-3xl font-extrabold tabular-nums tracking-[-0.03em] text-foreground">{metric.value}</span>
+            {metric.note ? <span className="text-[13px] text-muted-foreground">{metric.note}</span> : null}
+          </>
+        );
+        const cell = cn(
+          "flex flex-col gap-1.5 border-border p-5",
+          index % 2 === 1 && "border-l",
+          index >= 2 && "border-t xl:border-t-0",
+          index === 2 && "xl:border-l"
+        );
+        return metric.href ? (
+          <Link key={metric.label} href={metric.href} className={cn(cell, "transition-colors hover:bg-muted/60")}>
+            {body}
+          </Link>
+        ) : (
+          <div key={metric.label} className={cell}>
+            {body}
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-            {icon}
-          </div>
-        </div>
-        {trend ? (
-          <div className="inline-flex w-fit items-center gap-1 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
-            <ArrowUpRight className="h-3.5 w-3.5" />
-            {trend}
-          </div>
-        ) : null}
-      </CardHeader>
-    </Card>
+        );
+      })}
+    </section>
   );
-
-  if (href) {
-    return (
-      <Link href={href} className="block">
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
 }

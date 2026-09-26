@@ -37,7 +37,7 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border text-primary">
               <Sun className="h-5 w-5" />
             </div>
             <CardTitle className="mt-2">Appearance</CardTitle>
@@ -48,12 +48,13 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
               <button
                 key={value}
                 type="button"
+                aria-pressed={theme === value}
                 onClick={() => setTheme(value)}
                 className={cn(
                   "flex flex-col items-center gap-2 rounded-2xl border px-4 py-4 text-sm font-medium transition ease-spring active:scale-95 motion-reduce:active:scale-100",
                   theme === value
-                    ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-border bg-surface text-muted-foreground hover:bg-muted"
+                    ? "border-primary bg-muted font-semibold text-primary"
+                    : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-foreground"
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -65,7 +66,7 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
 
         <Card>
           <CardHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border text-primary">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <CardTitle className="mt-2">Access</CardTitle>
@@ -88,7 +89,7 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border text-tone-green">
               <Database className="h-5 w-5" />
             </div>
             <CardTitle className="mt-2">Data overview</CardTitle>

@@ -9,7 +9,8 @@ type Width = "full" | "half";
 export type HomeSection = { id: string; title: string; defaultWidth: Width; node: ReactNode };
 type LayoutItem = { id: string; width: Width };
 
-const STORAGE_KEY = "home-layout-v1";
+// v2: the brand redesign replaced the Home sections, so older saved orders reset.
+const STORAGE_KEY = "home-layout-v2";
 const FLIP_DURATION = 320;
 
 export function CustomizableGrid({ sections }: { sections: HomeSection[] }) {
@@ -198,11 +199,11 @@ export function CustomizableGrid({ sections }: { sections: HomeSection[] }) {
                 item.width === "full" && "xl:col-span-2",
                 "transition-[box-shadow,transform] ease-spring",
                 editing && "rounded-3xl outline-dashed outline-2 outline-offset-4 outline-primary/40",
-                editing && dragId === item.id && "z-20 scale-[1.02] shadow-glass"
+                editing && dragId === item.id && "z-20 scale-[1.02]"
               )}
             >
               {editing ? (
-                <div className="mb-2 flex items-center justify-between gap-2 rounded-2xl bg-muted px-3 py-2">
+                <div className="mb-2 flex items-center justify-between gap-2 rounded-2xl border border-border bg-muted px-3 py-2">
                   <span
                     onPointerDown={(event) => onGripPointerDown(item.id, event)}
                     className="flex touch-none items-center gap-2 text-sm font-medium select-none"
@@ -214,7 +215,7 @@ export function CustomizableGrid({ sections }: { sections: HomeSection[] }) {
                     type="button"
                     onClick={() => toggleWidth(item.id)}
                     title={item.width === "full" ? "Make half width" : "Make full width"}
-                    className="flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-medium text-muted-foreground transition ease-spring hover:text-foreground active:scale-95 motion-reduce:active:scale-100"
+                    className="flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted-foreground transition ease-spring hover:text-foreground active:scale-95 motion-reduce:active:scale-100"
                   >
                     {item.width === "full" ? (
                       <>

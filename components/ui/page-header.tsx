@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+// A plain page title row: no panel behind it, left aligned, actions on the right.
 export function PageHeader({
   eyebrow,
   title,
@@ -10,33 +11,20 @@ export function PageHeader({
 }: {
   eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   actions?: ReactNode;
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-5 rounded-[2rem] border border-white/40 bg-surface/70 px-6 py-7 shadow-glass backdrop-blur-xl dark:border-white/5",
-        className
-      )}
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          {eyebrow ? (
-            <p className="text-xs font-medium uppercase tracking-[0.26em] text-muted-foreground">
-              {eyebrow}
-            </p>
-          ) : null}
-          <h1 className="mt-2 text-3xl font-semibold text-balance sm:text-4xl">
-            {title}
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-            {description}
-          </p>
-        </div>
-        {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+    <header className={cn("flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between", className)}>
+      <div>
+        {eyebrow ? <p className="text-sm font-semibold text-muted-foreground">{eyebrow}</p> : null}
+        <h1 className="mt-1.5 text-3xl font-extrabold tracking-[-0.04em] text-balance sm:text-4xl">{title}</h1>
+        {description ? (
+          <p className="mt-2 max-w-3xl text-[15px] leading-6 text-muted-foreground">{description}</p>
+        ) : null}
       </div>
-    </div>
+      {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+    </header>
   );
 }

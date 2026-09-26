@@ -45,95 +45,80 @@ export const priorityLabels: Record<TaskPriority, string> = {
   LOW: "Low"
 };
 
-export const categoryAccent: Record<ProjectCategory, string> = {
-  OCC: "from-blue-500/20 via-blue-500/5 to-transparent",
-  HSE: "from-emerald-500/20 via-emerald-500/5 to-transparent",
-  TRAINING: "from-amber-500/20 via-amber-500/5 to-transparent",
-  AI_PROJECTS: "from-cyan-500/20 via-cyan-500/5 to-transparent",
-  PERSONAL: "from-rose-500/20 via-rose-500/5 to-transparent"
-};
-
+// Categories are told apart by a coloured dot next to their name, never by
+// colour alone. Hues come from the tone tokens so they hold up in both themes.
 export const categoryDot: Record<ProjectCategory, string> = {
-  OCC: "bg-blue-500",
-  HSE: "bg-emerald-500",
-  TRAINING: "bg-amber-500",
-  AI_PROJECTS: "bg-cyan-500",
-  PERSONAL: "bg-rose-500"
+  OCC: "bg-tone-blue",
+  HSE: "bg-tone-green",
+  TRAINING: "bg-tone-amber",
+  AI_PROJECTS: "bg-tone-violet",
+  PERSONAL: "bg-tone-pink"
 };
 
+// Status and priority badges: an outlined label whose text (and dot, via
+// Badge) carries the hue; the label itself always names the state.
 export const statusTone: Record<ProjectStatus, string> = {
-  IDEA: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
-  PLANNED: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
-  ACTIVE: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-  WAITING: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  ON_HOLD: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
-  COMPLETED: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  ARCHIVED: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-300"
+  IDEA: "text-tone-slate",
+  PLANNED: "text-tone-slate",
+  ACTIVE: "text-tone-blue",
+  WAITING: "text-tone-amber",
+  ON_HOLD: "text-tone-amber",
+  COMPLETED: "text-tone-green",
+  ARCHIVED: "text-tone-slate"
 };
 
 export const priorityTone: Record<TaskPriority, string> = {
-  CRITICAL: "bg-red-500/10 text-red-700 dark:text-red-300",
-  HIGH: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
-  MEDIUM: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-  LOW: "bg-slate-500/10 text-slate-700 dark:text-slate-300"
+  CRITICAL: "text-tone-red",
+  HIGH: "text-tone-amber",
+  MEDIUM: "text-tone-blue",
+  LOW: "text-tone-slate"
 };
 
 export const taskStatusTone: Record<TaskStatus, string> = {
-  TODO: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
-  IN_PROGRESS: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-  BLOCKED: "bg-red-500/10 text-red-700 dark:text-red-300",
-  DONE: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  TODO: "text-tone-slate",
+  IN_PROGRESS: "text-tone-blue",
+  BLOCKED: "text-tone-red",
+  DONE: "text-tone-green"
 };
 
 export const recordTypeTone: Record<string, string> = {
-  Project: "bg-primary/10 text-primary",
-  Task: "bg-blue-500/10 text-blue-600 dark:text-blue-300",
-  Note: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
-  Resource: "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+  Project: "text-tone-blue",
+  Task: "text-tone-violet",
+  Note: "text-tone-green",
+  Resource: "text-tone-amber"
 };
 
-export const navigationItems = [
-  { href: "/dashboard", label: "Home" },
-  { href: "/projects", label: "Projects" },
-  { href: "/tasks", label: "Tasks" },
-  { href: "/notes", label: "Notes" },
-  { href: "/analytics", label: "Analytics" },
-  { href: "/activity", label: "Activity" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/resources", label: "Resources" },
-  { href: "/ai-news", label: "AI News" },
-  { href: "/settings", label: "Settings" }
-] as const;
-
-export const quickActions = [
+// Dashboard navigation, grouped as the sidebar shows it. The first four
+// Workspace items are also the phone tab bar; everything else sits under More.
+export const navigationGroups = [
   {
-    title: "Add Project",
-    description: "Create a new initiative and assign ownership, category, and target dates.",
-    href: "/projects"
+    label: "Workspace",
+    items: [
+      { href: "/dashboard", label: "Home", icon: "home" },
+      { href: "/projects", label: "Projects", icon: "projects" },
+      { href: "/tasks", label: "Tasks", icon: "tasks" },
+      { href: "/notes", label: "Notes", icon: "notes" },
+      { href: "/calendar", label: "Calendar", icon: "calendar" }
+    ]
   },
   {
-    title: "Add Task",
-    description: "Capture priority work with due dates, blockers, and project context.",
-    href: "/tasks"
+    label: "Insight",
+    items: [
+      { href: "/analytics", label: "Analytics", icon: "analytics" },
+      { href: "/activity", label: "Activity", icon: "activity" },
+      { href: "/ai-news", label: "AI News", icon: "news" }
+    ]
   },
   {
-    title: "Add Note",
-    description: "Store ideas, meeting outcomes, and references in the vault.",
-    href: "/notes"
-  },
-  {
-    title: "View This Week",
-    description: "Focus on near-term deadlines, milestones, and execution windows.",
-    href: "/calendar"
-  },
-  {
-    title: "View Blocked Items",
-    description: "See tasks and projects waiting on approvals, dependencies, or inputs.",
-    href: "/tasks?status=BLOCKED"
-  },
-  {
-    title: "Search Everything",
-    description: "Jump quickly across projects, tasks, notes, and linked resources.",
-    href: "/notes"
+    label: "Library",
+    items: [{ href: "/resources", label: "Resources", icon: "resources" }]
   }
 ] as const;
+
+export const settingsNavItem = { href: "/settings", label: "Settings", icon: "settings" } as const;
+
+export type NavIcon =
+  | (typeof navigationGroups)[number]["items"][number]["icon"]
+  | typeof settingsNavItem.icon;
+
+export type NavItem = { href: string; label: string; icon: NavIcon };
