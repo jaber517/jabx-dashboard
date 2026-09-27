@@ -14,6 +14,8 @@ const PRIVATE_PATHS = [
   "/review",
   "/login",
   "/api/search",
+  "/api/files",
+  "/api/backups",
   "/api/ai-news"
 ];
 
@@ -64,7 +66,8 @@ export async function middleware(request: NextRequest) {
 
   if (!privateHost) return NextResponse.next();
 
-  if (PUBLIC_ASSETS.has(decodedPath) || decodedPath === "/api/health" ||
+  // The daily backup job authenticates with CRON_SECRET in its own handler.
+  if (PUBLIC_ASSETS.has(decodedPath) || decodedPath === "/api/health" || atPath(decodedPath, "/api/cron") ||
       decodedPath.startsWith("/_next/") || decodedPath.startsWith("/static/")) {
     return NextResponse.next();
   }

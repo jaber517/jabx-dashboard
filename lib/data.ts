@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { todayKey } from "@/lib/dates";
+import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type {
   ActivityRecord,
   MilestoneRecord,
@@ -29,15 +30,21 @@ function mapProjectLink(project: { id: string; title: string; slug: string } | n
   };
 }
 
+// The database stores these as plain text; narrow them to the app's known
+// values, falling back to a safe default if a row ever holds something else.
+function choice<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
+  return (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+}
+
 function mapTask(task: {
   id: string;
   title: string;
   description: string;
-  status: TaskRecord["status"];
-  priority: TaskRecord["priority"];
+  status: string;
+  priority: string;
   dueDate: Date | null;
   blocked: boolean;
-  category: TaskRecord["category"];
+  category: string;
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date | null;
@@ -47,6 +54,9 @@ function mapTask(task: {
 }): TaskRecord {
   return {
     ...task,
+    status: choice(task.status, TASK_STATUSES, "TODO"),
+    priority: choice(task.priority, TASK_PRIORITIES, "MEDIUM"),
+    category: choice(task.category, PROJECT_CATEGORIES, "PERSONAL"),
     dueDate: task.dueDate?.toISOString() ?? null,
     completedAt: task.completedAt?.toISOString() ?? null,
     createdAt: task.createdAt.toISOString(),
@@ -60,7 +70,7 @@ function mapNote(note: {
   title: string;
   content: string;
   tags: string;
-  category: NoteRecord["category"];
+  category: string;
   imageUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -69,6 +79,7 @@ function mapNote(note: {
 }): NoteRecord {
   return {
     ...note,
+    category: choice(note.category, PROJECT_CATEGORIES, "PERSONAL"),
     tags: note.tags
       .split(",")
       .map((tag) => tag.trim())
@@ -83,9 +94,9 @@ function mapMilestone(milestone: {
   id: string;
   title: string;
   summary: string;
-  status: MilestoneRecord["status"];
+  status: string;
   date: Date;
-  category: MilestoneRecord["category"];
+  category: string;
   createdAt: Date;
   updatedAt: Date;
   projectId: string | null;
@@ -93,6 +104,8 @@ function mapMilestone(milestone: {
 }): MilestoneRecord {
   return {
     ...milestone,
+    status: choice(milestone.status, PROJECT_STATUSES, "PLANNED"),
+    category: choice(milestone.category, PROJECT_CATEGORIES, "PERSONAL"),
     date: milestone.date.toISOString(),
     createdAt: milestone.createdAt.toISOString(),
     updatedAt: milestone.updatedAt.toISOString(),
@@ -106,7 +119,7 @@ function mapResource(resource: {
   description: string;
   url: string;
   type: string;
-  category: ResourceRecord["category"];
+  category: string;
   createdAt: Date;
   updatedAt: Date;
   projectId: string | null;
@@ -114,6 +127,7 @@ function mapResource(resource: {
 }): ResourceRecord {
   return {
     ...resource,
+    category: choice(resource.category, PROJECT_CATEGORIES, "PERSONAL"),
     createdAt: resource.createdAt.toISOString(),
     updatedAt: resource.updatedAt.toISOString(),
     project: mapProjectLink(resource.project ?? null)
@@ -125,13 +139,14 @@ function mapActivity(activity: {
   action: string;
   description: string;
   entityType: string;
-  category: ActivityRecord["category"];
+  category: string;
   createdAt: Date;
   projectId: string | null;
   project?: { id: string; title: string; slug: string } | null;
 }): ActivityRecord {
   return {
     ...activity,
+    category: choice(activity.category, PROJECT_CATEGORIES, "PERSONAL"),
     createdAt: activity.createdAt.toISOString(),
     project: mapProjectLink(activity.project ?? null)
   };
@@ -143,9 +158,9 @@ function mapProject(project: {
   title: string;
   summary: string;
   description: string;
-  category: ProjectRecord["category"];
-  status: ProjectRecord["status"];
-  priority: ProjectRecord["priority"];
+  category: string;
+  status: string;
+  priority: string;
   progress: number;
   owner: string | null;
   imageUrl?: string | null;
@@ -158,12 +173,16 @@ function mapProject(project: {
   resources?: Parameters<typeof mapResource>[0][];
   activities?: Parameters<typeof mapActivity>[0][];
 }): ProjectRecord {
+  const status = choice(project.status, PROJECT_STATUSES, "PLANNED");
   return {
     ...project,
+    category: choice(project.category, PROJECT_CATEGORIES, "PERSONAL"),
+    status,
+    priority: choice(project.priority, TASK_PRIORITIES, "MEDIUM"),
     dueDate: project.dueDate?.toISOString() ?? null,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
-    progress: deriveProjectProgress(project.status, project.tasks, project.progress),
+    progress: deriveProjectProgress(status, project.tasks, project.progress),
     tasks: project.tasks?.map(mapTask),
     notes: project.notes?.map(mapNote),
     milestones: project.milestones?.map(mapMilestone),
@@ -178,7 +197,7 @@ function mapProject(project: {
 // always shows 100 regardless of task state, since that's an explicit override.
 function deriveProjectProgress(
   status: ProjectRecord["status"],
-  tasks: { status: TaskRecord["status"] }[] | undefined,
+  tasks: { status: string }[] | undefined,
   storedProgress: number
 ): number {
   if (status === "COMPLETED") {

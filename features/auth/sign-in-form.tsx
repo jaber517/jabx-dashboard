@@ -47,11 +47,11 @@ export function SignInForm({ message }: { message?: string }) {
       const response = await startAuthentication({ optionsJSON, useBrowserAutofill: true });
       armed.current = false;
       if (!(await finish(response))) void armAutofill();
-    } catch (cause) {
+    } catch {
+      // Autofill runs quietly in the background: if the browser can't offer
+      // passkeys there (or the button took over), the passcode field and the
+      // passkey button still work, so there is nothing to tell the user.
       armed.current = false;
-      const text = passkeyErrorMessage(cause, "sign-in");
-      // Aborted because the button started its own request: nothing to show.
-      if (text && text !== "Cancelled.") setError(text);
     }
   }
 

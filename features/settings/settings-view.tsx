@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth-actions";
 import { SecuritySettings, type SecurityData } from "@/features/settings/security-settings";
+import { DataSettings, type DataSettingsProps } from "@/features/settings/data-settings";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Light", icon: Sun },
@@ -24,7 +25,15 @@ export type SettingsStats = {
   resourceCount: number;
 };
 
-export function SettingsView({ stats, security }: { stats: SettingsStats; security: SecurityData }) {
+export function SettingsView({
+  stats,
+  security,
+  data
+}: {
+  stats: SettingsStats;
+  security: SecurityData;
+  data: DataSettingsProps;
+}) {
   const { theme: storedTheme, setTheme } = useTheme();
   // Nothing saved yet means the default, which follows the system.
   const theme = storedTheme ?? "system";
@@ -91,6 +100,8 @@ export function SettingsView({ stats, security }: { stats: SettingsStats; securi
         </Card>
 
         <SecuritySettings passkeys={security.passkeys} sessions={security.sessions} />
+
+        <DataSettings {...data} />
 
         <Card className="lg:col-span-2">
           <CardHeader>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { assertAuthed } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { fileStorageEnabled, removePhoto, storePhoto } from "@/lib/files";
 import {
   PROJECT_CATEGORIES,
   PROJECT_STATUSES,
@@ -17,7 +18,11 @@ export type CreateResult = {
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
-async function readImage(formData: FormData): Promise<string | null> {
+type PhotoFolder = "projects" | "tasks" | "notes";
+
+// A photo from the form: saved to private file storage when it's configured
+// (see lib/files.ts), otherwise kept inline as a data: URL.
+async function readImage(formData: FormData, folder: PhotoFolder): Promise<string | null> {
   const file = formData.get("photo");
 
   if (!(file instanceof File) || file.size === 0) {
@@ -33,6 +38,7 @@ async function readImage(formData: FormData): Promise<string | null> {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+  if (fileStorageEnabled()) return storePhoto(buffer, file.type, folder);
   return `data:${file.type};base64,${buffer.toString("base64")}`;
 }
 
@@ -104,7 +110,7 @@ export async function createProject(
     await assertAuthed();
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "projects");
 
     await db.project.create({
       data: {
@@ -138,7 +144,8 @@ export async function updateProject(
     const id = requireText(formData, "id", "Project id");
     const title = requireText(formData, "title", "Title");
     const description = requireText(formData, "description", "Description");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "projects");
+    const oldImage = imageUrl ? (await db.project.findUnique({ where: { id }, select: { imageUrl: true } }))?.imageUrl : null;
 
     await db.project.update({
       where: { id },
@@ -155,6 +162,7 @@ export async function updateProject(
       }
     });
 
+    if (imageUrl) await removePhoto(oldImage);
     revalidatePath("/dash/projects");
     revalidatePath("/dash/dashboard");
     return { ok: true };
@@ -165,7 +173,8 @@ export async function updateProject(
 
 export async function deleteProject(id: string): Promise<void> {
   await assertAuthed();
-  await db.project.delete({ where: { id } });
+  const project = await db.project.delete({ where: { id } });
+  await removePhoto(project.imageUrl);
   revalidatePath("/dash/projects");
   revalidatePath("/dash/dashboard");
 }
@@ -188,7 +197,7 @@ export async function createTask(
     await assertAuthed();
     const title = requireText(formData, "title", "Title");
     const description = optionalText(formData, "description");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "tasks");
 
     const projectId = optionalProjectId(formData);
 
@@ -225,7 +234,8 @@ export async function updateTask(
     const id = requireText(formData, "id", "Task id");
     const title = requireText(formData, "title", "Title");
     const description = optionalText(formData, "description");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "tasks");
+    const oldImage = imageUrl ? (await db.task.findUnique({ where: { id }, select: { imageUrl: true } }))?.imageUrl : null;
     const newProjectId = optionalProjectId(formData);
 
     const previous = await db.task.findUnique({
@@ -250,6 +260,7 @@ export async function updateTask(
       }
     });
 
+    if (imageUrl) await removePhoto(oldImage);
     revalidatePath("/dash/tasks");
     revalidatePath("/dash/dashboard");
     revalidatePath("/dash/projects");
@@ -264,6 +275,7 @@ export async function updateTask(
 export async function deleteTask(id: string): Promise<void> {
   await assertAuthed();
   const task = await db.task.delete({ where: { id } });
+  await removePhoto(task.imageUrl);
   revalidatePath("/dash/tasks");
   revalidatePath("/dash/dashboard");
   revalidatePath("/dash/projects");
@@ -329,7 +341,7 @@ export async function createNote(
     await assertAuthed();
     const title = requireText(formData, "title", "Title");
     const content = requireText(formData, "content", "Content");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "notes");
     const tags = formData.get("tags");
 
     const projectId = optionalProjectId(formData);
@@ -363,7 +375,8 @@ export async function updateNote(
     const id = requireText(formData, "id", "Note id");
     const title = requireText(formData, "title", "Title");
     const content = requireText(formData, "content", "Content");
-    const imageUrl = await readImage(formData);
+    const imageUrl = await readImage(formData, "notes");
+    const oldImage = imageUrl ? (await db.note.findUnique({ where: { id }, select: { imageUrl: true } }))?.imageUrl : null;
     const tags = formData.get("tags");
     const newProjectId = optionalProjectId(formData);
 
@@ -381,6 +394,7 @@ export async function updateNote(
       }
     });
 
+    if (imageUrl) await removePhoto(oldImage);
     revalidatePath("/dash/notes");
     revalidatePath("/dash/dashboard");
     if (previous?.projectId) revalidatePath(`/dash/projects/${previous.projectId}`);
@@ -393,7 +407,8 @@ export async function updateNote(
 
 export async function deleteNote(id: string): Promise<void> {
   await assertAuthed();
-  await db.note.delete({ where: { id } });
+  const note = await db.note.delete({ where: { id } });
+  await removePhoto(note.imageUrl);
   revalidatePath("/dash/notes");
   revalidatePath("/dash/dashboard");
 }
