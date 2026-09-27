@@ -7,13 +7,15 @@ export const dynamic = "force-dynamic";
 export default function manifest(): MetadataRoute.Manifest {
   const privateHost = isPrivateHost(headers().get("host") ?? "");
   return {
-    name: privateHost ? "Jaber's Dashboard" : "jabx",
-    short_name: privateHost ? "Jaber" : "jabx",
+    id: privateHost ? "/dashboard" : "/",
+    name: privateHost ? "jabx dashboard" : "jabx",
+    short_name: "jabx",
     description: privateHost ? "Personal dashboard for projects, tasks, notes, and resources." : "jabx — AI lab. Apps, tools, and experiments.",
     start_url: privateHost ? "/dashboard" : "/",
+    scope: "/",
     display: "standalone",
-    background_color: "#F4F6F9",
-    theme_color: "#0A84FF",
+    background_color: "#07111B",
+    theme_color: "#07111B",
     icons: [
       {
         src: "/icon.png",

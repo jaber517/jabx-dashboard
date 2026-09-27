@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth-actions";
 import { SecuritySettings, type SecurityData } from "@/features/settings/security-settings";
 import { DataSettings, type DataSettingsProps } from "@/features/settings/data-settings";
+import { ReminderSettings } from "@/features/settings/reminder-settings";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Light", icon: Sun },
@@ -28,9 +29,11 @@ export type SettingsStats = {
 export function SettingsView({
   stats,
   security,
-  data
+  data,
+  reminderDevices
 }: {
   stats: SettingsStats;
+  reminderDevices: number;
   security: SecurityData;
   data: DataSettingsProps;
 }) {
@@ -100,6 +103,8 @@ export function SettingsView({
         </Card>
 
         <SecuritySettings passkeys={security.passkeys} sessions={security.sessions} />
+
+        <ReminderSettings devices={reminderDevices} />
 
         <DataSettings {...data} />
 

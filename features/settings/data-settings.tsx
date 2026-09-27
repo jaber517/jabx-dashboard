@@ -33,7 +33,7 @@ export function DataSettings({ storage, backups, inlinePhotos }: DataSettingsPro
   }
 
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader>
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border text-primary">
           <Archive className="h-5 w-5" aria-hidden="true" />

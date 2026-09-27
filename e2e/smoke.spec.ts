@@ -72,6 +72,35 @@ test.describe("signed in", () => {
     await expect(page.locator("article", { hasText: title })).toHaveCount(0);
   });
 
+  test("completing a repeating task creates the next one; undo takes it back", async ({ page }) => {
+    const title = `Weekly check ${Date.now()}`;
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuwait" }).format(new Date());
+    await page.goto("/tasks");
+
+    await page.getByRole("button", { name: "Add Task" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "Add Task" });
+    await dialog.getByLabel("Title").fill(title);
+    await dialog.getByLabel("Due date").fill(today);
+    await dialog.getByLabel("Repeat").selectOption("WEEKLY");
+    await dialog.getByRole("button", { name: /save|add|create/i }).last().click();
+    await expect(dialog).toBeHidden();
+
+    const cards = page.locator("article", { hasText: title });
+    await expect(cards).toHaveCount(1);
+    await expect(cards.first()).toContainText("Weekly");
+
+    // Complete it: the done one moves to Done and a new one is due in a week.
+    await cards.first().getByRole("button", { name: "Mark done" }).click();
+    await expect(cards).toHaveCount(2);
+    await expect(column(page, "Done").locator("article", { hasText: title })).toHaveCount(1);
+    await expect(column(page, "To Do").locator("article", { hasText: title })).toHaveCount(1);
+
+    // Undo the completion: the next occurrence goes away again.
+    await page.getByRole("status").filter({ hasText: "Completed" }).getByRole("button", { name: "Undo" }).click();
+    await expect(cards).toHaveCount(1);
+    await expect(column(page, "Done").locator("article", { hasText: title })).toHaveCount(0);
+  });
+
   test("⌘K opens the palette with create actions", async ({ page }) => {
     await page.keyboard.press("ControlOrMeta+k");
     const palette = page.getByRole("dialog", { name: "Search" });

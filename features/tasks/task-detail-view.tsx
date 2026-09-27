@@ -8,6 +8,7 @@ import { formatDate, formatRelativeDate, getPriorityLabel, getTaskStatusLabel } 
 import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import type { TaskRecord } from "@/types";
 import { TaskCardActions } from "@/features/tasks/task-card-actions";
+import { asRepeat, repeatLabels } from "@/lib/repeat";
 
 export function TaskDetailView({
   task,
@@ -41,8 +42,8 @@ export function TaskDetailView({
                 <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
               </span>
               <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
-              <Badge className="bg-muted text-muted-foreground">{categoryLabels[task.category]}</Badge>
-              {task.blocked ? <Badge className="bg-danger/10 text-danger">Blocked</Badge> : null}
+              <Badge className="text-muted-foreground">{categoryLabels[task.category]}</Badge>
+              {task.blocked ? <Badge className="text-danger">Blocked</Badge> : null}
             </div>
             <CardTitle className="mt-2">Details</CardTitle>
           </CardHeader>
@@ -68,6 +69,10 @@ export function TaskDetailView({
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">Due date</span>
               <span>{task.dueDate ? formatDate(task.dueDate) : "Not set"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-muted-foreground">Repeats</span>
+              <span>{repeatLabels[asRepeat(task.repeat)]}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">Project</span>

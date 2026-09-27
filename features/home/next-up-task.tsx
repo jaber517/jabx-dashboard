@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useUndo } from "@/components/providers/undo-provider";
+import { RepeatLabel } from "@/components/ui/repeat-label";
 import { setTaskDone, setTaskStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,8 @@ export function NextUpTask({
   due,
   overdue,
   priority,
-  previousStatus
+  previousStatus,
+  repeat = ""
 }: {
   id: string;
   title: string;
@@ -25,6 +27,7 @@ export function NextUpTask({
   overdue: boolean;
   priority: { label: string; tone: string };
   previousStatus: string;
+  repeat?: string;
 }) {
   const { notify } = useUndo();
   const [pending, startTransition] = useTransition();
@@ -59,6 +62,7 @@ export function NextUpTask({
         <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-muted-foreground">
           <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} aria-hidden="true" />
           {meta}
+          <RepeatLabel repeat={repeat} className="ml-1.5" />
         </p>
       </div>
       <span

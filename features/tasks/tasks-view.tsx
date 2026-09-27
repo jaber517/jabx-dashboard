@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
+import { RepeatLabel } from "@/components/ui/repeat-label";
 import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import { useUndo } from "@/components/providers/undo-provider";
 import { createTask, setTaskStatus } from "@/lib/actions";
@@ -374,7 +375,10 @@ export function TasksView({
                         <Link href={`/tasks/${task.id}`} draggable={false} className="text-sm font-semibold leading-snug after:absolute after:inset-0 after:rounded-2xl">
                           {task.title}
                         </Link>
-                        <ProjectLine task={task} />
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <ProjectLine task={task} />
+                          <RepeatLabel repeat={task.repeat} />
+                        </div>
                         {columnFor(task) === "BLOCKED" && task.description ? (
                           <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">{task.description}</p>
                         ) : null}
@@ -415,7 +419,10 @@ export function TasksView({
                   <Link href={`/tasks/${task.id}`} className="block truncate text-[15px] font-semibold after:absolute after:inset-0">
                     {task.title}
                   </Link>
-                  <ProjectLine task={task} />
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <ProjectLine task={task} />
+                    <RepeatLabel repeat={task.repeat} />
+                  </div>
                 </div>
                 <Badge className={taskStatusTone[column]}>{getTaskStatusLabel(column)}</Badge>
                 <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>

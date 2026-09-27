@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { assertAuthed } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fileStorageEnabled, removePhoto, storePhoto } from "@/lib/files";
+import { dayKey, todayKey } from "@/lib/dates";
+import { asRepeat, nextDueDate } from "@/lib/repeat";
 import {
   PROJECT_CATEGORIES,
   PROJECT_STATUSES,
@@ -207,6 +209,7 @@ export async function createTask(
         description,
         status: "TODO",
         ...statusFields(formData),
+        repeat: asRepeat(formData.get("repeat")),
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
         dueDate: optionalDate(formData, "dueDate"),
@@ -246,7 +249,7 @@ export async function updateTask(
     // Editing an already-done task keeps its original completion date.
     if (status.status === "DONE" && previous?.status === "DONE") status.completedAt = previous.completedAt;
 
-    await db.task.update({
+    const updated = await db.task.update({
       where: { id },
       data: {
         title,
@@ -256,10 +259,12 @@ export async function updateTask(
         dueDate: optionalDate(formData, "dueDate"),
         projectId: newProjectId,
         ...status,
+        repeat: asRepeat(formData.get("repeat")),
         ...(imageUrl ? { imageUrl } : {})
       }
     });
 
+    await followRepeat(updated, previous?.status);
     if (imageUrl) await removePhoto(oldImage);
     revalidatePath("/dash/tasks");
     revalidatePath("/dash/dashboard");
@@ -290,12 +295,51 @@ function revalidateTaskPaths(projectId: string | null) {
   if (projectId) revalidatePath(`/dash/projects/${projectId}`);
 }
 
+type RepeatingTask = {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  category: string;
+  dueDate: Date | null;
+  projectId: string | null;
+  repeat: string;
+  nextTaskId: string | null;
+};
+
+// Repeating tasks: completing one creates its next occurrence (once), and
+// reopening it takes that occurrence back if it hasn't been started.
+async function followRepeat(task: RepeatingTask, previousStatus: string | undefined) {
+  const repeat = asRepeat(task.repeat);
+  if (task.status === "DONE" && previousStatus !== "DONE" && repeat && !task.nextTaskId) {
+    const due = nextDueDate(repeat, task.dueDate ? dayKey(task.dueDate) : null, todayKey());
+    const next = await db.task.create({
+      data: {
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        category: task.category,
+        projectId: task.projectId,
+        repeat,
+        status: "TODO",
+        dueDate: due ? new Date(`${due}T00:00:00.000Z`) : null
+      }
+    });
+    await db.task.update({ where: { id: task.id }, data: { nextTaskId: next.id } });
+  } else if (previousStatus === "DONE" && task.status !== "DONE" && task.nextTaskId) {
+    await db.task.deleteMany({ where: { id: task.nextTaskId, status: "TODO" } });
+    await db.task.update({ where: { id: task.id }, data: { nextTaskId: null } });
+  }
+}
+
 // Moves a task between board columns. BLOCKED also sets the blocked flag;
 // leaving BLOCKED clears it; DONE stamps completedAt.
 export async function setTaskStatus(id: string, status: string): Promise<void> {
   await assertAuthed();
   if (!(TASK_STATUSES as readonly string[]).includes(status)) throw new Error("Unknown status.");
   const next = status as (typeof TASK_STATUSES)[number];
+  const before = await db.task.findUnique({ where: { id }, select: { status: true } });
   const task = await db.task.update({
     where: { id },
     data: {
@@ -304,6 +348,7 @@ export async function setTaskStatus(id: string, status: string): Promise<void> {
       completedAt: next === "DONE" ? new Date() : null
     }
   });
+  await followRepeat(task, before?.status);
   revalidateTaskPaths(task.projectId);
 }
 
@@ -321,16 +366,15 @@ export async function setTaskDueDate(id: string, day: string | null): Promise<vo
 
 export async function setTaskDone(id: string, done: boolean): Promise<void> {
   await assertAuthed();
+  const before = await db.task.findUnique({ where: { id }, select: { status: true } });
   const task = await db.task.update({
     where: { id },
     data: done
       ? { status: "DONE", blocked: false, completedAt: new Date() }
       : { status: "TODO", completedAt: null }
   });
-  revalidatePath("/dash/tasks");
-  revalidatePath("/dash/dashboard");
-  revalidatePath("/dash/projects");
-  if (task.projectId) revalidatePath(`/dash/projects/${task.projectId}`);
+  await followRepeat(task, before?.status);
+  revalidateTaskPaths(task.projectId);
 }
 
 export async function createNote(

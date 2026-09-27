@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { todayKey } from "@/lib/dates";
+import { asRepeat } from "@/lib/repeat";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type {
   ActivityRecord,
@@ -51,12 +52,14 @@ function mapTask(task: {
   imageUrl?: string | null;
   projectId: string | null;
   project?: { id: string; title: string; slug: string } | null;
+  repeat?: string;
 }): TaskRecord {
   return {
     ...task,
     status: choice(task.status, TASK_STATUSES, "TODO"),
     priority: choice(task.priority, TASK_PRIORITIES, "MEDIUM"),
     category: choice(task.category, PROJECT_CATEGORIES, "PERSONAL"),
+    repeat: asRepeat(task.repeat),
     dueDate: task.dueDate?.toISOString() ?? null,
     completedAt: task.completedAt?.toISOString() ?? null,
     createdAt: task.createdAt.toISOString(),

@@ -149,6 +149,7 @@ export function HomeDashboard({
                     overdue={days !== null && days <= 0}
                     priority={{ label: getPriorityLabel(task.priority), tone: priorityTone[task.priority] }}
                     previousStatus={task.blocked ? "BLOCKED" : task.status}
+                    repeat={task.repeat}
                   />
                 );
               })}

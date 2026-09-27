@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createTask, updateTask } from "@/lib/actions";
 import { categoryLabels } from "@/lib/constants";
 import { getPriorityLabel, getTaskStatusLabel } from "@/lib/formatters";
+import { REPEAT_OPTIONS, asRepeat, repeatLabels } from "@/lib/repeat";
 import { PROJECT_CATEGORIES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type { TaskRecord } from "@/types";
 
@@ -90,16 +91,28 @@ export function TaskFormDialog({
         </DialogField>
       </div>
 
-      <DialogField label="Project">
-        <Select name="projectId" defaultValue={task?.projectId ?? ""}>
-          <option value="">Independent task (no project)</option>
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.title}
-            </option>
-          ))}
-        </Select>
-      </DialogField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DialogField label="Repeat">
+          <Select name="repeat" defaultValue={asRepeat(task?.repeat)}>
+            {REPEAT_OPTIONS.map((item) => (
+              <option key={item || "none"} value={item}>
+                {repeatLabels[item]}
+              </option>
+            ))}
+          </Select>
+        </DialogField>
+
+        <DialogField label="Project">
+          <Select name="projectId" defaultValue={task?.projectId ?? ""}>
+            <option value="">Independent task (no project)</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.title}
+              </option>
+            ))}
+          </Select>
+        </DialogField>
+      </div>
 
       <DialogField label={isEdit ? "Replace photo (optional)" : "Photo (optional)"}>
         <Input name="photo" type="file" accept="image/*" className="py-2" />

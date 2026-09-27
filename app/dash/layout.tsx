@@ -10,6 +10,9 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
+  // Added to an iPhone Home Screen, open full screen like an app (needed for
+  // reminder notifications on iOS).
+  appleWebApp: { capable: true, title: "jabx", statusBarStyle: "black-translucent" },
   title: { default: "Jaber's Dashboard", template: "%s · Jaber" }
 };
 

@@ -56,6 +56,8 @@ export type TaskRecord = {
   completedAt: string | null;
   projectId: string | null;
   project: ProjectLink | null;
+  /** "", DAILY, WEEKDAYS, WEEKLY, MONTHLY or YEARLY (lib/repeat.ts). */
+  repeat: string;
 };
 
 export type NoteRecord = {

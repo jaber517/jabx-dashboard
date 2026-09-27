@@ -5,23 +5,26 @@ import { getSettingsStats } from "@/lib/data";
 import { deviceName } from "@/lib/device-name";
 import { fileStorageEnabled, listBackups } from "@/lib/files";
 import { countInlinePhotos } from "@/lib/backup";
+import { countSubscriptions } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const storage = fileStorageEnabled();
-  const [stats, passkeys, sessions, currentId, backups, inlinePhotos] = await Promise.all([
+  const [stats, passkeys, sessions, currentId, backups, inlinePhotos, reminderDevices] = await Promise.all([
     getSettingsStats(),
     listPasskeys(),
     listSessions(),
     currentSessionId(),
     storage ? listBackups().catch(() => []) : Promise.resolve([]),
-    countInlinePhotos()
+    countInlinePhotos(),
+    countSubscriptions()
   ]);
 
   return (
     <SettingsView
       stats={stats}
+      reminderDevices={reminderDevices}
       data={{
         storage,
         inlinePhotos,
