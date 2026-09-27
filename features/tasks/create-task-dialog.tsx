@@ -7,8 +7,8 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createTask, updateTask } from "@/lib/actions";
 import { categoryLabels } from "@/lib/constants";
-import { getPriorityLabel } from "@/lib/formatters";
-import { PROJECT_CATEGORIES, TASK_PRIORITIES } from "@/types";
+import { getPriorityLabel, getTaskStatusLabel } from "@/lib/formatters";
+import { PROJECT_CATEGORIES, TASK_PRIORITIES, TASK_STATUSES } from "@/types";
 import type { TaskRecord } from "@/types";
 
 export function TaskFormDialog({
@@ -41,12 +41,11 @@ export function TaskFormDialog({
         <Input name="title" placeholder="Task title" defaultValue={task?.title} required />
       </DialogField>
 
-      <DialogField label="Description">
+      <DialogField label="Description (optional)">
         <Textarea
           name="description"
           placeholder="What needs to be done?"
           defaultValue={task?.description}
-          required
         />
       </DialogField>
 
@@ -73,21 +72,34 @@ export function TaskFormDialog({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <DialogField label="Due date">
-          <Input name="dueDate" type="date" defaultValue={task?.dueDate?.slice(0, 10)} />
-        </DialogField>
-
-        <DialogField label="Project">
-          <Select name="projectId" defaultValue={task?.projectId ?? ""}>
-            <option value="">Independent task (no project)</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.title}
+        <DialogField label="Status">
+          <Select
+            name="status"
+            defaultValue={task ? (task.blocked && task.status !== "DONE" ? "BLOCKED" : task.status) : "TODO"}
+          >
+            {TASK_STATUSES.map((item) => (
+              <option key={item} value={item}>
+                {getTaskStatusLabel(item)}
               </option>
             ))}
           </Select>
         </DialogField>
+
+        <DialogField label="Due date">
+          <Input name="dueDate" type="date" defaultValue={task?.dueDate?.slice(0, 10)} />
+        </DialogField>
       </div>
+
+      <DialogField label="Project">
+        <Select name="projectId" defaultValue={task?.projectId ?? ""}>
+          <option value="">Independent task (no project)</option>
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>
+              {project.title}
+            </option>
+          ))}
+        </Select>
+      </DialogField>
 
       <DialogField label={isEdit ? "Replace photo (optional)" : "Photo (optional)"}>
         <Input name="photo" type="file" accept="image/*" className="py-2" />

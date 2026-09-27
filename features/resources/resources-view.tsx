@@ -13,6 +13,7 @@ import { PROJECT_CATEGORIES } from "@/types";
 import type { ResourceRecord } from "@/types";
 import { CreateResourceDialog } from "@/features/resources/create-resource-dialog";
 import { ResourceCardActions } from "@/features/resources/resource-card-actions";
+import { useUndo } from "@/components/providers/undo-provider";
 
 export function ResourcesView({
   resources,
@@ -25,7 +26,9 @@ export function ResourcesView({
   const [category, setCategory] = useState("ALL");
   const deferredQuery = useDeferredValue(query);
 
+  const { isPendingDelete } = useUndo();
   const filteredResources = resources.filter((resource) => {
+    if (isPendingDelete(resource.id)) return false;
     const haystack = `${resource.title} ${resource.description} ${resource.type}`.toLowerCase();
     const matchesQuery = deferredQuery.length === 0 || haystack.includes(deferredQuery.toLowerCase());
     return matchesQuery && (category === "ALL" || resource.category === category);

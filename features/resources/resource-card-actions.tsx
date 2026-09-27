@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
+import { useDeleteWithUndo } from "@/components/providers/undo-provider";
 import { deleteResource } from "@/lib/actions";
 import { ResourceFormDialog } from "@/features/resources/create-resource-dialog";
 import type { ResourceRecord } from "@/types";
@@ -15,6 +16,7 @@ export function ResourceCardActions({
   projects?: { id: string; title: string }[];
 }) {
   const [pending, startTransition] = useTransition();
+  const deleteWithUndo = useDeleteWithUndo("/resources");
 
   return (
     <div className="flex items-center gap-1.5">
@@ -32,11 +34,7 @@ export function ResourceCardActions({
         title="Delete resource"
         aria-label="Delete resource"
         disabled={pending}
-        onClick={() => {
-          if (window.confirm(`Delete "${resource.title}"?`)) {
-            startTransition(() => deleteResource(resource.id));
-          }
-        }}
+        onClick={() => deleteWithUndo(resource.id, resource.title, () => deleteResource(resource.id))}
       >
         <Trash2 className="h-4 w-4" />
       </IconButton>

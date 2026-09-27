@@ -17,6 +17,7 @@ import {
 } from "@/lib/formatters";
 import type { ProjectRecord } from "@/types";
 import { ProjectCardActions } from "@/features/projects/project-card-actions";
+import { plainText } from "@/lib/markdown";
 
 export function ProjectDetailView({ project }: { project: ProjectRecord }) {
   const doneTasks = project.tasks?.filter((task) => task.status === "DONE").length ?? 0;
@@ -160,7 +161,7 @@ export function ProjectDetailView({ project }: { project: ProjectRecord }) {
                     className="block rounded-2xl border border-border bg-surface p-4 transition ease-spring hover:border-primary/30 active:scale-[0.98] motion-reduce:active:scale-100"
                   >
                     <p className="text-sm font-semibold">{note.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{note.content}</p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground line-clamp-3">{plainText(note.content)}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {note.tags.map((tag) => (
                         <Badge key={tag} className="bg-muted text-muted-foreground">

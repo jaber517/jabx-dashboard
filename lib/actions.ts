@@ -46,6 +46,20 @@ function requireText(formData: FormData, field: string, label: string): string {
   return value.trim();
 }
 
+function optionalText(formData: FormData, field: string): string {
+  const value = formData.get(field);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+// Status plus the fields that follow from it: BLOCKED sets the blocked flag,
+// DONE stamps completedAt. Returns nothing when the form has no status field.
+function statusFields(formData: FormData) {
+  const value = formData.get("status");
+  if (typeof value !== "string" || !(TASK_STATUSES as readonly string[]).includes(value)) return {};
+  const status = value as (typeof TASK_STATUSES)[number];
+  return { status, blocked: status === "BLOCKED", completedAt: status === "DONE" ? new Date() : null };
+}
+
 function optionalChoice<T extends readonly string[]>(
   formData: FormData,
   field: string,
@@ -173,7 +187,7 @@ export async function createTask(
   try {
     await assertAuthed();
     const title = requireText(formData, "title", "Title");
-    const description = requireText(formData, "description", "Description");
+    const description = optionalText(formData, "description");
     const imageUrl = await readImage(formData);
 
     const projectId = optionalProjectId(formData);
@@ -182,7 +196,8 @@ export async function createTask(
       data: {
         title,
         description,
-        status: optionalChoice(formData, "status", TASK_STATUSES, "TODO"),
+        status: "TODO",
+        ...statusFields(formData),
         priority: optionalChoice(formData, "priority", TASK_PRIORITIES, "MEDIUM"),
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
         dueDate: optionalDate(formData, "dueDate"),
@@ -209,11 +224,17 @@ export async function updateTask(
     await assertAuthed();
     const id = requireText(formData, "id", "Task id");
     const title = requireText(formData, "title", "Title");
-    const description = requireText(formData, "description", "Description");
+    const description = optionalText(formData, "description");
     const imageUrl = await readImage(formData);
     const newProjectId = optionalProjectId(formData);
 
-    const previous = await db.task.findUnique({ where: { id }, select: { projectId: true } });
+    const previous = await db.task.findUnique({
+      where: { id },
+      select: { projectId: true, status: true, completedAt: true }
+    });
+    const status = statusFields(formData);
+    // Editing an already-done task keeps its original completion date.
+    if (status.status === "DONE" && previous?.status === "DONE") status.completedAt = previous.completedAt;
 
     await db.task.update({
       where: { id },
@@ -224,6 +245,7 @@ export async function updateTask(
         category: optionalChoice(formData, "category", PROJECT_CATEGORIES, "PERSONAL"),
         dueDate: optionalDate(formData, "dueDate"),
         projectId: newProjectId,
+        ...status,
         ...(imageUrl ? { imageUrl } : {})
       }
     });
@@ -246,6 +268,43 @@ export async function deleteTask(id: string): Promise<void> {
   revalidatePath("/dash/dashboard");
   revalidatePath("/dash/projects");
   if (task.projectId) revalidatePath(`/dash/projects/${task.projectId}`);
+}
+
+function revalidateTaskPaths(projectId: string | null) {
+  revalidatePath("/dash/tasks");
+  revalidatePath("/dash/dashboard");
+  revalidatePath("/dash/projects");
+  revalidatePath("/dash/review");
+  if (projectId) revalidatePath(`/dash/projects/${projectId}`);
+}
+
+// Moves a task between board columns. BLOCKED also sets the blocked flag;
+// leaving BLOCKED clears it; DONE stamps completedAt.
+export async function setTaskStatus(id: string, status: string): Promise<void> {
+  await assertAuthed();
+  if (!(TASK_STATUSES as readonly string[]).includes(status)) throw new Error("Unknown status.");
+  const next = status as (typeof TASK_STATUSES)[number];
+  const task = await db.task.update({
+    where: { id },
+    data: {
+      status: next,
+      blocked: next === "BLOCKED",
+      completedAt: next === "DONE" ? new Date() : null
+    }
+  });
+  revalidateTaskPaths(task.projectId);
+}
+
+// Reschedules a task; `day` is "YYYY-MM-DD" (stored as midnight UTC, like the
+// date field in the task form), or null to clear the due date.
+export async function setTaskDueDate(id: string, day: string | null): Promise<void> {
+  await assertAuthed();
+  if (day !== null && !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error("Invalid date.");
+  const task = await db.task.update({
+    where: { id },
+    data: { dueDate: day ? new Date(`${day}T00:00:00.000Z`) : null }
+  });
+  revalidateTaskPaths(task.projectId);
 }
 
 export async function setTaskDone(id: string, done: boolean): Promise<void> {

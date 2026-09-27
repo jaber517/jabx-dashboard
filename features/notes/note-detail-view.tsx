@@ -7,6 +7,7 @@ import { categoryLabels } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/formatters";
 import type { NoteRecord } from "@/types";
 import { NoteCardActions } from "@/features/notes/note-card-actions";
+import { Markdown } from "@/components/ui/markdown";
 
 export function NoteDetailView({
   note,
@@ -48,11 +49,11 @@ export function NoteDetailView({
                 className="max-h-80 w-full rounded-2xl border border-border object-cover"
               />
             ) : null}
-            <p className="whitespace-pre-wrap text-sm leading-7 text-muted-foreground">{note.content}</p>
+            <Markdown>{note.content}</Markdown>
             {note.tags.length > 0 ? (
               <div className="flex flex-wrap gap-2 pt-2">
                 {note.tags.map((tag) => (
-                  <Badge key={tag} className="bg-primary/10 text-primary">
+                  <Badge key={tag} className="text-primary">
                     #{tag}
                   </Badge>
                 ))}

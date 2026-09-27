@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { todayKey } from "@/lib/dates";
 import type {
   ActivityRecord,
   MilestoneRecord,
@@ -564,5 +565,22 @@ export async function getSettingsStats() {
       noteCount: 0,
       resourceCount: 0
     }
+  );
+}
+
+// Light data for the app shell on every page: project names for the global
+// "New …" dialogs, and the sidebar's task counts.
+export async function getShellData() {
+  const todayStart = new Date(`${todayKey()}T00:00:00.000Z`);
+  return withFallback(
+    async () => {
+      const [projects, openTasks, overdueTasks] = await Promise.all([
+        db.project.findMany({ select: { id: true, title: true }, orderBy: { title: "asc" } }),
+        db.task.count({ where: { status: { not: "DONE" } } }),
+        db.task.count({ where: { status: { not: "DONE" }, dueDate: { lt: todayStart } } })
+      ]);
+      return { projects, openTasks, overdueTasks };
+    },
+    { projects: [] as { id: string; title: string }[], openTasks: 0, overdueTasks: 0 }
   );
 }

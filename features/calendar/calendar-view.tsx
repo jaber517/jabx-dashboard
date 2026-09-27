@@ -9,20 +9,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { categoryLabels } from "@/lib/constants";
-import { formatDate } from "@/lib/formatters";
+import { dayKey, daysUntil, shortDate } from "@/lib/dates";
 import type { CalendarItem } from "@/lib/data";
 
-const DAY = 1000 * 60 * 60 * 24;
-
 function bucketFor(dueDate: string): string {
-  const now = Date.now();
-  const due = Date.parse(dueDate);
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
-  if (due < startOfToday.getTime()) return "Overdue";
-  if (due <= now + 7 * DAY) return "This week";
-  if (due <= now + 30 * DAY) return "Next 30 days";
+  const days = daysUntil(dueDate);
+  if (days < 0) return "Overdue";
+  if (days < 7) return "This week";
+  if (days <= 30) return "Next 30 days";
   return "Later";
 }
 
@@ -102,7 +96,7 @@ export function CalendarView({ items }: { items: CalendarItem[] }) {
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5 text-sm font-medium">
                         <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                        {formatDate(item.dueDate)}
+                        {shortDate(dayKey(item.dueDate))}
                       </div>
                     </Link>
                   ))}

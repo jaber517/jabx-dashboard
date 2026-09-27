@@ -3,17 +3,21 @@
 import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 import { FilterBadge } from "@/components/ui/filter-badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
-import { categoryLabels } from "@/lib/constants";
+import { categoryDot, categoryLabels } from "@/lib/constants";
 import { formatRelativeDate } from "@/lib/formatters";
 import { PROJECT_CATEGORIES } from "@/types";
 import type { NoteRecord } from "@/types";
 import { CreateNoteDialog } from "@/features/notes/create-note-dialog";
 import { NoteCardActions } from "@/features/notes/note-card-actions";
+import { useUndo } from "@/components/providers/undo-provider";
+import { plainText } from "@/lib/markdown";
+import { useUrlState } from "@/lib/use-url-state";
+import { cn } from "@/lib/utils";
 
 export function NotesView({
   notes,
@@ -22,12 +26,24 @@ export function NotesView({
   notes: NoteRecord[];
   projects?: { id: string; title: string }[];
 }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("ALL");
-  const [sort, setSort] = useState("RECENT");
+  const [filters, setFilters] = useUrlState({ q: "", category: "ALL", sort: "RECENT" });
+  const { category, sort } = filters;
+  const [query, setQueryState] = useState(filters.q);
   const deferredQuery = useDeferredValue(query);
+  const setQuery = (value: string) => {
+    setQueryState(value);
+    setFilters({ q: value });
+  };
+  const setCategory = (value: string) => setFilters({ category: value });
+  const chip = (active: boolean) =>
+    cn(
+      "flex h-9 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition-colors",
+      active ? "border-primary bg-muted text-foreground" : "border-border text-muted-foreground hover:text-foreground"
+    );
 
+  const { isPendingDelete } = useUndo();
   const filteredNotes = notes.filter((note) => {
+    if (isPendingDelete(note.id)) return false;
     const haystack = `${note.title} ${note.content} ${note.tags.join(" ")}`.toLowerCase();
     const matchesQuery = deferredQuery.length === 0 || haystack.includes(deferredQuery.toLowerCase());
     return matchesQuery && (category === "ALL" || note.category === category);
@@ -48,35 +64,32 @@ export function NotesView({
     <div className="page-shell">
       <PageHeader
         eyebrow="Workspace"
-        title="Notes and ideas"
-        description="A searchable knowledge vault for project thinking, meeting outcomes, reusable ideas, and prompt patterns."
+        title="Notes"
+        description="Project thinking, meeting outcomes, reusable ideas and prompt patterns."
         actions={<CreateNoteDialog projects={projects} />}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Search and filter</CardTitle>
-          <CardDescription>
-            Search titles, note content, and tags across the vault.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[1.2fr_0.6fr_0.6fr]">
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search notes, tags, and ideas..." />
-          <Select value={category} onChange={(event) => setCategory(event.target.value)}>
-            <option value="ALL">All categories</option>
-            {PROJECT_CATEGORIES.map((item) => (
-              <option key={item} value={item}>
-                {categoryLabels[item]}
-              </option>
-            ))}
-          </Select>
-          <Select value={sort} onChange={(event) => setSort(event.target.value)}>
+      <div className="flex flex-col gap-3">
+        <div role="group" aria-label="Category" className="flex flex-wrap gap-2">
+          <button type="button" aria-pressed={category === "ALL"} onClick={() => setCategory("ALL")} className={chip(category === "ALL")}>
+            All <span className="tabular-nums text-muted-foreground">{notes.length}</span>
+          </button>
+          {PROJECT_CATEGORIES.map((item) => (
+            <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)} className={chip(category === item)}>
+              <span className={cn("h-2 w-2 rounded-full", categoryDot[item])} aria-hidden="true" />
+              {categoryLabels[item]}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_14rem]">
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search notes, tags and ideas…" aria-label="Search notes" className="h-10" />
+          <Select value={sort} onChange={(event) => setFilters({ sort: event.target.value })} aria-label="Sort" className="h-10">
             <option value="RECENT">Sort: Newest first</option>
             <option value="OLDEST">Sort: Oldest first</option>
             <option value="TITLE">Sort: Title A–Z</option>
           </Select>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {filteredNotes.length === 0 ? (
         <EmptyState
@@ -88,7 +101,7 @@ export function NotesView({
           {sortedNotes.map((note) => (
             <Card
               key={note.id}
-              className="relative flex h-full flex-col transition ease-spring [&:has(>a:hover)]:border-primary/30 [&:has(>a:active)]:scale-[0.99] motion-reduce:[&:has(>a:active)]:scale-100"
+              className="relative flex h-full flex-col transition-colors [&:has(>a:hover)]:border-primary"
             >
               <Link
                 href={`/notes/${note.id}`}
@@ -97,7 +110,7 @@ export function NotesView({
               />
               <CardHeader className="pointer-events-none">
                 <div className="flex items-center justify-between gap-3">
-                  <FilterBadge className="bg-muted text-muted-foreground" onSelect={() => setCategory(note.category)}>
+                  <FilterBadge className="text-muted-foreground" onSelect={() => setCategory(note.category)}>
                     {categoryLabels[note.category]}
                   </FilterBadge>
                   <div className="flex items-center gap-2">
@@ -121,11 +134,11 @@ export function NotesView({
                       className="mb-4 max-h-48 w-full rounded-2xl border border-border object-cover"
                     />
                   ) : null}
-                  <p className="text-sm leading-6 text-muted-foreground line-clamp-4">{note.content}</p>
+                  <p className="text-sm leading-6 text-muted-foreground line-clamp-4">{plainText(note.content)}</p>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {note.tags.map((tag) => (
-                    <FilterBadge key={tag} className="bg-primary/10 text-primary" onSelect={() => setQuery(tag)}>
+                    <FilterBadge key={tag} className="text-primary" onSelect={() => setQuery(tag)}>
                       #{tag}
                     </FilterBadge>
                   ))}

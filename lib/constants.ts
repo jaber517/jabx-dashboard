@@ -104,6 +104,7 @@ export const navigationGroups = [
   {
     label: "Insight",
     items: [
+      { href: "/review", label: "Weekly review", icon: "review" },
       { href: "/analytics", label: "Analytics", icon: "analytics" },
       { href: "/activity", label: "Activity", icon: "activity" },
       { href: "/ai-news", label: "AI News", icon: "news" }
@@ -122,3 +123,8 @@ export type NavIcon =
   | typeof settingsNavItem.icon;
 
 export type NavItem = { href: string; label: string; icon: NavIcon };
+
+export const allNavItems: NavItem[] = [
+  ...navigationGroups.flatMap((group): readonly NavItem[] => group.items),
+  settingsNavItem
+];

@@ -11,6 +11,7 @@ const PRIVATE_PATHS = [
   "/calendar",
   "/resources",
   "/settings",
+  "/review",
   "/login",
   "/api/search",
   "/api/ai-news"

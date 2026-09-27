@@ -3,11 +3,31 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Search } from "lucide-react";
+import { ArrowRight, ExternalLink, Plus, Search } from "lucide-react";
+import { openCreate, type CreateKind } from "@/components/navigation/global-create";
 import { cn } from "@/lib/utils";
-import { recordTypeTone } from "@/lib/constants";
+import { allNavItems, recordTypeTone } from "@/lib/constants";
 
 const EXIT_DURATION = 160;
+
+type PaletteAction = { id: string; group: "Create" | "Go to"; label: string; keywords: string; create?: CreateKind; href?: string };
+
+const paletteActions: PaletteAction[] = [
+  ...(["task", "project", "note", "resource"] as const).map((kind) => ({
+    id: `new-${kind}`,
+    group: "Create" as const,
+    label: `New ${kind}`,
+    keywords: `new add create ${kind}`,
+    create: kind
+  })),
+  ...allNavItems.map((item) => ({
+    id: `go-${item.href}`,
+    group: "Go to" as const,
+    label: item.label,
+    keywords: `go open ${item.label}`.toLowerCase(),
+    href: item.href
+  }))
+];
 
 type SearchResult = {
   type: string;
@@ -112,6 +132,37 @@ export function GlobalSearch() {
     };
   }, [query, open]);
 
+  function runAction(action: PaletteAction) {
+    closePalette();
+    if (action.create) {
+      // Let the palette close first so focus lands in the new dialog.
+      setTimeout(() => openCreate(action.create as CreateKind), EXIT_DURATION);
+    } else if (action.href) {
+      router.push(action.href);
+    }
+  }
+
+  const trimmed = query.trim().toLowerCase();
+  const actions = trimmed
+    ? paletteActions.filter((action) => trimmed.split(/\s+/).every((word) => action.keywords.includes(word)))
+    : paletteActions;
+
+  // Arrow keys move between items; Enter in the search box picks the first.
+  function onPaletteKey(event: React.KeyboardEvent<HTMLDivElement>) {
+    const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("[data-palette-item]"));
+    if (items.length === 0) return;
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const next = event.key === "ArrowDown" ? index + 1 : index - 1;
+      if (next < 0) inputRef.current?.focus();
+      else items[Math.min(next, items.length - 1)].focus();
+    } else if (event.key === "Enter" && document.activeElement === inputRef.current) {
+      event.preventDefault();
+      items[0].click();
+    }
+  }
+
   function openResult(result: SearchResult) {
     closePalette();
     if (result.external) {
@@ -153,6 +204,7 @@ export function GlobalSearch() {
                     : "-translate-y-2 scale-95 opacity-0 duration-150"
                 )}
                 onClick={(event) => event.stopPropagation()}
+                onKeyDown={onPaletteKey}
               >
                 <div className="flex items-center gap-3 border-b border-border px-5 py-4">
                   <Search className="h-5 w-5 text-muted-foreground" />
@@ -160,29 +212,59 @@ export function GlobalSearch() {
                     ref={inputRef}
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search projects, tasks, notes, resources..."
+                    placeholder="Search, or type a command…"
+                    aria-label="Search or run a command"
                     className="w-full bg-transparent text-base outline-none placeholder:text-muted-foreground"
                   />
                 </div>
 
-                <div className="max-h-[50vh] overflow-y-auto p-2">
-                  {query.trim().length === 0 ? (
-                    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-                      Start typing to search across everything.
-                    </p>
-                  ) : loading && results.length === 0 ? (
-                    <p className="px-4 py-8 text-center text-sm text-muted-foreground">Searching...</p>
+                <div className="max-h-[55vh] overflow-y-auto p-2">
+                  {(["Create", "Go to"] as const).map((group) => {
+                    const items = actions.filter((action) => action.group === group);
+                    if (items.length === 0 || (trimmed && group === "Go to" && results.length > 0 && items.length > 3)) return null;
+                    return (
+                      <div key={group} className="mb-1">
+                        <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group}</p>
+                        {items.map((action) => (
+                          <button
+                            key={action.id}
+                            type="button"
+                            data-palette-item
+                            onClick={() => runAction(action)}
+                            className="flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-left text-sm font-semibold outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
+                          >
+                            {action.create ? (
+                              <Plus className="h-4 w-4 text-primary" aria-hidden="true" />
+                            ) : (
+                              <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                            )}
+                            <span className="flex-1">{action.label}</span>
+                            {action.id === "new-task" ? (
+                              <kbd className="rounded-md border border-border px-1.5 text-xs font-medium text-muted-foreground">N</kbd>
+                            ) : null}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })}
+                  {trimmed.length === 0 ? null : loading && results.length === 0 ? (
+                    <p className="px-4 py-6 text-center text-sm text-muted-foreground">Searching…</p>
                   ) : results.length === 0 ? (
-                    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-                      No matches for &ldquo;{query}&rdquo;.
-                    </p>
+                    actions.length === 0 ? (
+                      <p className="px-4 py-6 text-center text-sm text-muted-foreground">No matches for &ldquo;{query}&rdquo;.</p>
+                    ) : null
                   ) : (
-                    results.map((result) => (
+                    <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Results</p>
+                  )}
+                  {trimmed.length === 0
+                    ? null
+                    : results.map((result) => (
                       <button
                         key={`${result.type}-${result.id}`}
                         type="button"
+                        data-palette-item
                         onClick={() => openResult(result)}
-                        className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition ease-spring hover:bg-muted active:scale-[0.98] motion-reduce:active:scale-100"
+                        className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left outline-none transition-colors hover:bg-muted focus-visible:bg-muted"
                       >
                         <span
                           className={cn(
@@ -206,8 +288,7 @@ export function GlobalSearch() {
                           ) : null}
                         </span>
                       </button>
-                    ))
-                  )}
+                    ))}
                 </div>
               </div>
             </div>,

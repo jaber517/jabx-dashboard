@@ -2,7 +2,8 @@
 
 import { useOptimistic, useTransition } from "react";
 import Link from "next/link";
-import { setTaskDone } from "@/lib/actions";
+import { useUndo } from "@/components/providers/undo-provider";
+import { setTaskDone, setTaskStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 
 // One row of Home's "Next up" list: tick the box to complete the task in place.
@@ -13,7 +14,8 @@ export function NextUpTask({
   dot,
   due,
   overdue,
-  priority
+  priority,
+  previousStatus
 }: {
   id: string;
   title: string;
@@ -22,25 +24,31 @@ export function NextUpTask({
   due?: string;
   overdue: boolean;
   priority: { label: string; tone: string };
+  previousStatus: string;
 }) {
+  const { notify } = useUndo();
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useOptimistic(false);
 
   return (
     <li className="flex min-h-14 items-center gap-3.5 border-b border-border px-5 py-2.5 last:border-b-0">
-      <input
-        type="checkbox"
-        checked={done}
-        disabled={pending}
-        aria-label={`Mark "${title}" done`}
-        onChange={() =>
-          startTransition(async () => {
-            setDone(true);
-            await setTaskDone(id, true);
-          })
-        }
-        className="h-[18px] w-[18px] shrink-0 cursor-pointer accent-[hsl(var(--primary-strong))]"
-      />
+      {/* A 44px tap target around the 18px box. */}
+      <label className="-m-3 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+        <input
+          type="checkbox"
+          checked={done}
+          disabled={pending}
+          aria-label={`Mark "${title}" done`}
+          onChange={() =>
+            startTransition(async () => {
+              setDone(true);
+              await setTaskDone(id, true);
+              notify(`Completed “${title}”`, () => startTransition(() => setTaskStatus(id, previousStatus)));
+            })
+          }
+          className="h-[18px] w-[18px] shrink-0 cursor-pointer accent-[hsl(var(--primary-strong))]"
+        />
+      </label>
       <div className="min-w-0 flex-1">
         <Link
           href={`/tasks/${id}`}

@@ -1,16 +1,31 @@
 import type { ReactNode } from "react";
-import { MobileNavigation, Sidebar } from "@/components/navigation/sidebar";
+import { GlobalCreate } from "@/components/navigation/global-create";
+import { MobileNavigation, Sidebar, type NavCounts } from "@/components/navigation/sidebar";
+import { UndoProvider } from "@/components/providers/undo-provider";
 
-export function AppShell({ children, showNavigation = true }: { children: ReactNode; showNavigation?: boolean }) {
+export function AppShell({
+  children,
+  showNavigation = true,
+  projects = [],
+  counts
+}: {
+  children: ReactNode;
+  showNavigation?: boolean;
+  projects?: { id: string; title: string }[];
+  counts?: NavCounts;
+}) {
   if (!showNavigation) return <main>{children}</main>;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="min-w-0 flex-1">
-        <MobileNavigation />
-        <main>{children}</main>
+    <UndoProvider>
+      <div className="flex min-h-screen">
+        <Sidebar counts={counts} />
+        <div className="min-w-0 flex-1">
+          <MobileNavigation />
+          <main>{children}</main>
+        </div>
       </div>
-    </div>
+      <GlobalCreate projects={projects} />
+    </UndoProvider>
   );
 }

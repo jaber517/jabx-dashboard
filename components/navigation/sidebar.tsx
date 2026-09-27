@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
+  CalendarCheck,
   CalendarDays,
   Ellipsis,
   FileText,
@@ -14,6 +15,7 @@ import {
   Link2,
   LogOut,
   Newspaper,
+  Plus,
   Search,
   SlidersHorizontal,
   SquareCheckBig,
@@ -21,8 +23,9 @@ import {
   type LucideIcon
 } from "lucide-react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { openCreate } from "@/components/navigation/global-create";
 import { GlobalSearch, openSearch } from "@/components/navigation/global-search";
-import { navigationGroups, settingsNavItem, type NavIcon, type NavItem } from "@/lib/constants";
+import { allNavItems, navigationGroups, settingsNavItem, type NavIcon, type NavItem } from "@/lib/constants";
 import { logout } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +35,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   tasks: SquareCheckBig,
   notes: FileText,
   calendar: CalendarDays,
+  review: CalendarCheck,
   analytics: BarChart3,
   activity: Activity,
   news: Newspaper,
@@ -40,9 +44,8 @@ const icons: Record<NavIcon, LucideIcon> = {
 };
 
 const publicSite = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || "https://jabx.me";
-const allItems: NavItem[] = [...navigationGroups.flatMap((group): readonly NavItem[] => group.items), settingsNavItem];
 const tabItems: NavItem[] = navigationGroups[0].items.slice(0, 4);
-const moreItems = allItems.filter((item) => !tabItems.some((tab) => tab.href === item.href));
+const moreItems = allNavItems.filter((item) => !tabItems.some((tab) => tab.href === item.href));
 
 function useIsActive() {
   const pathname = usePathname();
@@ -61,11 +64,28 @@ function LogoutButton({ className }: { className?: string }) {
   );
 }
 
+export type NavCounts = { openTasks: number; overdueTasks: number };
+
+// Open-task count beside Tasks, with overdue ones called out in red.
+function TaskCount({ counts }: { counts?: NavCounts }) {
+  if (!counts || counts.openTasks === 0) return null;
+  return (
+    <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold tabular-nums">
+      {counts.overdueTasks > 0 ? (
+        <span className="rounded-full border border-danger/40 px-1.5 text-danger" title={`${counts.overdueTasks} overdue`}>
+          {counts.overdueTasks} late
+        </span>
+      ) : null}
+      <span className="text-muted-foreground">{counts.openTasks}</span>
+    </span>
+  );
+}
+
 const navItemClass =
   "flex h-10 items-center gap-3 rounded-xl px-2.5 text-sm font-medium transition-colors";
 
 // Desktop: a fixed left sidebar with grouped navigation, search and account links.
-export function Sidebar() {
+export function Sidebar({ counts }: { counts?: NavCounts }) {
   const isActive = useIsActive();
   const SettingsIcon = icons[settingsNavItem.icon];
 
@@ -99,6 +119,7 @@ export function Sidebar() {
                 >
                   <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                   {item.label}
+                  {item.href === "/tasks" ? <TaskCount counts={counts} /> : null}
                 </Link>
               );
             })}
@@ -156,14 +177,24 @@ export function MobileNavigation() {
         <Link href="/dashboard" aria-label="Dashboard home">
           <Wordmark className="h-6 w-auto text-foreground" />
         </Link>
-        <button
-          type="button"
-          onClick={openSearch}
-          aria-label="Search"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border text-foreground"
-        >
-          <Search className="h-[18px] w-[18px]" aria-hidden="true" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border text-foreground"
+          >
+            <Search className="h-[18px] w-[18px]" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => openCreate("task")}
+            aria-label="New task"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-strong text-primary-foreground"
+          >
+            <Plus className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
       <nav

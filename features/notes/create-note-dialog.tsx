@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { CreateDialog, DialogField } from "@/components/ui/create-dialog";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { createNote, updateNote } from "@/lib/actions";
 import { categoryLabels } from "@/lib/constants";
 import { PROJECT_CATEGORIES } from "@/types";
@@ -41,12 +41,7 @@ export function NoteFormDialog({
       </DialogField>
 
       <DialogField label="Content">
-        <Textarea
-          name="content"
-          placeholder="Write your note..."
-          defaultValue={note?.content}
-          required
-        />
+        <MarkdownEditor name="content" placeholder="Write your note…" defaultValue={note?.content} required />
       </DialogField>
 
       <div className="grid gap-4 sm:grid-cols-2">

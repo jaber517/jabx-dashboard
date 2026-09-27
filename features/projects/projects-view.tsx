@@ -10,23 +10,26 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Select } from "@/components/ui/select";
 import { categoryDot, categoryLabels, priorityTone, statusTone } from "@/lib/constants";
 import { formatDate, getPriorityLabel, getStatusLabel } from "@/lib/formatters";
+import { useUrlState } from "@/lib/use-url-state";
 import { cn } from "@/lib/utils";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES, TASK_PRIORITIES } from "@/types";
 import type { ProjectRecord } from "@/types";
 import { CreateProjectDialog } from "@/features/projects/create-project-dialog";
 import { ProjectCardActions } from "@/features/projects/project-card-actions";
+import { useUndo } from "@/components/providers/undo-provider";
 
 export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("ALL");
-  const [status, setStatus] = useState("ALL");
-  const [priority, setPriority] = useState("ALL");
-  const [sort, setSort] = useState("RECENT");
+  const [filters, setFilters] = useUrlState({ q: "", category: "ALL", status: "ALL", priority: "ALL", sort: "RECENT" });
+  const { category, status, priority, sort } = filters;
+  const [query, setQuery] = useState(filters.q);
   const deferredQuery = useDeferredValue(query);
+  const setCategory = (value: string) => setFilters({ category: value });
 
   const q = deferredQuery.trim().toLowerCase();
+  const { isPendingDelete } = useUndo();
   const filtered = projects.filter(
     (project) =>
+      !isPendingDelete(project.id) &&
       (!q || project.title.toLowerCase().includes(q) || project.summary.toLowerCase().includes(q)) &&
       (category === "ALL" || project.category === category) &&
       (status === "ALL" || project.status === status) &&
@@ -74,20 +77,23 @@ export function ProjectsView({ projects }: { projects: ProjectRecord[] }) {
           ))}
         </div>
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects…" aria-label="Search projects" className="h-10" />
-          <Select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Status" className="h-10">
+          <Input value={query} onChange={(event) => {
+              setQuery(event.target.value);
+              setFilters({ q: event.target.value });
+            }} placeholder="Search projects…" aria-label="Search projects" className="h-10" />
+          <Select value={status} onChange={(event) => setFilters({ status: event.target.value })} aria-label="Status" className="h-10">
             <option value="ALL">All statuses</option>
             {PROJECT_STATUSES.map((item) => (
               <option key={item} value={item}>{getStatusLabel(item)}</option>
             ))}
           </Select>
-          <Select value={priority} onChange={(event) => setPriority(event.target.value)} aria-label="Priority" className="h-10">
+          <Select value={priority} onChange={(event) => setFilters({ priority: event.target.value })} aria-label="Priority" className="h-10">
             <option value="ALL">All priorities</option>
             {TASK_PRIORITIES.map((item) => (
               <option key={item} value={item}>{getPriorityLabel(item)}</option>
             ))}
           </Select>
-          <Select value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort" className="h-10">
+          <Select value={sort} onChange={(event) => setFilters({ sort: event.target.value })} aria-label="Sort" className="h-10">
             <option value="RECENT">Sort: Recently updated</option>
             <option value="DUE">Sort: Due date</option>
             <option value="PROGRESS">Sort: Progress</option>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { differenceInCalendarDays, format, startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,6 +10,7 @@ import { Greeting } from "@/features/home/greeting";
 import { NextUpTask } from "@/features/home/next-up-task";
 import { categoryDot, priorityTone, statusTone } from "@/lib/constants";
 import { formatRelativeDate, getCategoryLabel, getPriorityLabel, getStatusLabel } from "@/lib/formatters";
+import { dayKey, daysUntil, relativeDay, todayKey, weekdayOf } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type {
   ActivityRecord,
@@ -22,16 +22,6 @@ import type {
 } from "@/types";
 
 const priorityRank = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
-
-// "Today", "Tomorrow", a weekday within the week, otherwise "3 Oct".
-function dueLabel(date: Date, today: Date) {
-  const days = differenceInCalendarDays(date, today);
-  if (days < 0) return format(date, "d MMM");
-  if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
-  if (days < 7) return format(date, "EEE");
-  return format(date, "d MMM");
-}
 
 function Panel({
   id,
@@ -76,7 +66,7 @@ export function HomeDashboard({
   milestones: MilestoneRecord[];
   resources: ResourceRecord[];
 }) {
-  const today = startOfDay(new Date());
+  const today = todayKey();
   const openTasks = tasks.filter((task) => task.status !== "DONE");
   const activeProjects = projects.filter((project) => ["ACTIVE", "WAITING", "PLANNED"].includes(project.status));
   const blockedCount = openTasks.filter((task) => task.blocked || task.status === "BLOCKED").length;
@@ -84,7 +74,7 @@ export function HomeDashboard({
 
   const dueThisWeek = openTasks.filter((task) => {
     if (!task.dueDate) return false;
-    const days = differenceInCalendarDays(new Date(task.dueDate), today);
+    const days = daysUntil(task.dueDate, today);
     return days >= 0 && days < 7;
   });
 
@@ -108,15 +98,15 @@ export function HomeDashboard({
     ...milestones.map((milestone) => ({ id: `m-${milestone.id}`, kind: "Milestone", title: milestone.title, context: milestone.project?.title ?? getCategoryLabel(milestone.category), href: milestone.projectId ? `/projects/${milestone.projectId}` : "/calendar", date: milestone.date }))
   ]
     .filter((item) => {
-      const days = differenceInCalendarDays(new Date(item.date), today);
+      const days = daysUntil(item.date, today);
       return days >= 0 && days < 7;
     })
     .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
     .slice(0, 5);
 
   const nextDeadline = dueThisWeek
-    .map((task) => new Date(task.dueDate as string))
-    .sort((a, b) => a.getTime() - b.getTime())[0];
+    .map((task) => task.dueDate as string)
+    .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
 
   const sections: HomeSection[] = [
     {
@@ -128,7 +118,7 @@ export function HomeDashboard({
           metrics={[
             { label: "Active projects", value: String(activeProjects.length), note: waitingCount ? `${waitingCount} waiting` : "None waiting", href: "/projects" },
             { label: "Open tasks", value: String(openTasks.length), note: blockedCount ? `${blockedCount} blocked` : "Nothing blocked", href: "/tasks" },
-            { label: "Due this week", value: String(dueThisWeek.length), note: nextDeadline ? `Next: ${dueLabel(nextDeadline, today)}` : "Nothing due", href: "/calendar" },
+            { label: "Due this week", value: String(dueThisWeek.length), note: nextDeadline ? `Next: ${relativeDay(nextDeadline, today)}` : "Nothing due", href: "/calendar" },
             { label: "Notes", value: String(notes.length), note: `${resources.length} linked resources`, href: "/notes" }
           ]}
         />
@@ -147,7 +137,7 @@ export function HomeDashboard({
           ) : (
             <ul>
               {nextUp.map((task) => {
-                const due = task.dueDate ? new Date(task.dueDate) : null;
+                const days = task.dueDate ? daysUntil(task.dueDate, today) : null;
                 return (
                   <NextUpTask
                     key={task.id}
@@ -155,9 +145,10 @@ export function HomeDashboard({
                     title={task.title}
                     meta={task.project?.title ?? getCategoryLabel(task.category)}
                     dot={categoryDot[task.category]}
-                    due={due ? dueLabel(due, today) : undefined}
-                    overdue={Boolean(due && differenceInCalendarDays(due, today) <= 0)}
+                    due={task.dueDate ? relativeDay(task.dueDate, today) : undefined}
+                    overdue={days !== null && days <= 0}
                     priority={{ label: getPriorityLabel(task.priority), tone: priorityTone[task.priority] }}
+                    previousStatus={task.blocked ? "BLOCKED" : task.status}
                   />
                 );
               })}
@@ -179,13 +170,13 @@ export function HomeDashboard({
           ) : (
             <ul className="p-2">
               {thisWeek.map((item) => {
-                const date = new Date(item.date);
+                const key = dayKey(item.date);
                 return (
                   <li key={item.id}>
                     <Link href={item.href} className="flex items-center gap-3.5 rounded-2xl p-2.5 transition-colors hover:bg-muted/60">
                       <span className="w-12 shrink-0 rounded-xl border border-border bg-background py-1 text-center">
-                        <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{format(date, "EEE")}</span>
-                        <span className="block text-lg font-extrabold tabular-nums">{format(date, "d")}</span>
+                        <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{weekdayOf(key)}</span>
+                        <span className="block text-lg font-extrabold tabular-nums">{Number(key.slice(8))}</span>
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-semibold">{item.title}</span>
@@ -273,7 +264,7 @@ export function HomeDashboard({
           <p className="mt-2 text-[15px] text-muted-foreground">Life is too short to remember what you had for lunch.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/calendar" className={buttonVariants({ variant: "secondary" })}>
+          <Link href="/review" className={buttonVariants({ variant: "secondary" })}>
             Review week
           </Link>
           <TaskFormDialog projects={projects.map((project) => ({ id: project.id, title: project.title }))} />
