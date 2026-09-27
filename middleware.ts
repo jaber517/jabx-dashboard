@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, expectedSessionToken } from "@/lib/auth-config";
+import { SESSION_COOKIE, readSessionCookie } from "@/lib/auth-config";
 import { isPrivateHost, privateNewsUrl } from "@/lib/hosts";
 
 const PRIVATE_PATHS = [
@@ -70,9 +70,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (decodedPath !== "/login") {
-    const session = request.cookies.get(SESSION_COOKIE)?.value;
-    const expected = await expectedSessionToken();
-    if (!session || !expected || session !== expected) {
+    // Signature and expiry only; the server also checks the session still
+    // exists (a device signed out in Settings is caught there).
+    const session = await readSessionCookie(request.cookies.get(SESSION_COOKIE)?.value);
+    if (!session) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.host = host;
       loginUrl.pathname = "/login";
@@ -84,9 +85,12 @@ export async function middleware(request: NextRequest) {
   // APIs stay at their real routes and also authenticate in their handlers.
   const destination = request.nextUrl.clone();
   destination.pathname = pathname === "/" ? "/dash/dashboard" : `/dash${pathname}`;
+  // The dashboard layout reads this to send revoked sessions to /login.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-jabx-path", decodedPath);
   const response = atPath(decodedPath, "/api")
     ? NextResponse.next()
-    : NextResponse.rewrite(destination);
+    : NextResponse.rewrite(destination, { request: { headers: requestHeaders } });
   response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;

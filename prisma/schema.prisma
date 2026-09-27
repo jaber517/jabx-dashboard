@@ -102,3 +102,38 @@ model Activity {
   projectId   String?
   project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
 }
+// Sign-in. These three tables are also created on demand by lib/auth-store.ts
+// (CREATE TABLE IF NOT EXISTS), so a deployed database needs no manual
+// migration. Keep the two in step.
+
+// One row per signed-in device. `id` is the SHA-256 of the random session
+// token in the cookie, so a leaked table can't be replayed as cookies.
+model AuthSession {
+  id         String   @id
+  method     String
+  userAgent  String   @default("")
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+}
+
+// A registered passkey (WebAuthn credential). Only the public key is stored.
+model Passkey {
+  id         String    @id
+  publicKey  String
+  counter    Int       @default(0)
+  transports String    @default("")
+  name       String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+}
+
+// Failed passcode attempts, for rate limiting and lockout.
+model LoginFailure {
+  id        String   @id @default(cuid())
+  ip        String
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([createdAt])
+}

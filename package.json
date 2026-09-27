@@ -18,6 +18,8 @@
     "@libsql/client": "^0.8.1",
     "@prisma/adapter-libsql": "^5.22.0",
     "@prisma/client": "^5.22.0",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -29,6 +31,7 @@
     "react-markdown": "^10.1.0",
     "recharts": "^2.13.0",
     "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {

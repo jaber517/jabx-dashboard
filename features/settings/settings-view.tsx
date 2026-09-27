@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth-actions";
+import { SecuritySettings, type SecurityData } from "@/features/settings/security-settings";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Light", icon: Sun },
@@ -23,8 +24,10 @@ export type SettingsStats = {
   resourceCount: number;
 };
 
-export function SettingsView({ stats }: { stats: SettingsStats }) {
-  const { theme, setTheme } = useTheme();
+export function SettingsView({ stats, security }: { stats: SettingsStats; security: SecurityData }) {
+  const { theme: storedTheme, setTheme } = useTheme();
+  // Nothing saved yet means the default, which follows the system.
+  const theme = storedTheme ?? "system";
 
   return (
     <div className="page-shell">
@@ -70,13 +73,13 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <CardTitle className="mt-2">Access</CardTitle>
-            <CardDescription>This dashboard is locked behind a passcode, just for you.</CardDescription>
+            <CardDescription>Passkeys are the everyday way in; the passcode is the backup.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm leading-6 text-muted-foreground">
-              Signing in keeps you in for 30 days on this device. To change the
-              passcode, update the <code>DASHBOARD_PASSWORD</code> value in the
-              project&apos;s environment variables and redeploy.
+              After 5 wrong passcodes an address is locked out for 15 minutes. To change the passcode,
+              update <code>DASHBOARD_PASSWORD</code> in the project&apos;s environment variables and
+              redeploy; that also signs out every device.
             </p>
             <form action={logout}>
               <Button type="submit" variant="secondary" className="gap-2">
@@ -86,6 +89,8 @@ export function SettingsView({ stats }: { stats: SettingsStats }) {
             </form>
           </CardContent>
         </Card>
+
+        <SecuritySettings passkeys={security.passkeys} sessions={security.sessions} />
 
         <Card className="lg:col-span-2">
           <CardHeader>
