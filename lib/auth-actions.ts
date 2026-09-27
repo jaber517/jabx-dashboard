@@ -76,13 +76,15 @@ export async function logout(): Promise<void> {
 // ------------------------------------------------------------- passkeys
 
 // The WebAuthn challenge rides in a short-lived signed cookie between the
-// "options" and "verify" steps, tagged with what it is for.
-const CHALLENGE_MINUTES = 5;
+// "options" and "verify" steps, tagged with what it is for. Sign-in gets
+// longer because the autofill request waits on the page until it is used.
+const CHALLENGE_MINUTES = { register: 5, login: 15 } as const;
 
 async function setChallenge(challenge: string, purpose: "register" | "login") {
-  const value = await sign(`${challenge}:${purpose}:${Date.now() + CHALLENGE_MINUTES * 60_000}`);
+  const minutes = CHALLENGE_MINUTES[purpose];
+  const value = await sign(`${challenge}:${purpose}:${Date.now() + minutes * 60_000}`);
   if (!value) throw new Error("Sign-in is not configured.");
-  cookies().set(CHALLENGE_COOKIE, value, { ...cookieBase, maxAge: CHALLENGE_MINUTES * 60 });
+  cookies().set(CHALLENGE_COOKIE, value, { ...cookieBase, maxAge: minutes * 60 });
 }
 
 async function takeChallenge(purpose: "register" | "login"): Promise<string> {
@@ -116,7 +118,9 @@ export async function passkeyRegistrationOptions() {
       id: key.id,
       transports: key.transports ? (key.transports.split(",") as never) : undefined
     })),
-    authenticatorSelection: { residentKey: "required", userVerification: "required" }
+    // "platform": save it on this device (iCloud Keychain, Windows Hello…)
+    // with Face ID / Touch ID, rather than offering a phone QR code.
+    authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", userVerification: "required" }
   });
   await setChallenge(options.challenge, "register");
   return options;

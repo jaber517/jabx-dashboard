@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { Fingerprint, KeyRound, MonitorSmartphone, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUndo } from "@/components/providers/undo-provider";
-import {
-  passkeyRegistrationOptions,
-  passkeyRegistrationVerify,
-  removePasskey,
-  signOutDevice,
-  signOutOtherDevices
-} from "@/lib/auth-actions";
+import { removePasskey, signOutDevice, signOutOtherDevices } from "@/lib/auth-actions";
+import { addPasskeyOnThisDevice } from "@/features/auth/passkey-client";
 import { formatRelativeDate } from "@/lib/formatters";
 
 export type SecurityData = {
@@ -37,24 +32,9 @@ export function SecuritySettings({ passkeys, sessions }: SecurityData) {
   function addPasskey() {
     setError("");
     startTransition(async () => {
-      try {
-        const optionsJSON = await passkeyRegistrationOptions();
-        const response = await startRegistration({ optionsJSON });
-        const result = await passkeyRegistrationVerify(response);
-        if (result.ok) notify("Passkey added. You can now sign in with it.");
-        else setError(result.error);
-      } catch (cause) {
-        const name = cause instanceof Error ? cause.name : "";
-        setError(
-          name === "NotAllowedError"
-            ? "Cancelled. Nothing was added."
-            : name === "InvalidStateError"
-              ? "This device already has a passkey for the dashboard."
-              : cause instanceof Error
-                ? cause.message
-                : "Couldn't add a passkey."
-        );
-      }
+      const result = await addPasskeyOnThisDevice();
+      if (result.ok) notify("Passkey added. Next time, pick it from the passcode field.");
+      else setError(result.error);
     });
   }
 
@@ -67,8 +47,8 @@ export function SecuritySettings({ passkeys, sessions }: SecurityData) {
           </div>
           <CardTitle className="mt-2">Passkeys</CardTitle>
           <CardDescription>
-            Sign in with Face ID, Touch ID or your device PIN. A passkey added on an iPhone or Mac syncs to your
-            other Apple devices through iCloud Keychain.
+            Sign in with Face ID, Touch ID or your device PIN. If your browser asks where to save the passkey,
+            choose iCloud Keychain: it then syncs to Safari, Chrome on your Mac and your iPhone.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
