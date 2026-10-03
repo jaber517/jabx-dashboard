@@ -150,6 +150,7 @@ export function HomeDashboard({
                     priority={{ label: getPriorityLabel(task.priority), tone: priorityTone[task.priority] }}
                     previousStatus={task.blocked ? "BLOCKED" : task.status}
                     repeat={task.repeat}
+                    checklist={task.checklist}
                   />
                 );
               })}

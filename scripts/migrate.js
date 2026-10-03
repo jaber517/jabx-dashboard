@@ -10,6 +10,8 @@
 const { createClient } = require("@libsql/client");
 
 const TABLES = [
+  `CREATE TABLE IF NOT EXISTS "ChecklistItem" ("id" TEXT NOT NULL PRIMARY KEY, "taskId" TEXT NOT NULL, "text" TEXT NOT NULL, "done" BOOLEAN NOT NULL DEFAULT false, "position" INTEGER NOT NULL DEFAULT 0, "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ChecklistItem_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "Task" ("id") ON DELETE CASCADE ON UPDATE CASCADE)`,
+  `CREATE INDEX IF NOT EXISTS "ChecklistItem_taskId_position_idx" ON "ChecklistItem"("taskId", "position")`,
   `CREATE TABLE IF NOT EXISTS "PushSubscription" ("id" TEXT NOT NULL PRIMARY KEY, "endpoint" TEXT NOT NULL, "p256dh" TEXT NOT NULL, "auth" TEXT NOT NULL, "userAgent" TEXT NOT NULL DEFAULT '', "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`
 ];
 

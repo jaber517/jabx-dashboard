@@ -9,6 +9,7 @@ import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import type { TaskRecord } from "@/types";
 import { TaskCardActions } from "@/features/tasks/task-card-actions";
 import { asRepeat, repeatLabels } from "@/lib/repeat";
+import { TaskChecklist } from "@/features/tasks/task-checklist";
 
 export function TaskDetailView({
   task,
@@ -33,32 +34,35 @@ export function TaskDetailView({
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5">
-                <TaskStatusIcon status={task.status} />
-                <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
-              </span>
-              <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
-              <Badge className="text-muted-foreground">{categoryLabels[task.category]}</Badge>
-              {task.blocked ? <Badge className="text-danger">Blocked</Badge> : null}
-            </div>
-            <CardTitle className="mt-2">Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm leading-6 text-muted-foreground">{task.description}</p>
-            {task.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={task.imageUrl}
-                alt=""
-                className="max-h-80 rounded-2xl border border-border object-cover"
-              />
-            ) : null}
-          </CardContent>
-        </Card>
+      <div className="grid items-start gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5">
+                  <TaskStatusIcon status={task.status} />
+                  <Badge className={taskStatusTone[task.status]}>{getTaskStatusLabel(task.status)}</Badge>
+                </span>
+                <Badge className={priorityTone[task.priority]}>{getPriorityLabel(task.priority)}</Badge>
+                <Badge className="text-muted-foreground">{categoryLabels[task.category]}</Badge>
+                {task.blocked ? <Badge className="text-danger">Blocked</Badge> : null}
+              </div>
+              <CardTitle className="mt-2">Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm leading-6 text-muted-foreground">{task.description}</p>
+              {task.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={task.imageUrl}
+                  alt=""
+                  className="max-h-80 rounded-2xl border border-border object-cover"
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+          <TaskChecklist taskId={task.id} items={task.checklistItems ?? []} taskDone={task.status === "DONE"} />
+        </div>
 
         <Card className="h-fit">
           <CardHeader>

@@ -53,9 +53,18 @@ function mapTask(task: {
   projectId: string | null;
   project?: { id: string; title: string; slug: string } | null;
   repeat?: string;
+  checklist?: { done: boolean; id?: string; text?: string }[];
 }): TaskRecord {
+  const { checklist, ...rest } = task;
   return {
-    ...task,
+    ...rest,
+    checklist: checklist
+      ? { done: checklist.filter((item) => item.done).length, total: checklist.length }
+      : { done: 0, total: 0 },
+    // Full items only where they were loaded (the task page).
+    checklistItems: checklist?.every((item) => item.id && item.text !== undefined)
+      ? checklist.map((item) => ({ id: item.id as string, text: item.text as string, done: item.done }))
+      : undefined,
     status: choice(task.status, TASK_STATUSES, "TODO"),
     priority: choice(task.priority, TASK_PRIORITIES, "MEDIUM"),
     category: choice(task.category, PROJECT_CATEGORIES, "PERSONAL"),
@@ -228,7 +237,8 @@ export async function getHomePageData() {
         }),
         db.task.findMany({
           include: {
-            project: true
+            project: true,
+            checklist: { select: { done: true } }
           },
           orderBy: [{ dueDate: "asc" }, { updatedAt: "desc" }]
         }),
@@ -357,7 +367,8 @@ export async function getTasksData() {
   return withFallback(async () => {
     const tasks = await db.task.findMany({
       include: {
-        project: true
+        project: true,
+        checklist: { select: { done: true } }
       },
       orderBy: [{ dueDate: "asc" }, { updatedAt: "desc" }]
     });
@@ -370,7 +381,7 @@ export async function getTaskDetail(id: string) {
   return withFallback(async () => {
     const task = await db.task.findUnique({
       where: { id },
-      include: { project: true }
+      include: { project: true, checklist: { orderBy: [{ position: "asc" }, { createdAt: "asc" }] } }
     });
 
     return task ? mapTask(task as Parameters<typeof mapTask>[0]) : null;

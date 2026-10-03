@@ -101,6 +101,41 @@ test.describe("signed in", () => {
     await expect(column(page, "Done").locator("article", { hasText: title })).toHaveCount(0);
   });
 
+  test("checklist: create with steps, tick them all, mark the task done", async ({ page }) => {
+    const title = `Checklist task ${Date.now()}`;
+    await page.goto("/tasks");
+
+    await page.getByRole("button", { name: "Add Task" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "Add Task" });
+    await dialog.getByLabel("Title").fill(title);
+    await dialog.getByLabel("Steps (optional)").fill("- Book the room\n- Send the agenda");
+    await dialog.getByRole("button", { name: /save|add|create/i }).last().click();
+    await expect(dialog).toBeHidden();
+
+    const card = page.locator("article", { hasText: title });
+    await expect(card).toContainText("0/2");
+
+    // On the task page: add a third step, then tick all three.
+    await card.getByRole("link", { name: title }).click();
+    const steps = page.getByRole("list", { name: "Steps" });
+    await expect(steps.getByRole("listitem")).toHaveCount(2);
+    await expect(steps).toContainText("Book the room"); // bullet mark stripped
+    await page.getByLabel("Add a step").fill("Print handouts");
+    await page.keyboard.press("Enter");
+    await expect(steps.getByRole("listitem")).toHaveCount(3);
+    await expect(page.getByText("0 of 3")).toBeVisible();
+
+    for (const text of ["Book the room", "Send the agenda", "Print handouts"]) {
+      await steps.getByRole("checkbox", { name: `Tick “${text}”` }).check();
+    }
+    await expect(page.getByText("3 of 3")).toBeVisible();
+    await page.getByRole("status").filter({ hasText: "All steps done" }).getByRole("button", { name: "Mark task done" }).click();
+
+    // Back on the board: the task is done with a full checklist.
+    await page.goto("/tasks");
+    await expect(column(page, "Done").locator("article", { hasText: title })).toContainText("3/3");
+  });
+
   test("⌘K opens the palette with create actions", async ({ page }) => {
     await page.keyboard.press("ControlOrMeta+k");
     const palette = page.getByRole("dialog", { name: "Search" });

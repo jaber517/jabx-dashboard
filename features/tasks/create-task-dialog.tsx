@@ -50,6 +50,12 @@ export function TaskFormDialog({
         />
       </DialogField>
 
+      {task ? null : (
+        <DialogField label="Steps (optional)">
+          <Textarea name="checklist" placeholder={"One step per line, e.g.\nBook the room\nSend the agenda"} className="min-h-[5.5rem]" />
+        </DialogField>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <DialogField label="Category">
           <Select name="category" defaultValue={task?.category ?? "PERSONAL"}>

@@ -3,6 +3,7 @@
 import { useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useUndo } from "@/components/providers/undo-provider";
+import { ChecklistProgress } from "@/components/ui/checklist-progress";
 import { RepeatLabel } from "@/components/ui/repeat-label";
 import { setTaskDone, setTaskStatus } from "@/lib/actions";
 import { cn } from "@/lib/utils";
@@ -17,7 +18,8 @@ export function NextUpTask({
   overdue,
   priority,
   previousStatus,
-  repeat = ""
+  repeat = "",
+  checklist
 }: {
   id: string;
   title: string;
@@ -28,6 +30,7 @@ export function NextUpTask({
   priority: { label: string; tone: string };
   previousStatus: string;
   repeat?: string;
+  checklist?: { done: number; total: number };
 }) {
   const { notify } = useUndo();
   const [pending, startTransition] = useTransition();
@@ -63,6 +66,7 @@ export function NextUpTask({
           <span className={cn("h-2 w-2 shrink-0 rounded-full", dot)} aria-hidden="true" />
           {meta}
           <RepeatLabel repeat={repeat} className="ml-1.5" />
+          {checklist ? <ChecklistProgress done={checklist.done} total={checklist.total} className="ml-1.5" /> : null}
         </p>
       </div>
       <span

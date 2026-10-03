@@ -31,7 +31,7 @@ async function main() {
   console.log(`Restoring backup from ${backup.createdAt} into ${url.startsWith("file:") ? url : "Turso"}…`);
 
   // Children before parents when deleting, parents before children when inserting.
-  const order = ["Project", "Task", "Note", "Milestone", "ResourceLink", "Activity", "Passkey"];
+  const order = ["Project", "Task", "ChecklistItem", "Note", "Milestone", "ResourceLink", "Activity", "Passkey"];
   const tables = Object.keys(backup.tables).sort((a, b) => {
     const ia = order.indexOf(a) === -1 ? order.length : order.indexOf(a);
     const ib = order.indexOf(b) === -1 ? order.length : order.indexOf(b);

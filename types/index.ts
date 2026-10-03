@@ -58,7 +58,13 @@ export type TaskRecord = {
   project: ProjectLink | null;
   /** "", DAILY, WEEKDAYS, WEEKLY, MONTHLY or YEARLY (lib/repeat.ts). */
   repeat: string;
+  /** Checklist progress (0/0 when the task has no checklist). */
+  checklist: { done: number; total: number };
+  /** The steps themselves, loaded on the task page only. */
+  checklistItems?: ChecklistItemRecord[];
 };
+
+export type ChecklistItemRecord = { id: string; text: string; done: boolean };
 
 export type NoteRecord = {
   id: string;

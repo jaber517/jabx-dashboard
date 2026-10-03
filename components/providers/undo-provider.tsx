@@ -6,13 +6,13 @@ import { X } from "lucide-react";
 
 const UNDO_WINDOW = 6000;
 
-type Toast = { key: number; message: string; undo?: () => void };
+type Toast = { key: number; message: string; undo?: () => void; actionLabel?: string };
 
 type UndoApi = {
   /** Hide an item now and delete it after the undo window unless undone. */
   scheduleDelete: (options: { id: string; message: string; run: () => Promise<unknown> }) => void;
-  /** Show a short confirmation, optionally with an Undo button. */
-  notify: (message: string, undo?: () => void) => void;
+  /** Show a short confirmation, optionally with a button (Undo by default). */
+  notify: (message: string, undo?: () => void, actionLabel?: string) => void;
   isPendingDelete: (id: string) => boolean;
 };
 
@@ -58,9 +58,9 @@ export function UndoProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const show = useCallback(
-    (message: string, undo?: () => void) => {
+    (message: string, undo?: () => void, actionLabel?: string) => {
       const key = ++nextKey.current;
-      setToasts((current) => [...current.slice(-2), { key, message, undo }]);
+      setToasts((current) => [...current.slice(-2), { key, message, undo, actionLabel }]);
       setTimeout(() => dismiss(key), UNDO_WINDOW);
       return key;
     },
@@ -116,7 +116,7 @@ export function UndoProvider({ children }: { children: ReactNode }) {
 
   const api: UndoApi = {
     scheduleDelete,
-    notify: (message, undo) => void show(message, undo),
+    notify: (message, undo, actionLabel) => void show(message, undo, actionLabel),
     isPendingDelete: (id) => pending.has(id)
   };
 
@@ -141,9 +141,9 @@ export function UndoProvider({ children }: { children: ReactNode }) {
                   toast.undo?.();
                   dismiss(toast.key);
                 }}
-                className="h-9 rounded-xl px-3 font-semibold text-primary hover:bg-muted"
+                className="h-9 shrink-0 rounded-xl px-3 font-semibold text-primary hover:bg-muted"
               >
-                Undo
+                {toast.actionLabel ?? "Undo"}
               </button>
             ) : null}
             <button

@@ -52,6 +52,20 @@ model Task {
   // The next occurrence created when this one was completed, so reopening
   // it can take that occurrence back.
   nextTaskId  String?
+  checklist   ChecklistItem[]
+}
+
+// A step inside a task. Ordered by `position`; removed with its task.
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  text      String
+  done      Boolean  @default(false)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([taskId, position])
 }
 
 model Note {

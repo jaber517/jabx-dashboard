@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
+import { ChecklistProgress } from "@/components/ui/checklist-progress";
 import { RepeatLabel } from "@/components/ui/repeat-label";
 import { TaskStatusIcon } from "@/components/ui/task-status-icon";
 import { useUndo } from "@/components/providers/undo-provider";
@@ -378,6 +379,7 @@ export function TasksView({
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <ProjectLine task={task} />
                           <RepeatLabel repeat={task.repeat} />
+                    <ChecklistProgress done={task.checklist.done} total={task.checklist.total} />
                         </div>
                         {columnFor(task) === "BLOCKED" && task.description ? (
                           <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">{task.description}</p>
@@ -422,6 +424,7 @@ export function TasksView({
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <ProjectLine task={task} />
                     <RepeatLabel repeat={task.repeat} />
+                    <ChecklistProgress done={task.checklist.done} total={task.checklist.total} />
                   </div>
                 </div>
                 <Badge className={taskStatusTone[column]}>{getTaskStatusLabel(column)}</Badge>

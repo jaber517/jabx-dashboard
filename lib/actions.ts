@@ -203,7 +203,7 @@ export async function createTask(
 
     const projectId = optionalProjectId(formData);
 
-    await db.task.create({
+    const created = await db.task.create({
       data: {
         title,
         description,
@@ -218,6 +218,12 @@ export async function createTask(
       }
     });
 
+    const steps = checklistLines(formData.get("checklist"));
+    if (steps.length > 0) {
+      await db.checklistItem.createMany({
+        data: steps.map((text, position) => ({ taskId: created.id, text, position }))
+      });
+    }
     revalidatePath("/dash/tasks");
     revalidatePath("/dash/dashboard");
     revalidatePath("/dash/projects");
@@ -279,6 +285,7 @@ export async function updateTask(
 
 export async function deleteTask(id: string): Promise<void> {
   await assertAuthed();
+  await db.checklistItem.deleteMany({ where: { taskId: id } });
   const task = await db.task.delete({ where: { id } });
   await removePhoto(task.imageUrl);
   revalidatePath("/dash/tasks");
@@ -326,9 +333,19 @@ async function followRepeat(task: RepeatingTask, previousStatus: string | undefi
         dueDate: due ? new Date(`${due}T00:00:00.000Z`) : null
       }
     });
+    const steps = await db.checklistItem.findMany({ where: { taskId: task.id }, orderBy: { position: "asc" } });
+    if (steps.length > 0) {
+      await db.checklistItem.createMany({
+        data: steps.map((step, position) => ({ taskId: next.id, text: step.text, position }))
+      });
+    }
     await db.task.update({ where: { id: task.id }, data: { nextTaskId: next.id } });
   } else if (previousStatus === "DONE" && task.status !== "DONE" && task.nextTaskId) {
-    await db.task.deleteMany({ where: { id: task.nextTaskId, status: "TODO" } });
+    const untouched = await db.task.findFirst({ where: { id: task.nextTaskId, status: "TODO" }, select: { id: true } });
+    if (untouched) {
+      await db.checklistItem.deleteMany({ where: { taskId: untouched.id } });
+      await db.task.delete({ where: { id: untouched.id } });
+    }
     await db.task.update({ where: { id: task.id }, data: { nextTaskId: null } });
   }
 }
@@ -549,4 +566,77 @@ export async function deleteResource(id: string): Promise<void> {
   revalidatePath("/dash/resources");
   revalidatePath("/dash/dashboard");
   if (resource.projectId) revalidatePath(`/dash/projects/${resource.projectId}`);
+}
+
+// ------------------------------------------------------------ checklists
+
+const MAX_STEP_LENGTH = 300;
+const MAX_STEPS = 100;
+
+/** Non-empty lines of a pasted or typed list, without bullet marks. */
+function checklistLines(value: FormDataEntryValue | string | null): string[] {
+  if (typeof value !== "string") return [];
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*(?:[-*•]|\[[ xX]?\]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
+    .map((line) => line.slice(0, MAX_STEP_LENGTH))
+    .slice(0, MAX_STEPS);
+}
+
+async function revalidateChecklist(taskId: string) {
+  const task = await db.task.findUnique({ where: { id: taskId }, select: { projectId: true } });
+  revalidateTaskPaths(task?.projectId ?? null);
+  revalidatePath(`/dash/tasks/${taskId}`);
+}
+
+/** Adds one step, or several when `text` has several lines. */
+export async function addChecklistItems(taskId: string, text: string): Promise<{ ok: boolean; error?: string }> {
+  await assertAuthed();
+  const steps = checklistLines(text);
+  if (steps.length === 0) return { ok: false, error: "Type a step first." };
+  const existing = await db.checklistItem.count({ where: { taskId } });
+  if (existing + steps.length > MAX_STEPS) return { ok: false, error: `A checklist can have up to ${MAX_STEPS} steps.` };
+  const last = await db.checklistItem.findFirst({ where: { taskId }, orderBy: { position: "desc" }, select: { position: true } });
+  const start = (last?.position ?? -1) + 1;
+  await db.checklistItem.createMany({
+    data: steps.map((step, index) => ({ taskId, text: step, position: start + index }))
+  });
+  await revalidateChecklist(taskId);
+  return { ok: true };
+}
+
+/** Ticks or unticks a step; reports whether every step is now done. */
+export async function setChecklistItemDone(id: string, done: boolean): Promise<{ allDone: boolean }> {
+  await assertAuthed();
+  const item = await db.checklistItem.update({ where: { id }, data: { done } });
+  const remaining = await db.checklistItem.count({ where: { taskId: item.taskId, done: false } });
+  await revalidateChecklist(item.taskId);
+  return { allDone: remaining === 0 };
+}
+
+export async function renameChecklistItem(id: string, text: string): Promise<void> {
+  await assertAuthed();
+  const value = text.trim().slice(0, MAX_STEP_LENGTH);
+  if (!value) return;
+  const item = await db.checklistItem.update({ where: { id }, data: { text: value } });
+  await revalidateChecklist(item.taskId);
+}
+
+export async function deleteChecklistItem(id: string): Promise<void> {
+  await assertAuthed();
+  const item = await db.checklistItem.findUnique({ where: { id }, select: { taskId: true } });
+  if (!item) return;
+  await db.checklistItem.delete({ where: { id } });
+  await revalidateChecklist(item.taskId);
+}
+
+/** Saves a new order: `ids` is the task's steps, top to bottom. */
+export async function reorderChecklist(taskId: string, ids: string[]): Promise<void> {
+  await assertAuthed();
+  const owned = await db.checklistItem.findMany({ where: { taskId }, select: { id: true } });
+  const ownedIds = new Set(owned.map((item) => item.id));
+  const order = ids.filter((id) => ownedIds.has(id));
+  await db.$transaction(order.map((id, position) => db.checklistItem.update({ where: { id }, data: { position } })));
+  await revalidateChecklist(taskId);
 }
