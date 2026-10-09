@@ -16,7 +16,8 @@ const PRIVATE_PATHS = [
   "/api/search",
   "/api/files",
   "/api/backups",
-  "/api/ai-news"
+  "/api/ai-news",
+  "/api/team"
 ];
 
 const PUBLIC_ASSETS = new Set([
@@ -91,9 +92,11 @@ export async function middleware(request: NextRequest) {
   // The dashboard layout reads this to send revoked sessions to /login.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-jabx-path", decodedPath);
-  const response = atPath(decodedPath, "/api")
-    ? NextResponse.next()
-    : NextResponse.rewrite(destination, { request: { headers: requestHeaders } });
+  const response = atPath(decodedPath, "/api/team")
+    ? NextResponse.rewrite(destination, { request: { headers: requestHeaders } })
+    : atPath(decodedPath, "/api")
+      ? NextResponse.next()
+      : NextResponse.rewrite(destination, { request: { headers: requestHeaders } });
   response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;

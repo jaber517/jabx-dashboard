@@ -12,7 +12,7 @@ import {
   type RegistrationResponseJSON
 } from "@simplewebauthn/server";
 import { isPrivateHost } from "@/lib/hosts";
-import { CHALLENGE_COOKIE, SESSION_COOKIE, sign, unsign, verifyPasscode } from "@/lib/auth-config";
+import { SESSION_COOKIE, verifyPasscode } from "@/lib/auth-config";
 import {
   clearFailures,
   createSession,
@@ -28,6 +28,7 @@ import {
 } from "@/lib/auth-store";
 import { assertAuthed, clientIp, currentSessionId, relyingParty, userAgent } from "@/lib/auth";
 import { deviceName } from "@/lib/device-name";
+import { setWebAuthnChallenge, takeWebAuthnChallenge } from "@/lib/webauthn-challenge";
 
 function requirePrivateHost() {
   if (!isPrivateHost(headers().get("host") ?? "")) notFound();
@@ -75,28 +76,6 @@ export async function logout(): Promise<void> {
 
 // ------------------------------------------------------------- passkeys
 
-// The WebAuthn challenge rides in a short-lived signed cookie between the
-// "options" and "verify" steps, tagged with what it is for. Sign-in gets
-// longer because the autofill request waits on the page until it is used.
-const CHALLENGE_MINUTES = { register: 5, login: 15 } as const;
-
-async function setChallenge(challenge: string, purpose: "register" | "login") {
-  const minutes = CHALLENGE_MINUTES[purpose];
-  const value = await sign(`${challenge}:${purpose}:${Date.now() + minutes * 60_000}`);
-  if (!value) throw new Error("Sign-in is not configured.");
-  cookies().set(CHALLENGE_COOKIE, value, { ...cookieBase, maxAge: minutes * 60 });
-}
-
-async function takeChallenge(purpose: "register" | "login"): Promise<string> {
-  const payload = await unsign(cookies().get(CHALLENGE_COOKIE)?.value);
-  cookies().delete(CHALLENGE_COOKIE);
-  const [challenge, forPurpose, expires] = payload?.split(":") ?? [];
-  if (!challenge || forPurpose !== purpose || Number(expires) < Date.now()) {
-    throw new Error("That took too long. Please try again.");
-  }
-  return challenge;
-}
-
 type Result = { ok: true } | { ok: false; error: string };
 
 const USER_ID = new TextEncoder().encode("jabx-dashboard-owner");
@@ -122,7 +101,7 @@ export async function passkeyRegistrationOptions() {
     // with Face ID / Touch ID, rather than offering a phone QR code.
     authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", userVerification: "required" }
   });
-  await setChallenge(options.challenge, "register");
+  await setWebAuthnChallenge(options.challenge, "register");
   return options;
 }
 
@@ -134,7 +113,7 @@ export async function passkeyRegistrationVerify(response: RegistrationResponseJS
     const { rpID, origin } = relyingParty();
     const verification = await verifyRegistrationResponse({
       response,
-      expectedChallenge: await takeChallenge("register"),
+      expectedChallenge: await takeWebAuthnChallenge("register"),
       expectedOrigin: origin,
       expectedRPID: rpID,
       requireUserVerification: true
@@ -160,7 +139,7 @@ export async function passkeyLoginOptions() {
   requirePrivateHost();
   const { rpID } = relyingParty();
   const options = await generateAuthenticationOptions({ rpID, userVerification: "required" });
-  await setChallenge(options.challenge, "login");
+  await setWebAuthnChallenge(options.challenge, "login");
   return options;
 }
 
@@ -173,7 +152,7 @@ export async function passkeyLoginVerify(response: AuthenticationResponseJSON): 
     if (!passkey) return { ok: false, error: "This passkey isn't registered here. Sign in with your passcode, then add it in Settings." };
     const verification = await verifyAuthenticationResponse({
       response,
-      expectedChallenge: await takeChallenge("login"),
+      expectedChallenge: await takeWebAuthnChallenge("login"),
       expectedOrigin: origin,
       expectedRPID: rpID,
       requireUserVerification: true,

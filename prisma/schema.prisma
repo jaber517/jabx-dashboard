@@ -167,3 +167,11 @@ model PushSubscription {
   userAgent String   @default("")
   createdAt DateTime @default(now())
 }
+
+// Durable laptop reachability for the AI Team tab. There is one well-known row.
+model TeamPresence {
+  id                    String    @id @default("laptop")
+  lastSeenAt            DateTime?
+  lastCheckAt           DateTime?
+  lastRunnerHeartbeatAt DateTime?
+}
