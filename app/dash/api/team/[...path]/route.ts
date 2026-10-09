@@ -5,7 +5,7 @@ import { listPasskeys } from "@/lib/auth-store";
 import { teamBridgeRequest } from "@/lib/team-bridge";
 import { isTeamApiResponse, isTeamHealth } from "@/lib/team-contracts";
 import { getTeamPresence, recordTeamBridgeSuccess } from "@/lib/team-presence";
-import { resolveTeamRoute } from "@/lib/team-route-policy";
+import { isSameOrigin, resolveTeamRoute } from "@/lib/team-route-policy";
 import { readTeamStepUpCookieValue, TEAM_STEP_UP_COOKIE } from "@/lib/team-step-up-cookie";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ function json(body: unknown, status = 200) {
 }
 
 function sameOrigin(request: Request): boolean {
-  return request.headers.get("origin") === new URL(request.url).origin;
+  return isSameOrigin(request.headers.get("origin"), request.headers.get("host"), request.headers.get("x-forwarded-host"));
 }
 
 async function stepUpTime(): Promise<number | null> {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { resolveTeamRoute } from "../lib/team-route-policy";
+import { isSameOrigin, resolveTeamRoute } from "../lib/team-route-policy";
 
 const ALLOWED: Array<["GET" | "POST", string[], string?]> = [
   ["GET", ["snapshot"]],
@@ -51,4 +51,16 @@ test("only decision, start and cancel require step-up", () => {
     const expected = method === "POST" && ["decision", "start", "cancel"].includes(segments.at(-1) ?? "");
     assert.equal(route.requiresStepUp, expected);
   }
+});
+
+test("same-origin check compares Origin with the Host the request arrived on", () => {
+  assert.equal(isSameOrigin("https://dash.jabx.me", "dash.jabx.me"), true);
+  assert.equal(isSameOrigin("http://dash.localhost:3100", "dash.localhost:3100"), true);
+  assert.equal(isSameOrigin("https://dash.jabx.me", "internal.vercel", "dash.jabx.me"), true);
+  assert.equal(isSameOrigin("https://evil.example", "dash.jabx.me"), false);
+  assert.equal(isSameOrigin("https://dash.jabx.me.evil.example", "dash.jabx.me"), false);
+  assert.equal(isSameOrigin("https://dash.jabx.me:8443", "dash.jabx.me"), false);
+  assert.equal(isSameOrigin(null, "dash.jabx.me"), false);
+  assert.equal(isSameOrigin("not a url", "dash.jabx.me"), false);
+  assert.equal(isSameOrigin("javascript:alert(1)", "dash.jabx.me"), false);
 });

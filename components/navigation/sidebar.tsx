@@ -19,13 +19,17 @@ import {
   Search,
   SlidersHorizontal,
   SquareCheckBig,
+  Users,
   X,
   type LucideIcon
 } from "lucide-react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { MacbookOffline } from "@/components/icons/macbook-offline";
 import { openCreate } from "@/components/navigation/global-create";
 import { GlobalSearch, openSearch } from "@/components/navigation/global-search";
-import { allNavItems, navigationGroups, settingsNavItem, type NavIcon, type NavItem } from "@/lib/constants";
+import { useTeamPresence } from "@/features/ai-team/presence";
+import { presenceDot } from "@/features/ai-team/status";
+import { allNavItems, navigationGroups, phoneTabHrefs, settingsNavItem, type NavIcon, type NavItem } from "@/lib/constants";
 import { logout } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
@@ -40,11 +44,12 @@ const icons: Record<NavIcon, LucideIcon> = {
   activity: Activity,
   news: Newspaper,
   resources: Link2,
+  team: Users,
   settings: SlidersHorizontal
 };
 
 const publicSite = process.env.NEXT_PUBLIC_PUBLIC_SITE_URL || "https://jabx.me";
-const tabItems: NavItem[] = navigationGroups[0].items.slice(0, 4);
+const tabItems: NavItem[] = phoneTabHrefs.map((href) => allNavItems.find((item) => item.href === href)!);
 const moreItems = allNavItems.filter((item) => !tabItems.some((tab) => tab.href === item.href));
 
 function useIsActive() {
@@ -61,6 +66,38 @@ function LogoutButton({ className }: { className?: string }) {
         Log out
       </button>
     </form>
+  );
+}
+
+// The nav icon for an item. AI Team carries a dot for the laptop: green when online, muted
+// grey when offline (the icon becomes the MacBook-offline mark). The dot is positioned over
+// the icon, so it never shifts the layout when it appears.
+function NavItemIcon({ item, className }: { item: NavItem; className: string }) {
+  if (item.icon === "team") return <TeamIcon className={className} />;
+  const Icon = icons[item.icon];
+  return <Icon className={className} aria-hidden="true" />;
+}
+
+function TeamIcon({ className }: { className: string }) {
+  const presence = useTeamPresence();
+  const dot = presenceDot(presence.online);
+  return (
+    <span className="relative inline-flex">
+      {presence.online === false ? (
+        <MacbookOffline simple color="currentColor" screen="hsl(var(--surface))" className={className} />
+      ) : (
+        <Users className={className} aria-hidden="true" />
+      )}
+      {dot ? (
+        <>
+          <span
+            className={cn("absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-surface", dot.className)}
+            aria-hidden="true"
+          />
+          <span className="sr-only">MacBook {dot.label}: </span>
+        </>
+      ) : null}
+    </span>
   );
 }
 
@@ -105,7 +142,6 @@ export function Sidebar({ counts }: { counts?: NavCounts }) {
               {group.label}
             </p>
             {group.items.map((item) => {
-              const Icon = icons[item.icon];
               const active = isActive(item.href);
               return (
                 <Link
@@ -117,7 +153,7 @@ export function Sidebar({ counts }: { counts?: NavCounts }) {
                     active ? "bg-muted font-semibold text-primary" : "text-foreground hover:bg-muted/60"
                   )}
                 >
-                  <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                  <NavItemIcon item={item} className="h-[18px] w-[18px]" />
                   {item.label}
                   {item.href === "/tasks" ? <TaskCount counts={counts} /> : null}
                 </Link>
@@ -202,7 +238,6 @@ export function MobileNavigation() {
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         {tabItems.map((item) => {
-          const Icon = icons[item.icon];
           const active = isActive(item.href);
           return (
             <Link
@@ -214,7 +249,7 @@ export function MobileNavigation() {
                 active ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <Icon className="h-[22px] w-[22px]" aria-hidden="true" />
+              <NavItemIcon item={item} className="h-[22px] w-[22px]" />
               {item.label}
             </Link>
           );
@@ -258,7 +293,6 @@ export function MobileNavigation() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {moreItems.map((item) => {
-                const Icon = icons[item.icon];
                 const active = isActive(item.href);
                 return (
                   <Link
@@ -270,7 +304,7 @@ export function MobileNavigation() {
                       active ? "text-primary" : "text-foreground"
                     )}
                   >
-                    <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                    <NavItemIcon item={item} className="h-[18px] w-[18px]" />
                     {item.label}
                   </Link>
                 );

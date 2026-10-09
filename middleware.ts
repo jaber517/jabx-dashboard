@@ -12,6 +12,7 @@ const PRIVATE_PATHS = [
   "/resources",
   "/settings",
   "/review",
+  "/ai-team",
   "/login",
   "/api/search",
   "/api/files",
@@ -24,6 +25,10 @@ const PUBLIC_ASSETS = new Set([
   "/icon.png", "/apple-icon.png", "/manifest.webmanifest", "/sw.js",
   "/jabx-logo-header.jpg", "/logo.jpg"
 ]);
+
+// Team portraits are already public on the site (/team); the AI Team tab needs them on the
+// private host too. Only these image files, never the /team page itself.
+const TEAM_PORTRAIT = /^\/team\/[a-z-]+\.(jpg|svg)$/;
 
 function atPath(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -68,7 +73,7 @@ export async function middleware(request: NextRequest) {
   if (!privateHost) return NextResponse.next();
 
   // The daily backup job authenticates with CRON_SECRET in its own handler.
-  if (PUBLIC_ASSETS.has(decodedPath) || decodedPath === "/api/health" || atPath(decodedPath, "/api/cron") ||
+  if (PUBLIC_ASSETS.has(decodedPath) || TEAM_PORTRAIT.test(decodedPath) || decodedPath === "/api/health" || atPath(decodedPath, "/api/cron") ||
       decodedPath.startsWith("/_next/") || decodedPath.startsWith("/static/")) {
     return NextResponse.next();
   }

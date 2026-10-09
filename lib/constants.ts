@@ -88,8 +88,8 @@ export const recordTypeTone: Record<string, string> = {
   Resource: "text-tone-amber"
 };
 
-// Dashboard navigation, grouped as the sidebar shows it. The first four
-// Workspace items are also the phone tab bar; everything else sits under More.
+// Dashboard navigation, grouped as the sidebar shows it. The phone tab bar
+// shows phoneTabHrefs in that order; everything else sits under More.
 export const navigationGroups = [
   {
     label: "Workspace",
@@ -100,6 +100,10 @@ export const navigationGroups = [
       { href: "/notes", label: "Notes", icon: "notes" },
       { href: "/calendar", label: "Calendar", icon: "calendar" }
     ]
+  },
+  {
+    label: "Team",
+    items: [{ href: "/ai-team", label: "AI Team", icon: "team" }]
   },
   {
     label: "Insight",
@@ -115,6 +119,8 @@ export const navigationGroups = [
     items: [{ href: "/resources", label: "Resources", icon: "resources" }]
   }
 ] as const;
+
+export const phoneTabHrefs = ["/dashboard", "/tasks", "/projects", "/ai-team"] as const;
 
 export const settingsNavItem = { href: "/settings", label: "Settings", icon: "settings" } as const;
 

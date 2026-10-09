@@ -66,3 +66,19 @@ export function resolveTeamRoute(method: string, segments: string[], rawSearch =
     requiresStepUp: method === "POST" && STEP_UP_PATTERNS.some((pattern) => matches(segments, pattern))
   };
 }
+
+/**
+ * CSRF check for POSTs: the browser's Origin must be exactly this site's host. Compared with
+ * the Host the request arrived on (x-forwarded-host first, as set by Vercel), not request.url,
+ * which behind a rewrite or a local server can name an internal host.
+ */
+export function isSameOrigin(origin: string | null, host: string | null, forwardedHost: string | null = null): boolean {
+  const expected = (forwardedHost?.split(",")[0] || host || "").trim().toLowerCase();
+  if (!origin || !expected) return false;
+  try {
+    const parsed = new URL(origin);
+    return (parsed.protocol === "https:" || parsed.protocol === "http:") && parsed.host.toLowerCase() === expected;
+  } catch {
+    return false;
+  }
+}
