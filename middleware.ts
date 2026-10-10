@@ -13,6 +13,7 @@ const PRIVATE_PATHS = [
   "/settings",
   "/review",
   "/ai-team",
+  "/studio",
   "/login",
   "/api/search",
   "/api/files",

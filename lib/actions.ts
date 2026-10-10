@@ -12,6 +12,7 @@ import {
   TASK_PRIORITIES,
   TASK_STATUSES
 } from "@/types";
+import { STUDIO_STAGES } from "@/lib/studio-leads";
 
 export type CreateResult = {
   ok: boolean;
@@ -640,3 +641,47 @@ export async function reorderChecklist(taskId: string, ids: string[]): Promise<v
   await db.$transaction(order.map((id, position) => db.checklistItem.update({ where: { id }, data: { position } })));
   await revalidateChecklist(taskId);
 }
+
+/** Updates a lead's sales pipeline stage and optional note. */
+export async function updateLeadStage(
+  leadId: string,
+  stage: string,
+  note?: string | null
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await assertAuthed();
+
+    if (!leadId || typeof leadId !== "string" || leadId.trim().length === 0) {
+      return { ok: false, error: "Lead ID is required." };
+    }
+
+    if (!(STUDIO_STAGES as readonly string[]).includes(stage)) {
+      return { ok: false, error: "Invalid pipeline stage." };
+    }
+
+    const trimmedNote = typeof note === "string" && note.trim().length > 0 ? note.trim() : null;
+
+    await db.leadStage.upsert({
+      where: { leadId: leadId.trim() },
+      create: {
+        leadId: leadId.trim(),
+        stage,
+        note: trimmedNote
+      },
+      update: {
+        stage,
+        note: trimmedNote
+      }
+    });
+
+    revalidatePath("/dash/studio");
+    revalidatePath("/studio");
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Failed to update lead stage."
+    };
+  }
+}
+

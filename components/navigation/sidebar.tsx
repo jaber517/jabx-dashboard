@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
+  Briefcase,
   CalendarCheck,
   CalendarDays,
   Ellipsis,
@@ -45,6 +46,7 @@ const icons: Record<NavIcon, LucideIcon> = {
   news: Newspaper,
   resources: Link2,
   team: Users,
+  studio: Briefcase,
   settings: SlidersHorizontal
 };
 

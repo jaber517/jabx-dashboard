@@ -103,7 +103,10 @@ export const navigationGroups = [
   },
   {
     label: "Team",
-    items: [{ href: "/ai-team", label: "AI Team", icon: "team" }]
+    items: [
+      { href: "/ai-team", label: "AI Team", icon: "team" },
+      { href: "/studio", label: "Studio", icon: "studio" }
+    ]
   },
   {
     label: "Insight",

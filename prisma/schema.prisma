@@ -175,3 +175,12 @@ model TeamPresence {
   lastCheckAt           DateTime?
   lastRunnerHeartbeatAt DateTime?
 }
+
+// Lead sales pipeline stage and notes.
+model LeadStage {
+  leadId    String   @id
+  stage     String
+  note      String?
+  updatedAt DateTime @updatedAt
+}
+
