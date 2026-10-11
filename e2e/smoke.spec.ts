@@ -206,9 +206,9 @@ test.describe("public site", () => {
     await expect(empty.getByText("Please enter your name.")).toBeVisible();
     await expect(empty.getByLabel("Your name")).toBeFocused();
 
-    const form = await fillValid(page, "Too short");
+    const form = await fillValid(page, "Website");
     await form.getByRole("button", { name: "Send request" }).click();
-    await expect(form.getByText("at least 20 characters")).toBeVisible();
+    await expect(form.getByText("A few more words would help us understand.")).toBeVisible();
     expect(body).toBeNull();
 
     await form.getByLabel("What problem do you want to solve?").fill("Our inspection reports live in five spreadsheets.");

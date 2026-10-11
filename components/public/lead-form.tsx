@@ -4,6 +4,7 @@ import { leadPackages, leadSectors, leadTimings } from "@/lib/services";
 
 // Posts a quote request as JSON to the lead Worker (see its README for the contract).
 // The rules mirror the Worker's validateLead so visitors see problems before sending.
+// The problem box is only checked on Send, so an empty box is never flagged while someone is still filling in the form.
 type Field = "name" | "company" | "sector" | "email" | "phone" | "package" | "problem" | "timing";
 type Values = Record<Field, string>;
 type Errors = Partial<Record<Field, string>>;
@@ -20,7 +21,7 @@ function check(field: Field, raw: string): string | undefined {
     case "company": return value.length < 2 ? "Please enter your company's name." : value.length > 150 ? "Please keep this under 150 characters." : undefined;
     case "email": return !EMAIL.test(value) || value.length > 254 ? "Please enter a valid email address." : undefined;
     case "phone": return value && !PHONE.test(value) ? "Please enter a valid phone number, or leave it empty." : undefined;
-    case "problem": return value.length < 20 ? "Please write at least 20 characters so we understand the problem." : value.length > 4000 ? "Please keep this under 4,000 characters." : undefined;
+    case "problem": return value.length === 0 ? "Tell us briefly what you need." : value.length < 10 ? "A few more words would help us understand." : value.length > 4000 ? "Please keep this under 4,000 characters." : undefined;
     case "sector": return leadSectors.includes(value) ? undefined : "Please choose a sector.";
     case "package": return leadPackages.some((item) => item.value === value) ? undefined : "Please choose a package.";
     case "timing": return leadTimings.includes(value) ? undefined : "Please choose a timing.";
@@ -145,7 +146,7 @@ export function LeadForm({ action }: { action: string }) {
       {input("phone", "Phone", "tel", "tel", true)}
       <div className="public-field public-field-wide">
         <label htmlFor="lead-problem">What problem do you want to solve?</label>
-        <textarea id="lead-problem" name="problem" rows={5} value={values.problem} required placeholder="A few sentences is enough. What happens today, and what should change?" aria-invalid={errors.problem ? true : undefined} aria-describedby={describe("problem")} onChange={(event) => update("problem", event.target.value)} onBlur={() => leave("problem")} />
+        <textarea id="lead-problem" name="problem" rows={5} value={values.problem} required placeholder="A few sentences is enough. What happens today, and what should change?" aria-invalid={errors.problem ? true : undefined} aria-describedby={describe("problem")} onChange={(event) => update("problem", event.target.value)} />
         {error("problem")}
       </div>
       {select("timing", "Timing", asOptions(leadTimings))}
