@@ -47,6 +47,6 @@ export default function LandingPage() {
       </div>
     </section>
 
-    <section className="public-closing public-section"><div><p className="public-eyebrow">Get in touch</p><h2>Have something in mind?</h2></div><a href="mailto:contact@jabx.me" className="public-text-link">contact@jabx.me <Arrow /></a></section>
+    <section className="public-closing public-section"><div><p className="public-eyebrow">Get in touch</p><h2>Have something in mind?</h2></div><Link href="/services" className="public-text-link">See services <Arrow /></Link></section>
   </PublicShell>;
 }

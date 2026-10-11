@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import { Wordmark } from "./public-art";
 import "./public.css";
 
-const links = [{ href: "/projects", label: "Projects" }, { href: "/about", label: "About" }, { href: "/team", label: "Team" }];
+const links = [{ href: "/services", label: "Services" }, { href: "/projects", label: "Projects" }, { href: "/about", label: "About" }, { href: "/team", label: "Team" }];
 
 export function PublicHeader() {
   const pathname = usePathname();

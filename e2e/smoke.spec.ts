@@ -149,3 +149,73 @@ test.describe("signed in", () => {
     await expect(page.getByRole("button", { name: "Blocked", pressed: true })).toBeVisible();
   });
 });
+
+test.describe("public site", () => {
+  const site = "http://localhost:3100";
+  // Inlined at build time, so a run tests one state: the email fallback by default, or the
+  // form with NEXT_PUBLIC_LEADS_FORM_URL=https://leads.example.test/api/leads npx playwright test
+  const leadsUrl = process.env.NEXT_PUBLIC_LEADS_FORM_URL;
+
+  async function fillValid(page: Page, problem: string) {
+    const form = page.getByRole("form", { name: "Request a quote" });
+    await form.getByLabel("Your name").fill("Test Person");
+    await form.getByLabel("Company").fill("Test Co");
+    await form.getByLabel("Sector").selectOption("Logistics");
+    await form.getByLabel("Email").fill("test@example.com");
+    await form.getByLabel("What problem do you want to solve?").fill(problem);
+    await form.getByLabel("Timing").selectOption("Within a month");
+    return form;
+  }
+
+  test("services lists the three packages with no prices", async ({ page }) => {
+    await page.goto(`${site}/services`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Useful software");
+    for (const name of ["Business Website", "Operations Dashboard", "Business Automation"]) {
+      await expect(page.getByRole("heading", { name, level: 3 })).toBeVisible();
+    }
+    await expect(page.getByRole("main")).not.toContainText(/KWD|\bKD\b|\$|price:/i);
+    await expect(page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Services" })).toHaveAttribute("aria-current", "page");
+  });
+
+  test("contact offers email when the form has no endpoint", async ({ page }) => {
+    test.skip(Boolean(leadsUrl), "built with a leads endpoint");
+    await page.goto(`${site}/contact`);
+    await expect(page.getByRole("form", { name: "Request a quote" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Send an email" })).toHaveAttribute("href", "mailto:contact@jabx.me");
+  });
+
+  test("contact form validates, then thanks after a 2xx", async ({ page }) => {
+    test.skip(!leadsUrl, "built without a leads endpoint");
+    let body: unknown = null;
+    await page.route(leadsUrl!, async (route) => {
+      body = route.request().postDataJSON();
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    });
+    await page.goto(`${site}/contact?package=operations-dashboard`);
+    const empty = page.getByRole("form", { name: "Request a quote" });
+    await expect(empty.getByLabel("Which package?")).toHaveValue("operations-dashboard");
+    await empty.getByRole("button", { name: "Send request" }).click();
+    await expect(empty.getByText("Please enter your name.")).toBeVisible();
+    await expect(empty.getByLabel("Your name")).toBeFocused();
+
+    const form = await fillValid(page, "Too short");
+    await form.getByRole("button", { name: "Send request" }).click();
+    await expect(form.getByText("at least 20 characters")).toBeVisible();
+    expect(body).toBeNull();
+
+    await form.getByLabel("What problem do you want to solve?").fill("Our inspection reports live in five spreadsheets.");
+    await form.getByRole("button", { name: "Send request" }).click();
+    await expect(page.getByRole("heading", { name: "Thank you. Your request is in." })).toBeVisible();
+    expect(body).toMatchObject({ name: "Test Person", package: "operations-dashboard", sector: "Logistics", phone: "", website: "" });
+  });
+
+  test("contact form shows the email address when sending fails", async ({ page }) => {
+    test.skip(!leadsUrl, "built without a leads endpoint");
+    await page.route(leadsUrl!, (route) => route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: "Too many requests." }) }));
+    await page.goto(`${site}/contact?package=business-website`);
+    const form = await fillValid(page, "We need a simple bilingual website.");
+    await form.getByRole("button", { name: "Send request" }).click();
+    await expect(form.getByRole("alert")).toContainText("contact@jabx.me");
+    await expect(form.getByRole("button", { name: "Send request" })).toBeEnabled();
+  });
+});
