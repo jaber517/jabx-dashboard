@@ -73,8 +73,8 @@ export async function middleware(request: NextRequest) {
 
   if (!privateHost) return NextResponse.next();
 
-  // The daily backup job authenticates with CRON_SECRET in its own handler.
-  if (PUBLIC_ASSETS.has(decodedPath) || TEAM_PORTRAIT.test(decodedPath) || decodedPath === "/api/health" || atPath(decodedPath, "/api/cron") ||
+  // Webhooks and cron jobs authenticate with bearer secrets in their own handlers.
+  if (PUBLIC_ASSETS.has(decodedPath) || TEAM_PORTRAIT.test(decodedPath) || decodedPath === "/api/health" || decodedPath === "/api/studio/notify" || atPath(decodedPath, "/api/cron") ||
       decodedPath.startsWith("/_next/") || decodedPath.startsWith("/static/")) {
     return NextResponse.next();
   }
