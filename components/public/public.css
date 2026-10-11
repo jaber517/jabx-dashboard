@@ -166,6 +166,7 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
 .public-site { --error: #f0605d; }
 .public-request { padding: 40px 36px; margin-bottom: 24px; scroll-margin-top: 104px; }
 .public-request > h2 { margin-block: 12px 8px; }
+.public-request-alt { margin-top: 20px; color: var(--muted); }
 .public-form { margin-top: 28px; }
 .public-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; }
 .public-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }

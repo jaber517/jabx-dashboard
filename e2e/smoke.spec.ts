@@ -184,6 +184,14 @@ test.describe("public site", () => {
     await expect(page.getByRole("link", { name: "Send an email" })).toHaveAttribute("href", "mailto:contact@jabx.me");
   });
 
+  test("contact leads with the form and keeps email as a small line", async ({ page }) => {
+    test.skip(!leadsUrl, "built without a leads endpoint");
+    await page.goto(`${site}/contact`);
+    await expect(page.getByRole("form", { name: "Request a quote" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Send an email" })).toHaveCount(0);
+    await expect(page.getByText("Prefer email?")).toBeVisible();
+  });
+
   test("contact form validates, then thanks after a 2xx", async ({ page }) => {
     test.skip(!leadsUrl, "built without a leads endpoint");
     let body: unknown = null;
