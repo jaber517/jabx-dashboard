@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createBackup } from "@/lib/backup";
 import { fileStorageEnabled } from "@/lib/files";
+import { cleanupStudioLeads, type StudioCleanupResult } from "@/lib/studio-cleanup";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -15,5 +16,8 @@ export async function GET(request: Request) {
   if (!fileStorageEnabled()) return NextResponse.json({ ok: false, error: "File storage is not configured." }, { status: 500 });
 
   const result = await createBackup();
-  return NextResponse.json({ ok: true, ...result });
+  const cleanup = await cleanupStudioLeads().catch(
+    (): StudioCleanupResult => ({ checked: 0, deleted: 0, failed: 1 })
+  );
+  return NextResponse.json({ ok: true, ...result, cleanup });
 }
