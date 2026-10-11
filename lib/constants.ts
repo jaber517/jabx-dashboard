@@ -123,7 +123,7 @@ export const navigationGroups = [
   }
 ] as const;
 
-export const phoneTabHrefs = ["/dashboard", "/tasks", "/projects", "/ai-team"] as const;
+export const phoneTabHrefs = ["/dashboard", "/tasks", "/ai-team", "/studio"] as const;
 
 export const settingsNavItem = { href: "/settings", label: "Settings", icon: "settings" } as const;
 

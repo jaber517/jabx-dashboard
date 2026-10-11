@@ -130,19 +130,19 @@ test.describe("signed in", () => {
 test.describe("iPhone", () => {
   test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-  test("the tab bar is Home · Tasks · Projects · AI Team · More", async ({ page }) => {
+  test("the tab bar is Home · Tasks · AI Team · Studio · More", async ({ page }) => {
     await signIn(page);
     await laptop(page, { online: false });
     await page.goto("/ai-team");
     const tabs = page.getByRole("navigation", { name: "Dashboard" }).locator(":scope > a, :scope > button");
     await expect(tabs).toHaveCount(5);
-    const labels = ["Home", "Tasks", "Projects", "AI Team", "More"];
+    const labels = ["Home", "Tasks", "AI Team", "Studio", "More"];
     for (const [index, label] of labels.entries()) await expect(tabs.nth(index)).toContainText(label);
     for (const index of labels.keys()) {
       const box = await tabs.nth(index).boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
     }
     // Offline: the AI Team tab shows the muted dot.
-    await expect(tabs.nth(3)).toContainText("MacBook offline");
+    await expect(tabs.nth(2)).toContainText("MacBook offline");
   });
 });
