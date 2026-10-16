@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 // Smoke tests: sign in, the Tasks board, undo, privacy of dashboard pages.
@@ -6,6 +7,10 @@ import { defineConfig, devices } from "@playwright/test";
 // they never touch real data. Run with `npm run test:e2e`.
 const PORT = 3100;
 export const PASSCODE = "e2e-test-passcode";
+// Absolute on purpose. Prisma resolves a relative SQLite path against the folder the client
+// was last generated from, and node_modules can be shared (symlinked) with other worktrees,
+// so "file:./test.db" could open another checkout's test database.
+export const TEST_DATABASE_URL = `file:${path.join(__dirname, "prisma", "test.db")}`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -25,7 +30,7 @@ export default defineConfig({
     timeout: 300_000,
     reuseExistingServer: false,
     env: {
-      DATABASE_URL: "file:./test.db",
+      DATABASE_URL: TEST_DATABASE_URL,
       DASHBOARD_PASSWORD: PASSCODE,
       AUTH_SECRET: "e2e-only-signing-secret",
       TURSO_DATABASE_URL: "",
