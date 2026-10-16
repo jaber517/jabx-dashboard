@@ -22,6 +22,12 @@
   -webkit-font-smoothing: antialiased;
 }
 .public-site { min-height: 100vh; overflow-x: clip; }
+/* Override the workspace's CSS smooth scrolling only while PublicShell exists.
+   Lenis owns wheel easing; hashes and keyboard navigation remain native. */
+html:has(.public-site) { scroll-behavior: auto; }
+html.lenis:has(.public-site), html.lenis:has(.public-site) body { height: auto; }
+.public-site [id] { scroll-margin-top: 104px; }
+.public-site #public-main { scroll-margin-top: 80px; }
 .public-site :is(h1,h2,h3,h4), .public-void h1 { font-family: inherit; font-weight: 800; margin: 0; text-wrap: balance; color: var(--white); }
 .public-site h1 { font-size: clamp(44px, 5.4vw, 68px); line-height: 1.04; letter-spacing: -.045em; }
 .public-site h2 { font-size: clamp(28px, 3.3vw, 40px); line-height: 1.15; letter-spacing: -.03em; font-weight: 700; }
@@ -34,9 +40,9 @@
 .public-site a, .public-header a, .public-footer a, .public-void a { text-decoration: none; }
 .public-site a, .public-header :is(a,button), .public-footer a { transition: color 150ms, background-color 150ms, border-color 150ms, transform 200ms var(--ease-spring); }
 .public-site .public-accent { color: var(--signal); }
-/* Short label with the brand's small blue x as its marker. */
-.public-eyebrow, .public-site .public-eyebrow { display: inline-flex; align-items: baseline; gap: 10px; font-size: 12px; font-weight: 600; line-height: 1.5; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
-.public-eyebrow::before { content: "x"; font-size: 15px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--signal); }
+/* The existing small marker echoes the wordmark's Inter Bold x. */
+.public-eyebrow, .public-site .public-eyebrow { display: inline-flex; align-items: baseline; gap: 8px; font-size: 12px; font-weight: 600; line-height: 1.5; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
+.public-eyebrow::before { content: "x"; font-size: 15px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--signal); }
 .public-site .public-lead { font-size: 19px; line-height: 1.55; margin-top: 24px; max-width: 580px; }
 
 /* Header */
@@ -60,7 +66,7 @@
 .public-button-secondary { background: transparent; border-color: var(--line); color: var(--white); }
 .public-button-secondary:hover { border-color: var(--signal); }
 .public-nav .public-button { min-height: 44px; padding-inline: 20px; font-size: 15px; }
-.public-nav .public-button[aria-current="page"] { box-shadow: 0 0 0 2px var(--ink), 0 0 0 3px var(--signal); }
+.public-nav .public-button[aria-current="page"]:not(:focus-visible) { outline: 1px solid var(--signal); outline-offset: 3px; }
 :is(.public-button, .public-button-secondary, .public-social-card):active { transform: scale(.97); }
 .public-text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--signal); font-size: 16px; font-weight: 600; }
 .public-text-link:hover, .public-text-link:focus-visible { text-decoration: underline; text-underline-offset: 5px; }
@@ -76,21 +82,21 @@
 .public-hero-solo { grid-template-columns: minmax(0, 1fr); padding-block: 64px 56px; }
 .public-hero-copy > .public-eyebrow { margin-bottom: 22px; }
 .public-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; margin-top: 32px; }
-/* The wordmark as the hero's mark: jab in white, the x in Signal Blue. */
-.public-mark { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; aspect-ratio: 5 / 4; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-.public-mark img { display: block; width: 100%; height: auto; margin-block: auto; }
-.public-mark-caption { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.public-mark-caption span:last-child { color: var(--white); }
+/* Inline artwork stays in flow at its original aspect ratio, without a panel.
+   Shared dimensions reserve its space before hydration, including on mobile. */
+.public-wordmark { display: block; width: 100%; height: auto; aspect-ratio: 246.6 / 116.6; color: var(--white); }
+.public-hero-signature { min-width: 0; }
+.public-hero-wordmark { transform-origin: center; }
 
 /* Sections */
-.public-section { border-top: 1px solid var(--line); padding-block: 56px; }
-.public-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.public-section { border-top: 1px solid var(--line); padding-block: 96px; }
+.public-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 40px; }
 .public-section-heading .public-eyebrow { margin-bottom: 12px; }
 
 /* Cards: Surface fill, 1px Line border, no shadow. */
 .public-card { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden; }
 a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
-.public-feature { display: grid; grid-template-columns: 1fr 1fr; min-height: 420px; transition: border-color 150ms; }
+.public-feature { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; transition: border-color 150ms; }
 .public-feature-copy { display: flex; flex-direction: column; align-items: flex-start; padding: 40px; }
 .public-app-id { display: flex; align-items: center; gap: 18px; margin-block: 24px 20px; }
 .public-app-icon { width: 72px; height: 72px; flex-shrink: 0; }
@@ -101,24 +107,26 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
 .public-platforms span { padding: 4px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--white); }
 .public-feature-copy > p { margin-block: 24px; }
 .public-feature-copy > .public-text-link { margin-top: auto; }
-.public-feature-image { position: relative; display: flex; align-items: center; justify-content: center; margin: 0; min-width: 0; background: var(--panel); border-left: 1px solid var(--line); }
+.public-feature-image { position: relative; display: flex; align-items: center; justify-content: center; margin: 0; min-width: 0; padding: 40px 24px; overflow: hidden; background: var(--panel); border-left: 1px solid var(--line); }
 .public-feature-image img { width: min(100%, 460px); height: auto; }
 .public-site figcaption { position: absolute; bottom: 16px; right: 16px; font-size: 12px; font-weight: 600; color: var(--mist); padding: 4px 10px; background: var(--ink); border: 1px solid var(--line); border-radius: 8px; }
 .public-teaser { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; }
 .public-teaser .public-eyebrow { margin-bottom: 16px; }
-.public-teaser > div:nth-child(2) > p { max-width: 460px; }
+.public-teaser > div:nth-child(2) p { max-width: 460px; }
 .public-teaser .public-text-link { margin-top: 12px; }
 .public-closing { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
 .public-closing .public-eyebrow { margin-bottom: 14px; }
 
 /* Home: team strip */
-.public-team-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; max-width: 560px; margin-block: 24px 8px; }
+.public-team-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-block: 32px 8px; }
 .public-team-strip a { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--panel); }
 .public-team-strip a:hover { border-color: var(--signal); }
 .public-team-strip img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
 
 /* Footer */
-.public-footer { display: flex; align-items: center; gap: 24px; border-top: 1px solid var(--line); min-height: 88px; padding-block: 20px; font-size: 14px; color: var(--muted); }
+.public-footer { border-top: 1px solid var(--line); padding-top: 48px; font-size: 14px; color: var(--muted); }
+.public-footer-signature { width: 176px; margin-bottom: 8px; }
+.public-footer-row { display: flex; align-items: center; gap: 24px; min-height: 88px; padding-block: 24px; }
 .public-footer-socials { display: flex; align-items: center; gap: 4px; padding-left: 16px; border-left: 1px solid var(--line); }
 .public-footer-socials a { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: var(--mist); }
 .public-footer-socials svg { width: 21px; height: 21px; }
@@ -154,7 +162,7 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
 .public-email-panel h2 a span { color: var(--signal); }
 .public-email-panel h2 a:hover { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 8px; text-decoration-thickness: 2px; }
 .public-email-panel > .public-button { white-space: nowrap; }
-.public-social-section > h2 { margin-bottom: 24px; }
+.public-social-section > .public-reveal { margin-bottom: 32px; }
 .public-social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .public-social-card { display: flex; align-items: center; gap: 22px; min-height: 140px; padding: 28px; }
 .public-social-icon { width: 40px; height: 40px; flex-shrink: 0; color: var(--mist); stroke-width: 1.6; }
@@ -245,15 +253,58 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
 .public-void p:not(.public-eyebrow) { margin: 14px auto 0; max-width: 440px; color: var(--mist); font-size: 17px; line-height: 1.6; }
 .public-void .public-button { margin-top: 28px; }
 
-/* Motion — only for people who haven't asked for less of it. */
+/* Full-width tonal pauses, with the same aligned content and solid brand fills. */
+.public-home-hero { grid-template-columns: minmax(0, 1fr); gap: 64px; padding-block: 80px; }
+.public-band { position: relative; isolation: isolate; }
+.public-band::before { content: ""; position: absolute; z-index: -1; inset: 0 calc((1120px - 100vw) / 2); background: var(--surface); border-block: 1px solid var(--line); }
+.public-statement { padding-block: 112px; }
+.public-site .public-statement-line { max-width: 960px; font-size: clamp(40px, 6vw, 80px); line-height: 1.08; font-weight: 700; letter-spacing: -.04em; color: var(--white); text-wrap: balance; }
+.public-statement-line span { display: inline-block; }
+.public-work { border-top: 0; padding-block: 112px; }
+.public-teaser { grid-template-columns: 1fr 1.25fr; padding-block: 112px; border-top: 0; }
+.public-closing { padding-block: 112px; border-top: 0; }
+.public-social-grid > .public-reveal > a { height: 100%; }
+
+/* SSR / no-JS is fully visible. Only hydrated offscreen nodes receive pending. */
+.public-reveal { min-width: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .public-hero-copy { animation: public-rise 600ms var(--ease-spring) both; }
-  .public-mark { animation: public-rise 600ms 80ms var(--ease-spring) both; }
+  .public-reveal { transition: opacity 600ms ease-out var(--reveal-delay, 0ms), transform 600ms ease-out var(--reveal-delay, 0ms); }
+  .public-reveal[data-reveal-pending] { opacity: 0; transform: translateY(30px); }
+  .public-reveal:focus-within { opacity: 1; transform: none; transition: none; }
+
+  /* Progressive enhancement: no JS scroll handler, no permanent will-change.
+     Unsupported engines retain the fully visible, untransformed composition. */
+  @supports (animation-timeline: view()) {
+    .public-home-hero { view-timeline-name: --hero; view-timeline-axis: block; }
+    .public-hero-wordmark { animation: public-wordmark-settle cubic-bezier(.22, 1, .36, 1) both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
+    /* Add a small transform to the path's existing SVG placement; never replace
+       its translate(192.532 132), which positions the x within the artwork. */
+    @supports (animation-composition: add) {
+      .public-hero-wordmark-x { animation: public-x-settle cubic-bezier(.22, 1, .36, 1) both; animation-composition: add; animation-timeline: --hero; animation-range: exit 0% exit 80%; }
+    }
+    .public-statement { view-timeline-name: --statement; view-timeline-axis: block; }
+    .public-statement-line span { animation: public-word-in linear both; animation-timeline: --statement; animation-range: entry 10% cover 42%; }
+    .public-statement-line span:nth-child(2) { animation-range: entry 22% cover 48%; }
+    .public-statement-line span:nth-child(3) { animation-range: entry 34% cover 54%; }
+    .public-statement-line span:nth-child(4) { animation-range: entry 46% cover 60%; }
+    @media (min-width: 701px) {
+      .public-work .public-feature-image img { animation: public-phone-drift linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+    }
+  }
 }
-@keyframes public-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes public-wordmark-settle { from { transform: translateY(0) scale(1); } to { transform: translateY(16px) scale(.99); } }
+/* One SVG unit is about 4.5px at the widest container and 1.5px on mobile. */
+@keyframes public-x-settle { from { transform: translateY(0); } to { transform: translateY(-1px); } }
+@keyframes public-word-in { from { opacity: .4; } to { opacity: 1; } }
+@keyframes public-phone-drift { from { transform: translateY(24px); } to { transform: translateY(-24px); } }
+
+@media (max-width: 1216px) and (min-width: 1001px) {
+  .public-band::before { inset-inline: -48px; }
+}
 
 @media (max-width: 1000px) {
   .public-container { width: calc(100% - 64px); }
+  .public-band::before { inset-inline: -32px; }
   .public-hero { gap: 36px; }
   .public-feature-copy { padding: 32px; }
   .public-email-panel { grid-template-columns: 44px 1fr; gap: 22px; padding: 30px; }
@@ -266,6 +317,9 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
 }
 @media (max-width: 700px) {
   .public-container { width: calc(100% - 32px); }
+  .public-band::before { inset-inline: -16px; }
+  .public-site [id] { scroll-margin-top: 88px; }
+  .public-site #public-main { scroll-margin-top: 68px; }
   .public-header-row { height: 68px; }
   .public-logo img { width: 96px; }
   .public-nav { gap: 10px; }
@@ -280,20 +334,24 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
   .public-site p { font-size: 16px; }
   .public-site .public-lead { font-size: 17px; margin-top: 20px; }
   .public-hero { grid-template-columns: 1fr; gap: 32px; padding-block: 40px 48px; }
-  .public-mark { aspect-ratio: auto; padding: 22px; }
-  .public-mark img { width: 72%; margin: 12px auto; }
-  .public-section { padding-block: 40px; }
+  .public-home-hero { padding-block: 56px 64px; gap: 40px; }
+  .public-section { padding-block: 64px; }
+  .public-statement { padding-block: 72px; }
+  .public-site .public-statement-line { font-size: clamp(40px, 11vw, 64px); max-width: 480px; }
+  .public-section-heading { margin-bottom: 32px; }
   .public-section-heading { flex-direction: column; align-items: flex-start; }
   .public-feature { grid-template-columns: 1fr; min-height: 0; }
-  .public-feature-copy { padding: 26px 22px; }
+  .public-feature-copy { padding: 32px 24px; }
   .public-feature h3 { font-size: 40px; }
   .public-app-icon { width: 60px; height: 60px; }
-  .public-feature-image { border-left: 0; border-top: 1px solid var(--line); padding: 20px 12px; }
+  .public-feature-image { border-left: 0; border-top: 1px solid var(--line); padding: 32px 16px; }
   .public-feature-image img { width: min(100%, 360px); }
   .public-site figcaption { bottom: 10px; right: 10px; font-size: 11px; }
-  .public-teaser, .public-studio { grid-template-columns: 1fr; gap: 20px; }
+  .public-teaser, .public-studio { grid-template-columns: 1fr; gap: 32px; }
   .public-team-strip { grid-template-columns: repeat(4, 1fr); }
-  .public-footer { flex-wrap: wrap; gap: 4px 20px; font-size: 13px; }
+  .public-footer { padding-top: 40px; font-size: 13px; }
+  .public-footer-signature { width: 136px; margin-bottom: 4px; }
+  .public-footer-row { flex-wrap: wrap; gap: 4px 20px; }
   .public-footer-links { gap: 20px; }
   .public-project-heading { flex-wrap: wrap; align-items: flex-start; }
   .public-project-heading h2 { font-size: 40px; }
@@ -318,6 +376,7 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
   .public-founder-body h2 { font-size: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .public-site *, .public-header *, .public-footer * { transition: none; }
+  .public-site *, .public-header *, .public-footer * { transition: none; animation: none; }
+  .public-reveal[data-reveal-pending] { opacity: 1; transform: none; }
   :is(.public-button, .public-button-secondary, .public-social-card):active { transform: none; }
 }
