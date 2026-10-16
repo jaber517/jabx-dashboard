@@ -277,11 +277,9 @@ a.public-card:hover, .public-feature:hover { border-color: var(--signal); }
   @supports (animation-timeline: view()) {
     .public-home-hero { view-timeline-name: --hero; view-timeline-axis: block; }
     .public-hero-wordmark { animation: public-wordmark-settle cubic-bezier(.22, 1, .36, 1) both; animation-timeline: --hero; animation-range: exit 0% exit 100%; }
-    /* Add a small transform to the path's existing SVG placement; never replace
-       its translate(192.532 132), which positions the x within the artwork. */
-    @supports (animation-composition: add) {
-      .public-hero-wordmark-x { animation: public-x-settle cubic-bezier(.22, 1, .36, 1) both; animation-composition: add; animation-timeline: --hero; animation-range: exit 0% exit 80%; }
-    }
+    /* On the x's wrapper <g>, so the path's own translate(192.532 132) is never replaced
+       (Safari drops the SVG attribute when a CSS transform lands on the same element). */
+    .public-hero-wordmark-x { animation: public-x-settle cubic-bezier(.22, 1, .36, 1) both; animation-timeline: --hero; animation-range: exit 0% exit 80%; }
     .public-statement { view-timeline-name: --statement; view-timeline-axis: block; }
     .public-statement-line span { animation: public-word-in linear both; animation-timeline: --statement; animation-range: entry 10% cover 42%; }
     .public-statement-line span:nth-child(2) { animation-range: entry 22% cover 48%; }
