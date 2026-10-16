@@ -1,9 +1,13 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { PASSCODE } from "../playwright.config";
+import { clearPasskeys } from "./test-db";
 
 // The AI Team tab. The laptop is never reachable from the test server, so every
 // /api/team call is answered in the browser by page.route: either the 503 dash sends when
 // the MacBook is offline, or a small fixed team.
+
+// "Approve asks for Face ID first" expects an account with no passkey, whatever ran before.
+test.beforeAll(clearPasskeys);
 
 async function signIn(page: Page) {
   await page.goto("/login");

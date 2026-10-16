@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { PASSCODE } from "../playwright.config";
+import { clearPasskeys } from "./test-db";
 
 // Face ID for actions, end to end with a simulated authenticator (Chromium's virtual
 // WebAuthn device): register a passkey, press Approve, and check that the real server accepts
@@ -70,6 +71,10 @@ async function laptopReads(page: Page) {
 }
 
 test.describe("Face ID for actions", () => {
+  // The test enrolls a passkey in the shared test database: start without one and leave none behind.
+  test.beforeAll(clearPasskeys);
+  test.afterAll(clearPasskeys);
+
   test("a passkey check lets Approve through; without one the server refuses", async ({ page }) => {
     await virtualFaceId(page);
     await signIn(page);
