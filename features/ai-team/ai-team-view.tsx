@@ -16,7 +16,7 @@ import { useTeamPresence } from "./presence";
 import { describeTask, RUN_STATUS } from "./runs";
 import { assigneeName, employeeStatus, formatAge, groupByState, lastSeenText, leadSummary, stateLabel, stateTone } from "./status";
 import { StepUpProvider } from "./step-up-sheet";
-import { taskRef, type AttentionItem, type Employee, type RunnerStatus, type Snapshot, type Task, type Thread } from "./types";
+import { taskRef, type AttentionItem, type Employee, type ProjectSummary, type RunnerStatus, type Snapshot, type Task, type Thread } from "./types";
 import { ErrorText, LEAD_ID, MutedText, OfflineProvider, Portrait, teamEmployees, ToneBadge } from "./ui";
 
 type Board = { snapshot: Snapshot; attention: AttentionItem[]; threads: Thread[]; receivedAt: number };
@@ -27,6 +27,85 @@ let lastBoard: Board | null = null;
 
 function clockTime(ms: number) {
   return new Date(ms).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+// --- Projects -----------------------------------------------------------------------------
+// Where each project stopped and what is planned next, from its PROJECT.md on the laptop.
+const GROUP_ORDER = ["Jabx itself", "Products", "Services"];
+
+function ProjectCard({ project, tasks, active, onShow }: { project: ProjectSummary; tasks: Task[]; active: boolean; onShow: (id: string) => void }) {
+  const plan = project.plan;
+  const mine = tasks.filter((t) => t.project_id === project.project_id);
+  const done = mine.filter((t) => t.state === "accepted" || t.state === "cancelled").length;
+  const open = mine.length - done;
+  return (
+    <Card className={cn("grid content-start gap-3 p-4", active && "ring-2 ring-primary")}>
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-base font-bold">{project.project_id}</h3>
+        {plan?.lifecycle ? <ToneBadge>{plan.lifecycle}</ToneBadge> : null}
+        <button
+          type="button"
+          onClick={() => onShow(project.project_id)}
+          className="ml-auto min-h-11 text-[13px] font-semibold text-primary"
+          aria-label={`Show tasks for ${project.project_id}`}
+        >
+          {open} open · {done} done
+        </button>
+      </div>
+      {plan?.where_stopped ? (
+        <div className="grid gap-1">
+          <p className="text-[13px] font-semibold text-muted-foreground">Where it stopped</p>
+          <p className="text-sm leading-6">{plan.where_stopped}</p>
+        </div>
+      ) : null}
+      {plan && plan.next.length ? (
+        <div className="grid gap-1">
+          <p className="text-[13px] font-semibold text-muted-foreground">Next</p>
+          <ol className="grid list-decimal gap-1 pl-5 text-sm leading-6">
+            {plan.next.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+      {!plan ? <MutedText>No plan in this project’s record yet.</MutedText> : null}
+      {plan?.reviewed ? <p className="text-[12px] text-muted-foreground">Plan reviewed {plan.reviewed}</p> : null}
+    </Card>
+  );
+}
+
+function ProjectPlans({ projects, tasks, filter, onShow }: { projects: ProjectSummary[]; tasks: Task[]; filter: string; onShow: (id: string) => void }) {
+  const shown = projects.filter((p) => filter === "all" || p.project_id === filter);
+  if (!shown.length) return null;
+  const groups = new Map<string, ProjectSummary[]>();
+  for (const project of shown) {
+    const group = project.plan?.group ?? "Other";
+    groups.set(group, [...(groups.get(group) ?? []), project]);
+  }
+  const ordered = [...groups.keys()].sort((a, b) => {
+    const rank = (g: string) => (GROUP_ORDER.includes(g) ? GROUP_ORDER.indexOf(g) : GROUP_ORDER.length);
+    return rank(a) - rank(b) || a.localeCompare(b);
+  });
+  return (
+    <section aria-label="Projects" className="grid gap-4">
+      <h2 className="text-lg font-bold">
+        Projects <span className="font-semibold text-muted-foreground">{shown.length}</span>
+      </h2>
+      {ordered.map((group) => (
+        <details key={group} open className="group grid gap-3">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" aria-hidden="true" />
+            {group} <span>{groups.get(group)!.length}</span>
+          </summary>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {groups.get(group)!.map((project) => (
+              <ProjectCard key={project.project_id} project={project} tasks={tasks} active={filter === project.project_id} onShow={onShow} />
+            ))}
+          </div>
+        </details>
+      ))}
+    </section>
+  );
 }
 
 // --- Offline ------------------------------------------------------------------------------
@@ -372,6 +451,10 @@ export function AiTeamView() {
     setPerson((current) => (current === employeeId ? null : employeeId));
     tasksRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  const showProject = (projectId: string) => {
+    setFilter(projectId);
+    tasksRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const problems = data?.projects.filter((p) => p.error || p.rejected_count > 0) ?? [];
   const asOf = board?.receivedAt ?? null;
 
@@ -427,6 +510,8 @@ export function AiTeamView() {
                   Dispatch is paused for {p.project_id}.
                 </p>
               ))}
+
+            {data ? <ProjectPlans projects={data.projects} tasks={tasks} filter={filter} onShow={showProject} /> : null}
 
             <section aria-label="Employees" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {employees.map((employee) => (

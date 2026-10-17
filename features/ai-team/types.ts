@@ -57,6 +57,16 @@ export type ProjectSummary = {
   duplicates_ignored: number;
   rejected_count: number;
   rejected_lines: { line: number; reason: string }[];
+  // From the project's PROJECT.md on the laptop. Absent from laptops older than 2026-10-17.
+  plan?: ProjectPlan | null;
+};
+
+export type ProjectPlan = {
+  group: string | null;
+  lifecycle: string | null;
+  where_stopped: string | null;
+  next: string[];
+  reviewed: string | null;
 };
 
 export type Employee = {

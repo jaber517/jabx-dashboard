@@ -51,7 +51,13 @@ const thread = {
 const team: Record<string, unknown> = {
   "/api/team/snapshot": {
     generated_at: "2026-10-09T10:00:00Z",
-    projects: [{ project_id: "jabx", error: null, paused: false, last_event_at: null, event_count: 1, duplicates_ignored: 0, rejected_count: 0, rejected_lines: [] }],
+    projects: [
+      {
+        project_id: "jabx", error: null, paused: false, last_event_at: null, event_count: 1, duplicates_ignored: 0, rejected_count: 0, rejected_lines: [],
+        plan: { group: "Jabx itself", lifecycle: "active", where_stopped: "Project structure set.", next: ["Show plans on dash", "Repair mode"], reviewed: "2026-10-17" }
+      },
+      { project_id: "dayhq", error: null, paused: false, last_event_at: null, event_count: 0, duplicates_ignored: 0, rejected_count: 0, rejected_lines: [] }
+    ],
     employees: [
       { id: "adam", name: "Adam Carter", role: "Team Lead", photo: null },
       { id: "cody", name: "Cody Morgan", role: "Software Engineer", photo: null }
@@ -112,6 +118,21 @@ test.describe("signed in", () => {
     await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
     await expect(offline).toHaveCount(0);
     await expect(page.getByRole("region", { name: "Needs your attention" })).toContainText("Review the bridge");
+  });
+
+  test("projects show where they stopped and what is next", async ({ page }) => {
+    await laptop(page, { online: true });
+    await page.goto("/ai-team");
+
+    const projects = page.getByRole("region", { name: "Projects" });
+    await expect(projects).toContainText("Jabx itself");
+    await expect(projects).toContainText("Project structure set.");
+    await expect(projects.getByRole("listitem")).toHaveText(["Show plans on dash", "Repair mode"]);
+    // A laptop record without a plan still shows the project.
+    await expect(projects).toContainText("No plan in this project’s record yet.");
+
+    await projects.getByRole("button", { name: "Show tasks for jabx" }).click();
+    await expect(page.getByRole("combobox", { name: "Project" })).toHaveValue("jabx");
   });
 
   test("Approve asks for Face ID first", async ({ page }) => {
