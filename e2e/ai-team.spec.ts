@@ -120,22 +120,25 @@ test.describe("signed in", () => {
     await expect(page.getByRole("region", { name: "Needs your attention" })).toContainText("Review the bridge");
   });
 
-  test("projects show where they stopped and what is next", async ({ page }) => {
+  test("picking a project in the task filter shows where it stopped and what is next", async ({ page }) => {
     await laptop(page, { online: true });
     await page.goto("/ai-team");
 
-    const projects = page.getByRole("region", { name: "Projects" });
-    await expect(projects.getByRole("group", { name: "Jabx itself" })).toBeVisible();
-    await expect(projects.getByText("Project structure set.")).toBeVisible();
-    await expect(projects.getByRole("heading", { name: "jabx", level: 4 })).toBeVisible();
-    await expect(projects.getByRole("listitem")).toHaveText(["Show plans on dash", "Repair mode"]);
-    // A laptop record without a plan still shows the project.
-    await expect(projects.getByText("No plan in this project’s record yet.")).toBeVisible();
-    // The project filter lists projects under the same groups.
+    // All projects: no plan card above or between the team and the tasks.
+    await expect(page.getByRole("region", { name: "Employees" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Project plan" })).toHaveCount(0);
+    // The project filter lists projects under their groups.
     await expect(page.locator('select[aria-label="Project"] optgroup')).toHaveCount(2);
 
-    await projects.getByRole("button", { name: "Show tasks for jabx" }).click();
-    await expect(page.getByRole("combobox", { name: "Project" })).toHaveValue("jabx");
+    await page.getByRole("combobox", { name: "Project" }).selectOption("jabx");
+    const plan = page.getByRole("region", { name: "Tasks" }).getByRole("region", { name: "Project plan" });
+    await expect(plan.getByRole("heading", { name: "jabx" })).toBeVisible();
+    await expect(plan.getByText("Project structure set.")).toBeVisible();
+    await expect(plan.getByRole("listitem")).toHaveText(["Show plans on dash", "Repair mode"]);
+
+    // A laptop record without a plan says so.
+    await page.getByRole("combobox", { name: "Project" }).selectOption("dayhq");
+    await expect(plan.getByText("No plan in this project’s record yet.")).toBeVisible();
   });
 
   test("Approve asks for Face ID first", async ({ page }) => {
