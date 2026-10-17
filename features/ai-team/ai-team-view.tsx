@@ -41,7 +41,7 @@ function ProjectCard({ project, tasks, active, onShow }: { project: ProjectSumma
   return (
     <Card className={cn("grid content-start gap-3 p-4", active && "ring-2 ring-primary")}>
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-base font-bold">{project.project_id}</h3>
+        <h4 className="text-base font-bold">{project.project_id}</h4>
         {plan?.lifecycle ? <ToneBadge>{plan.lifecycle}</ToneBadge> : null}
         <button
           type="button"
@@ -74,35 +74,36 @@ function ProjectCard({ project, tasks, active, onShow }: { project: ProjectSumma
   );
 }
 
-function ProjectPlans({ projects, tasks, filter, onShow }: { projects: ProjectSummary[]; tasks: Task[]; filter: string; onShow: (id: string) => void }) {
-  const shown = projects.filter((p) => filter === "all" || p.project_id === filter);
-  if (!shown.length) return null;
+// Projects by group, groups in GROUP_ORDER, Jabx itself's own record first within its group.
+function groupProjects(projects: ProjectSummary[]): [string, ProjectSummary[]][] {
   const groups = new Map<string, ProjectSummary[]>();
-  for (const project of shown) {
+  for (const project of projects) {
     const group = project.plan?.group ?? "Other";
     groups.set(group, [...(groups.get(group) ?? []), project]);
   }
-  const ordered = [...groups.keys()].sort((a, b) => {
-    const rank = (g: string) => (GROUP_ORDER.includes(g) ? GROUP_ORDER.indexOf(g) : GROUP_ORDER.length);
-    return rank(a) - rank(b) || a.localeCompare(b);
-  });
+  const rank = (g: string) => (GROUP_ORDER.includes(g) ? GROUP_ORDER.indexOf(g) : GROUP_ORDER.length);
+  return [...groups.entries()].sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
+}
+
+function ProjectPlans({ projects, tasks, filter, onShow }: { projects: ProjectSummary[]; tasks: Task[]; filter: string; onShow: (id: string) => void }) {
+  const shown = projects.filter((p) => filter === "all" || p.project_id === filter);
+  if (!shown.length) return null;
   return (
     <section aria-label="Projects" className="grid gap-4">
       <h2 className="text-lg font-bold">
         Projects <span className="font-semibold text-muted-foreground">{shown.length}</span>
       </h2>
-      {ordered.map((group) => (
-        <details key={group} open className="group grid gap-3">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-semibold text-muted-foreground">
-            <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" aria-hidden="true" />
-            {group} <span>{groups.get(group)!.length}</span>
-          </summary>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {groups.get(group)!.map((project) => (
+      {groupProjects(shown).map(([group, members]) => (
+        <div key={group} role="group" aria-label={group} className="grid gap-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            {group} <span>{members.length}</span>
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {members.map((project) => (
               <ProjectCard key={project.project_id} project={project} tasks={tasks} active={filter === project.project_id} onShow={onShow} />
             ))}
           </div>
-        </details>
+        </div>
       ))}
     </section>
   );
@@ -536,10 +537,14 @@ export function AiTeamView() {
                 <div className="flex flex-wrap gap-2">
                   <Select aria-label="Project" value={filter} onChange={(event) => setFilter(event.target.value)}>
                     <option value="all">All projects</option>
-                    {(data?.projects ?? []).map((p) => (
-                      <option key={p.project_id} value={p.project_id}>
-                        {p.project_id}
-                      </option>
+                    {groupProjects(data?.projects ?? []).map(([group, members]) => (
+                      <optgroup key={group} label={group}>
+                        {members.map((p) => (
+                          <option key={p.project_id} value={p.project_id}>
+                            {p.project_id}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </Select>
                   <Select aria-label="Person" value={person ?? ""} onChange={(event) => setPerson(event.target.value || null)}>

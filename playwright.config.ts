@@ -24,6 +24,11 @@ export default defineConfig({
     ...devices["Desktop Chrome"],
     viewport: { width: 1440, height: 950 }
   },
+  // Jaber uses Safari: the AI Team tab also runs in WebKit, where a folded <details> drew empty.
+  projects: [
+    { name: "chromium" },
+    { name: "safari", testMatch: /ai-team\.spec\.ts/, use: { ...devices["Desktop Safari"], viewport: { width: 1440, height: 950 }, serviceWorkers: "block" } }
+  ],
   webServer: {
     command: `npx prisma db push --skip-generate --force-reset && npx tsx prisma/seed.ts && npx next build && npx next start -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,

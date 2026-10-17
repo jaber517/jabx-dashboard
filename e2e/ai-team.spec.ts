@@ -125,11 +125,14 @@ test.describe("signed in", () => {
     await page.goto("/ai-team");
 
     const projects = page.getByRole("region", { name: "Projects" });
-    await expect(projects).toContainText("Jabx itself");
-    await expect(projects).toContainText("Project structure set.");
+    await expect(projects.getByRole("group", { name: "Jabx itself" })).toBeVisible();
+    await expect(projects.getByText("Project structure set.")).toBeVisible();
+    await expect(projects.getByRole("heading", { name: "jabx", level: 4 })).toBeVisible();
     await expect(projects.getByRole("listitem")).toHaveText(["Show plans on dash", "Repair mode"]);
     // A laptop record without a plan still shows the project.
-    await expect(projects).toContainText("No plan in this project’s record yet.");
+    await expect(projects.getByText("No plan in this project’s record yet.")).toBeVisible();
+    // The project filter lists projects under the same groups.
+    await expect(page.locator('select[aria-label="Project"] optgroup')).toHaveCount(2);
 
     await projects.getByRole("button", { name: "Show tasks for jabx" }).click();
     await expect(page.getByRole("combobox", { name: "Project" })).toHaveValue("jabx");
